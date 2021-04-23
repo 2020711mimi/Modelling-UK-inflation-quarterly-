@@ -614,12 +614,23 @@ slr.total <- list()
 for (i in 2:length(regression)) {
   slr.total[[i]] <- model.select(regression[[i]], keep = keep.dummies, sig = 0.01, verbose = F)
 }
+#which(lengths(slr.total)==0)显示哪个是缺失的
+length( which(lengths(slr.total)==0))#统计slr.total缺失了多少个.
+
 
 #
 search_for_these <- c("lag1[, x]", "lag2[, x]", "lag3[, x]", "lag4[, x]")
 replace_with_these <- c("lag1", "lag2", "lag3", "lag4")
 found <- list()
-
+#
+for (i in 2:122) {
+  found[[i]] <- match(names(regression[[i]]$coefficients), search_for_these, nomatch = 0)
+  names(regression[[i]]$coefficients)[names(regression[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
+for (i in 1:length(slr.total)) {
+  found[[i]] <- match(names(slr.total[[i]]$coefficients), search_for_these, nomatch = 0)
+  names(slr.total[[i]]$coefficients)[names(slr.total[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
 
 # -------------------------------------------------------------------------
 
@@ -657,7 +668,7 @@ stargazer(slr.1[2:7],
           se = NULL, type = "html"
 )
 
-stargazer(slr.1[8:13],
+stargazer(slr.1[8:13],#6个数字
           star.char = c("*"),
           star.cutoffs = c(0.01),
           notes = c(" * p<0.01; "),
@@ -672,15 +683,45 @@ stargazer(slr.1[8:13],
           df = FALSE,
           digits = 2, single.row = TRUE,
           model.numbers = FALSE,
-          column.labels = c(colnames(COPY[9]),colnames(COPY[11-15])),
+          column.labels = c(colnames(COPY[9]),colnames(COPY[11:15])),#6个数
           summary = FALSE,
           out = "C:/Users/PC/Desktop/output/4.15 quarterly data/1-2.html",
           flip = FALSE,
           se = NULL, type = "html"
 )
 
-# 2 Alcoholic beverages, tobacco and narcotics-----------------------------------------------------------------------
+#library(texreg)
+screenreg(slr.total[22])
 
+# 2 Alcoholic beverages, tobacco and narcotics-----------------------------------------------------------------------
+slr.2<- list()
+for (i in 16:21) {
+  slr.2[[i]] <- model.select(regression[[i]], keep = keep.dummies, sig = 0.01, verbose = F)
+}
+for (i in 2:length(slr.2)) {
+  found[[i]] <- match(names(slr.2[[i]]$coefficients), search_for_these, nomatch = 0)
+  names(slr.2[[i]]$coefficients)[names(slr.2[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
+stargazer(slr.2[2:7],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/2.html",
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[16:21])),
+          summary = FALSE,
+          se = NULL, type = "html"
+)
 stargazer(slr.total[16:21],
           star.char = c("*"),
           star.cutoffs = c(0.01),
@@ -701,7 +742,6 @@ stargazer(slr.total[16:21],
           summary = FALSE,
           se = NULL, type = "html"
 )
-
 # 3 Clothing and footwear-----------------------------------------------------------------------
 stargazer(slr.total[22:27],
           star.char = c("*"),
