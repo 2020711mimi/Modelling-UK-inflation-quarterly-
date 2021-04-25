@@ -1,0 +1,387 @@
+---
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(stargazer)
+```
+
+Stargazer table in microsoft word:
+```{r}
+# 01FOOD and their lower level------------------------------------------------------------------
+
+
+
+stargazer(slr.total[1:6],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[2:7])),
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/1-1.text",
+          flip = FALSE,
+          se = NULL, type = "text"
+)
+
+stargazer(slr.total[7:12],#6
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[9]),colnames(COPY[11:15])),#6
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/1-2.text",
+          flip = FALSE,
+          se = NULL, type = "text"
+)
+```
+```{r}
+# 2 Alcoholic beverages, tobacco and narcotics-----------------------------------------------------------------------
+stargazer(slr.total[13:18],#6
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[16:21])),#6
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/2.text",
+          flip = FALSE,
+          se = NULL, type = "text"
+)
+```
+
+```{r}
+# 2 Alcoholic beverages, tobacco and narcotics-----------------------------------------------------------------------
+stargazer(slr.total[13:18],#6
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[16:21])),#6
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/2.text",
+          flip = FALSE,
+          se = NULL, type = "text"
+)
+```
+
+```{r}
+  # 3 Clothing and footwear-----------------------------------------------------------------------
+stargazer(slr.total[19:22],#4
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[22:24]),colnames(COPY[27])),#4
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/3.text",
+          flip = FALSE,
+          se = NULL, type = "text"
+)
+```
+
+```{r}
+# 4 Housing, water, electricity, gas and other fuels-----------------------------------------------------------------------
+stargazer(slr.total[23:32],#10
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[28:34]),colnames(COPY[36:38])),#10
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/4.text",
+          flip = FALSE,
+          se = NULL, type = "text"
+)
+```
+
+```{r}
+# 5 Furnishings, household equipment and routine household maintenance-----------------------------------------------------------------------
+stargazer(slr.total[33:44],#12
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[41:43]),colnames(COPY[45:53])),#12
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/5.text",
+          flip = FALSE,
+          se = NULL, type = "text"
+)
+```
+
+```{r}
+# 6 Health-----------------------------------------------------------------------
+stargazer(slr.total[45:48],#4
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[56]),colnames(COPY[59:61])),#4
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/6.text",
+          flip = FALSE,
+          se = NULL, type = "text"
+)
+```
+
+```{r}
+# 07 Transport -----------------------------------------------------------------------
+stargazer(slr.total[49:57],#9
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[63]),colnames(COPY[65:66]),colnames(COPY[70:73]),colnames(COPY[75:76])),#1+2+4+2=9
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/7.text",
+          flip = FALSE,
+          se = NULL, type = "text"
+)
+```
+
+```{r}
+# 08 Communication -----------------------------------------------------------------------
+stargazer(slr.total[58],#9
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[78])),
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/8.text",
+          flip = FALSE,
+          se = NULL, type = "text"
+)
+```
+
+```{r}
+stargazer(slr.total[59:68],#10
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[80:85]),colnames(COPY[89:92])),#6+4=10
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/9-1.text",
+          flip = FALSE,
+          se = NULL, type = "text"
+)
+```
+
+```{r}
+stargazer(slr.total[69:74],#6
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[93:96]),colnames(COPY[98]),colnames(COPY[101])),
+          #4+1+1=6
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/9-2.text",
+          flip = FALSE,
+          se = NULL, type = "text"
+)
+```
+
+```{r}
+# 10 Education ----------------------------------------------------------------------
+stargazer(slr.total[75],#6
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[102])),
+          #4+1+1=6
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/10.text",
+          flip = FALSE,
+          se = NULL, type = "text"
+)
+```
+
+```{r}
+# 11 Restaurants and hotels ----------------------------------------------------------------------
+stargazer(slr.total[76:78],#3
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[104:106])),#3
+          #4+1+1=6
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/11.text",
+          flip = FALSE,
+          se = NULL, type = "text"
+)
+```
+
+```{r}
+# 12 Miscellaneous goods and services ----------------------------------------------------------------------
+stargazer(slr.total[79:89],#11
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[108]),colnames(COPY[110:113]),colnames(COPY[115:119]),
+                            colnames(COPY[122])),#1+4+5+1=11
+          #4+1+1=6
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/12.text",
+          flip = FALSE,
+          se = NULL, type = "text"
+)
+```
+

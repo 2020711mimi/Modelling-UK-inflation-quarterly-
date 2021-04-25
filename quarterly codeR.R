@@ -601,12 +601,7 @@ keep.dummies <- c("quarter1","quarter3","quarter4",
 
 slr.cpi <- model.select(CPI_,keep = keep.dummies,sig = 0.05,verbose = F)
 
-# -------------------------------------------------------------------------
-slr.total <- list()
-for (i in 2:length(regression)) {
-  slr.total[[i]] <- model.select(regression[[i]], keep = keep.dummies, sig = 0.05, verbose = F)
-}
-# ?ǵ?ɾ 
+
 
 # 0.01 --------------------------------------------------------------------
 
@@ -614,7 +609,7 @@ slr.total <- list()
 for (i in 2:length(regression)) {
   slr.total[[i]] <- model.select(regression[[i]], keep = keep.dummies, sig = 0.01, verbose = F)
 }
-#which(lengths(slr.total)==0)显示哪个是缺失的
+which(lengths(slr.total)==0)#显示哪个是缺失的
 length( which(lengths(slr.total)==0))#统计slr.total缺失了多少个.
 
 
@@ -622,8 +617,9 @@ length( which(lengths(slr.total)==0))#统计slr.total缺失了多少个.
 search_for_these <- c("lag1[, x]", "lag2[, x]", "lag3[, x]", "lag4[, x]")
 replace_with_these <- c("lag1", "lag2", "lag3", "lag4")
 found <- list()
-#
-for (i in 2:122) {
+#把名字他妈的一个个给我改了
+#change lag[,1] entirely
+for (i in 1:122) {
   found[[i]] <- match(names(regression[[i]]$coefficients), search_for_these, nomatch = 0)
   names(regression[[i]]$coefficients)[names(regression[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
 }
@@ -631,22 +627,22 @@ for (i in 1:length(slr.total)) {
   found[[i]] <- match(names(slr.total[[i]]$coefficients), search_for_these, nomatch = 0)
   names(slr.total[[i]]$coefficients)[names(slr.total[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
 }
-
+for (i in 1:length(slr.total)) {
+  found[[i]] <- match(names(slr.total[[i]]$coefficients), search_for_these, nomatch = 0)
+  names(slr.total[[i]]$coefficients)[names(slr.total[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
+for (i in 1:length(slr.total)) {
+  found[[i]] <- match(names(slr.total[[i]]$coefficients), search_for_these, nomatch = 0)
+  names(slr.total[[i]]$coefficients)[names(slr.total[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
 # -------------------------------------------------------------------------
 
 
 # 01FOOD and their lower level------------------------------------------------------------------
-slr.1<-list()
-for (i in 2:15) {
-  slr.1[[i]] <- model.select(regression[[i]], keep = keep.dummies, sig = 0.01, verbose = F)
-}
-for (i in 2:length(slr.1)) {
-  found[[i]] <- match(names(slr.1[[i]]$coefficients), search_for_these, nomatch = 0)
-  names(slr.1[[i]]$coefficients)[names(slr.1[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
-}
 
 
-stargazer(slr.1[2:7],
+
+stargazer(slr.total[1:6],
           star.char = c("*"),
           star.cutoffs = c(0.01),
           notes = c(" * p<0.01; "),
@@ -668,7 +664,7 @@ stargazer(slr.1[2:7],
           se = NULL, type = "html"
 )
 
-stargazer(slr.1[8:13],#6个数字
+stargazer(slr.total[7:12],#6
           star.char = c("*"),
           star.cutoffs = c(0.01),
           notes = c(" * p<0.01; "),
@@ -683,7 +679,7 @@ stargazer(slr.1[8:13],#6个数字
           df = FALSE,
           digits = 2, single.row = TRUE,
           model.numbers = FALSE,
-          column.labels = c(colnames(COPY[9]),colnames(COPY[11:15])),#6个数
+          column.labels = c(colnames(COPY[9]),colnames(COPY[11:15])),#6
           summary = FALSE,
           out = "C:/Users/PC/Desktop/output/4.15 quarterly data/1-2.html",
           flip = FALSE,
@@ -691,24 +687,15 @@ stargazer(slr.1[8:13],#6个数字
 )
 
 #library(texreg)
-screenreg(slr.total[22])
+#screenreg(slr.total[22])
 
 # 2 Alcoholic beverages, tobacco and narcotics-----------------------------------------------------------------------
-slr.2<- list()
-for (i in 16:21) {
-  slr.2[[i]] <- model.select(regression[[i]], keep = keep.dummies, sig = 0.01, verbose = F)
-}
-for (i in 2:length(slr.2)) {
-  found[[i]] <- match(names(slr.2[[i]]$coefficients), search_for_these, nomatch = 0)
-  names(slr.2[[i]]$coefficients)[names(slr.2[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
-}
-stargazer(slr.2[2:7],
+stargazer(slr.total[13:18],#6
           star.char = c("*"),
           star.cutoffs = c(0.01),
           notes = c(" * p<0.01; "),
           omit = c("quarter1","quarter3","quarter4",
                    "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
-          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/2.html",
           dep.var.labels.include = FALSE,
           notes.append = FALSE,
           # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
@@ -718,38 +705,19 @@ stargazer(slr.2[2:7],
           df = FALSE,
           digits = 2, single.row = TRUE,
           model.numbers = FALSE,
-          column.labels = c(colnames(COPY[16:21])),
+          column.labels = c(colnames(COPY[16:21])),#6
           summary = FALSE,
-          se = NULL, type = "html"
-)
-stargazer(slr.total[16:21],
-          star.char = c("*"),
-          star.cutoffs = c(0.01),
-          notes = c(" * p<0.01; "),
-          omit = c("quarter1","quarter3","quarter4",
-                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
           out = "C:/Users/PC/Desktop/output/4.15 quarterly data/2.html",
-          dep.var.labels.include = FALSE,
-          notes.append = FALSE,
-          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
-          report = "vc*",
-          align = TRUE,
-          header = FALSE,
-          df = FALSE,
-          digits = 2, single.row = TRUE,
-          model.numbers = FALSE,
-          column.labels = c(colnames(COPY[16:21])),
-          summary = FALSE,
+          flip = FALSE,
           se = NULL, type = "html"
 )
 # 3 Clothing and footwear-----------------------------------------------------------------------
-stargazer(slr.total[22:27],
+stargazer(slr.total[19:22],#4
           star.char = c("*"),
           star.cutoffs = c(0.01),
           notes = c(" * p<0.01; "),
           omit = c("quarter1","quarter3","quarter4",
                    "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
-          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/2.html",
           dep.var.labels.include = FALSE,
           notes.append = FALSE,
           # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
@@ -759,19 +727,20 @@ stargazer(slr.total[22:27],
           df = FALSE,
           digits = 2, single.row = TRUE,
           model.numbers = FALSE,
-          column.labels = c(colnames(COPY[22:27])),
+          column.labels = c(colnames(COPY[22:24]),colnames(COPY[27])),#4
           summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/3.html",
+          flip = FALSE,
           se = NULL, type = "html"
 )
 
 # 4 Housing, water, electricity, gas and other fuels-----------------------------------------------------------------------
-stargazer(slr.total[28:40],
+stargazer(slr.total[23:32],#10
           star.char = c("*"),
           star.cutoffs = c(0.01),
           notes = c(" * p<0.01; "),
           omit = c("quarter1","quarter3","quarter4",
                    "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
-          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/2.html",
           dep.var.labels.include = FALSE,
           notes.append = FALSE,
           # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
@@ -781,19 +750,20 @@ stargazer(slr.total[28:40],
           df = FALSE,
           digits = 2, single.row = TRUE,
           model.numbers = FALSE,
-          column.labels = c(colnames(COPY[22:27])),
+          column.labels = c(colnames(COPY[28:34]),colnames(COPY[36:38])),#10
           summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/4.html",
+          flip = FALSE,
           se = NULL, type = "html"
 )
 
 # 5 Furnishings, household equipment and routine household maintenance-----------------------------------------------------------------------
-stargazer(slr.total[28:40],
+stargazer(slr.total[33:44],#12
           star.char = c("*"),
           star.cutoffs = c(0.01),
           notes = c(" * p<0.01; "),
           omit = c("quarter1","quarter3","quarter4",
                    "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
-          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/2.html",
           dep.var.labels.include = FALSE,
           notes.append = FALSE,
           # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
@@ -803,31 +773,199 @@ stargazer(slr.total[28:40],
           df = FALSE,
           digits = 2, single.row = TRUE,
           model.numbers = FALSE,
-          column.labels = c(colnames(COPY[22:27])),
+          column.labels = c(colnames(COPY[41:43]),colnames(COPY[45:53])),#12
           summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/5.html",
+          flip = FALSE,
           se = NULL, type = "html"
 )
 
 # 6 Health-----------------------------------------------------------------------
-
+stargazer(slr.total[45:48],#4
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[56]),colnames(COPY[59:61])),#4
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/6.html",
+          flip = FALSE,
+          se = NULL, type = "html"
+)
 
 # 07 Transport -----------------------------------------------------------------------
-
+stargazer(slr.total[49:57],#9
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[63]),colnames(COPY[65:66]),colnames(COPY[70:73]),colnames(COPY[75:76])),#1+2+4+2=9
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/7.html",
+          flip = FALSE,
+          se = NULL, type = "html"
+)
 
 # 08 Communication -----------------------------------------------------------------------
-
+stargazer(slr.total[58],#9
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[78])),
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/8.html",
+          flip = FALSE,
+          se = NULL, type = "html"
+)
 
 # 09 Recreation and culture -----------------------------------------------------------------------
+stargazer(slr.total[59:68],#10
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[80:85]),colnames(COPY[89:92])),#6+4=10
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/9-1.html",
+          flip = FALSE,
+          se = NULL, type = "html"
+)
 
-
+stargazer(slr.total[69:74],#6
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[93:96]),colnames(COPY[98]),colnames(COPY[101])),
+          #4+1+1=6
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/9-2.html",
+          flip = FALSE,
+          se = NULL, type = "html"
+)
 # 10 Education ----------------------------------------------------------------------
-
+stargazer(slr.total[75],#6
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[102])),
+          #4+1+1=6
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/10.html",
+          flip = FALSE,
+          se = NULL, type = "html"
+)
 
 # 11 Restaurants and hotels ----------------------------------------------------------------------
-
+stargazer(slr.total[76:78],#3
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[104:106])),#3
+          #4+1+1=6
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/11.html",
+          flip = FALSE,
+          se = NULL, type = "html"
+)
 
 # 12 Miscellaneous goods and services ----------------------------------------------------------------------
-
+stargazer(slr.total[79:89],#11
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[108]),colnames(COPY[110:113]),colnames(COPY[115:119]),
+                            colnames(COPY[122])),#1+4+5+1=11
+          #4+1+1=6
+          summary = FALSE,
+          out = "C:/Users/PC/Desktop/output/4.15 quarterly data/12.html",
+          flip = FALSE,
+          se = NULL, type = "html"
+)
 # CPI ---------------------------------------------------------------------
 
 

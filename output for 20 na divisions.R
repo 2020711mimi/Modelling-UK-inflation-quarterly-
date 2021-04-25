@@ -128,7 +128,7 @@ res1 <- lm(
   data = y1
 )
 
-# ÎÒÕæÊÇ²ÙÁËÄãÂèÁË ----------------------------------------------------------------
+# ?????Ç²????????? ----------------------------------------------------------------
 
 # res1.simple <- model.select(res1, keep = keep.dummies, sig = 0.05, verbose = F)
 # names(res1$coefficients) #<-
@@ -293,7 +293,7 @@ slr.total <- list()
 for (i in 2:length(regression)) {
   slr.total[[i]] <- model.select(regression[[i]], keep = keep.dummies, sig = 0.05, verbose = F)
 }
-# ¼ÇµÃÉ¾ 
+# ?Çµ?É¾ 
 
 # 0.01 --------------------------------------------------------------------
 
@@ -314,7 +314,7 @@ for (i in 2:173) {
   names(slr.total[[i]]$coefficients)[names(slr.total[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
 }
 
-# 1,86,141ËùÓĞ²ÎÊıÈ«²¿²»ÏÔÖø
+# 1,86,141???Ğ²???È«????????
 # screenreg(list(regression[[1]], regression[[86]], regression[[141]]))
 # 1 -----------------------------------------------------------------------
 library(stargazer)
@@ -798,7 +798,7 @@ stargazer(slr.total[76:77],
           se = NULL, type = "html"
 )
 # 9 -----------------------------------------------------------------------
-# 86ÓĞÎÊÌâ
+# 86??????
 # slr.total <- list()
 # for (i in 2:length(regression)) {
 #  slr.total[[i]] <- model.select(regression[[i]], keep = keep.dummies, sig = 0.05, verbose = F)
@@ -1383,7 +1383,7 @@ length(which(a < 0.01))
 a <- lapply(regression[2:122], function(x) summary(x)$coefficients["VAT1", 4])
 a <- lapply(slr.total[2:122], function(x) summary(x)$coefficients["VAT1", 4])
 length(a)
- # °Ù·ÖºÅ ---------------------------------------------------------------------
+ # ?Ù·Öº? ---------------------------------------------------------------------
 
 percent <- function(x, digits = 2, format = "f", ...) {
   paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
@@ -1703,9 +1703,9 @@ for (i in 1:12) {
   MS12.0.01.lag[i]<-length(which(a[[i]] < 0.01))*weight[[12]]
 }
 
-# ¼ÆËãd1µ½d12ÊÇ²»ÊÇµÈÓÚ120¸övat1 ---------------------------------------------------
+# ????d1??d12?Ç²??Çµ???120??vat1 ---------------------------------------------------
 
-#¼ÆËãd1+d12ÊÇ²»ÊÇ=120¸ö±äÁ¿
+#????d1+d12?Ç²???=120????ï¿½ï¿½
 dflist = mget(paste0("d", 1:12))
 ylist = lapply(dflist, function(x) length(which(x$term=="Trend")))
 Reduce("+",ylist)
@@ -1881,13 +1881,13 @@ library(plyr)
 
 
 # tidy for 0.05--------------------------------------------------------------------
-slr.0.05 <- list() # regression µ½122
+slr.0.05 <- list() # regression ??122
 for (i in 2:122) {
-  slr.0.05[[i]] <- model.select(regression[[i]], keep = keep.dummies, sig = 0.05, verbose = F) # 122¸ö?Ã»ÓĞ1ºÍ86
+  slr.0.05[[i]] <- model.select(regression[[i]], keep = keep.dummies, sig = 0.05, verbose = F) # 122???Ã»??1??86
 }
 
 slr.86 <- model.select(regression[[86]],keep = keep.dummies,sig = 0.01,verbose = F)
- # Ìæ»»±äÁ¿Ãû³Æ
+ # ?æ»»??ï¿½ï¿½????
 for (i in 2:122) {
   found[[i]] <- match(names(slr.0.05[[i]]$coefficients), search_for_these, nomatch = 0)
   names(slr.0.05[[i]]$coefficients)[names(slr.0.05[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
@@ -1963,11 +1963,11 @@ length(grep(x = a$term, pattern ="\\blag11\\b"))
 length(grep(x = a$term, pattern = "lag12"))
 length(grep(x = a$term, pattern ="\\blag12\\b"))
 # for 0.01 ----------------------------------------------------------------
-slr.0.01 <- list() # regression µ½122
+slr.0.01 <- list() # regression ??122
 for (i in 2:122) {
-  slr.0.01[[i]] <- model.select(regression[[i]], keep = keep.dummies, sig = 0.01, verbose = F) # 122¸ö
+  slr.0.01[[i]] <- model.select(regression[[i]], keep = keep.dummies, sig = 0.01, verbose = F) # 122??
 }
-# Ìæ»»±äÁ¿Ãû³Æ
+# ?æ»»??ï¿½ï¿½????
 for (i in 2:122) {
   found[[i]] <- match(names(slr.0.01[[i]]$coefficients), search_for_these, nomatch = 0)
   names(slr.0.01[[i]]$coefficients)[names(slr.0.01[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
@@ -2076,7 +2076,7 @@ a <- do.call(rbind.data.frame, tidy_mods)
 
 # print -------------------------------------------------------------------
 
-# ÕâÖÁÉÙÊÇÔÚ5%Çø¼ä¶¼ÏÔÖø°Ö -----------------------------------------------------------
+# ??????????5%???ä¶¼?????? -----------------------------------------------------------
 
 
 
@@ -2086,7 +2086,7 @@ length(
   )
 length(
   grep(x = a$term, pattern ="\\blag2\\b")
-  )#¶ÔµÄ
+  )#?Ôµ?
 
 #length(grep(x = a$term, pattern ="lag9"))
 #length(grep(x = a$term, pattern =paste0("lag",9)))
@@ -2099,7 +2099,7 @@ length(
 length(
   which(a$term ==paste0("lag",9))
 )
-#lag9 ¸öÊıÊÇ34µÃ¶¼²»¶Ô£¬£¨°üº¬cpi¡ª¡ªlag9£© 19¸ö²ÅÊÇ¶ÔµÃ£¬
+#lag9 ??????34?Ã¶????Ô£???????cpi????lag9?? 19?????Ç¶ÔµÃ£?
 for (i in 1:12) {
   #print(length(grep(x = a$term, pattern =paste0("\\blag",i,"\\b"))))
   print(percent(length(grep(x = a$term,  pattern =paste0("\\blag",i,"\\b")))/121))
@@ -2154,7 +2154,7 @@ length(
 percent(
 length(
   grep(x = a$term, pattern ="\\blag12\\b")
-)/121)#¶ÔµÄ
+)/121)#?Ôµ?
 # 0.01 step cpi lag 1-12 --------------------------------------------------
 
 y<-list()
@@ -2190,11 +2190,11 @@ percent(nrow(my.data.frame)/121)
 
 #  stepwise ---------------------------------------------------------
 
-# ²é¿´120¸öTrendµÄÎ»ÖÃ ------------------------------------------------------------
+# ?é¿´120??Trend??Î»?? ------------------------------------------------------------
 y<-which(a$term=="Trend")
 write.table(y,"Trend.csv",sep=",")
 
-# µÚÒ» ----------------------------------------------------------------------
+# ??Ò» ----------------------------------------------------------------------
 d1 <- a[1:305,]
 length(which(d1$term=="Trend"))
 which(d1$term=="Trend")
@@ -2223,7 +2223,7 @@ for (i in 1:12) {
 #  nrow(my.data.frame)*weight[[1]]
 #)
 
-# ¶ş -----------------------------------------------------------------------
+# ?? -----------------------------------------------------------------------
 d2 <- a[306:439,]
 length(which(d2$term=="Trend"))
 d2lag0.01<-list()
@@ -2247,7 +2247,7 @@ for (i in 1:12) {
   
 }
 
-# Èı -----------------------------------------------------------------------
+# ?? -----------------------------------------------------------------------
 d3 <- a[440:575,]
 length(which(d3$term=="Trend"))
 d3lag0.01<-list()
@@ -2271,7 +2271,7 @@ for (i in 1:12) {
   
 }
 
-# ËÄ -----------------------------------------------------------------------
+# ?? -----------------------------------------------------------------------
 d4 <- a[576:831,]
 length(which(d4$term=="Trend"))
 d4lag0.01<-list()
@@ -2295,7 +2295,7 @@ for (i in 1:12) {
   
 }
 
-# Îå -----------------------------------------------------------------------
+# ?? -----------------------------------------------------------------------
 d5 <- a[832:1126,]
 length(which(d5$term=="Trend"))
 d5lag0.01<-list()
@@ -2319,7 +2319,7 @@ for (i in 1:12) {
   
 }
 
-# Áù -----------------------------------------------------------------------
+# ?? -----------------------------------------------------------------------
 d6 <- a[1127:1298,]
 length(which(d6$term=="Trend"))
 d6lag0.01<-list()
@@ -2343,7 +2343,7 @@ for (i in 1:12) {
   
 }
 
-# Æß -----------------------------------------------------------------------
+# ?? -----------------------------------------------------------------------
 d7 <- a[1299:1640,]
 length(which(d7$term=="Trend"))
 d7lag0.01<-list()
@@ -2367,7 +2367,7 @@ for (i in 1:12) {
 
 }
 
-# °Ë -----------------------------------------------------------------------
+# ?? -----------------------------------------------------------------------
 d8 <- a[1641:1696,]
 length(which(d8$term=="Trend"))
 d8lag0.01<-list()
@@ -2391,7 +2391,7 @@ for (i in 1:12) {
   
 }
 
-# ¾Å -----------------------------------------------------------------------
+# ?? -----------------------------------------------------------------------
 d9 <- a[1697:2140,]
 length(which(d9$term=="Trend"))
 d9lag0.01<-list()
@@ -2997,7 +2997,7 @@ for (i in 1:12) {
   HL06.0.01.cpi[i]<-length(grep(x = a$term,  pattern =paste0("\\bCPI_lag",i,"\\b")))*weight[[6]]
 }
 
-# TR07 --------------------------------------------------------------------ÓĞµãÎÊÌâ 68Ã»ÓĞ0.01
+# TR07 --------------------------------------------------------------------?Ğµ????? 68Ã»??0.01
 slr.total <- list()
 for (i in 62:76) {
   slr.total[[i]] <- model.select(regression[[i]], keep = keep.dummies, sig = 0.01, verbose = F)
