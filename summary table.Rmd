@@ -1,0 +1,226 @@
+---
+title: "summary table quarterly"
+author: "Yiyi"
+date: "2021/4/27"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(stargazer)
+```
+
+
+```{r}
+library(tidyverse)
+rm(list = ls())
+library(stargazer)
+# DATA INPUT --------------------------------------------------------------
+Sys.setlocale("LC_TIME", "English")
+getwd()
+library(readxl)
+cpi <- read_excel("correct quarter cpi.xlsx")#108
+library(data.table)
+
+setDF(cpi)#convert to 'data.frame'
+
+cols.num <- c(colnames(cpi))
+cpi[cols.num] <- sapply(cpi[cols.num],as.numeric)
+
+cpi <- as.data.table(cpi)
+colnames(cpi) = gsub("&", "and", colnames(cpi))
+COPY<-copy(cpi)
+tracemem(COPY)==tracemem(cpi)
+Data_A = as.data.table (cpi)
+
+# -------------------------------------------------------------------------
+Varnames <- copy(names(Data_A))
+Data_A[, (names(Data_A)) := lapply(.SD, as.numeric)][,
+                                                     rn := .I]
+melted <- melt(Data_A, id.vars="rn")[,
+                                     (paste0("lag_", 0:4)) := shift(value, 0:4, type="lag"),
+                                     by=variable][, 
+                                                  value:=NULL][]
+res <- dcast.data.table(melt(melted, id.vars=c("rn", "variable"), variable.name="lag"),
+                        rn ~ variable + lag, sum)
+res[, ncol(res), with=FALSE]
+# lagged variable generation ----------------------------------------------
+
+
+cpi <- cpi[, unlist(lapply(.SD, shift, n = 0:4), recursive = FALSE)]#lags generation
+# quarterly  Dummies ---------------------------------------------------------
+
+
+cpi$time <- seq.Date(from = as.Date("1992/01/01",format = "%Y/%m/%d"), by = "quarter", length.out = 112)
+cpi$time <- format(cpi$time, format = "%b")
+
+cpi <- fastDummies::dummy_cols(cpi, select_columns = "time", remove_most_frequent_dummy = TRUE,
+)
+
+cpi$time1 <- seq.Date(from = as.Date("1992/01/01",format = "%Y/%m/%d"), by = "quarter", length.out = 112)
+
+# Trend,vat, recession ----------------------------------------------------
+newdata<-copy(cpi)
+
+newdata<-newdata[newdata$'time1' >= as.Date("1993-01-01")]
+Trend <- seq_along(newdata$time1)
+
+VAT1 <- as.numeric(newdata$`time1` == "2008-10-01")
+VAT2 <- as.numeric(newdata$`time1` == "2010-01-01")
+VAT3 <- as.numeric(newdata$`time1` == "2011-01-01")
+Recession <- as.numeric(newdata$`time1` >= "2008-04-01" & newdata$`time1`<= "2009-06-01")#??5??dummy
+
+# Lag ---------------------------------------------------------------------
+library(dplyr) 
+lag1 <- newdata %>% 
+  select(matches("(2)$"))
+lag2 <- newdata %>% 
+  select(matches("(3)$"))
+lag3 <- newdata %>% 
+  select(matches("(4)$"))
+lag4 <- newdata %>% 
+  select(matches("(5)$"))
+
+# MONTYHLY DUMMIES --------------------------------------------------------
+
+
+quarter1 <- as.numeric(newdata$time_Jan)
+quarter3 <- as.numeric(newdata$time_Jul)
+quarter4 <- as.numeric(newdata$time_Oct)
+
+COPY <- as.data.frame(COPY)
+lag1 <- as.data.frame(lag1)
+lag2 <- as.data.frame(lag2)
+lag3 <- as.data.frame(lag3)
+lag4 <- as.data.frame(lag4)
+
+# CPI-LAGS ----------------------------------------------------------------
+
+
+CPI_lag1 <- (newdata$"CPI ALL ITEMS2")
+CPI_lag2 <- (newdata$"CPI ALL ITEMS3")
+CPI_lag3 <- (newdata$"CPI ALL ITEMS4")
+CPI_lag4 <- (newdata$"CPI ALL ITEMS5")
+
+# Copy????1992????ɾ?? ?ָ? 108obs --------------------------------------------------
+
+COPY<-COPY[-1:-4,]
+# regression --------------------------------------------------------------
+
+
+reg.model <- lapply(1:122, function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+lag4[,x]+
+                                            quarter1+quarter3+quarter4+VAT1+VAT2+VAT3+Recession+Trend)
+)
+for (i in 1:122) {
+  names(reg.model[[i]]$coefficients)<-c('Constant','lag1','lag2',"lag3","lag4","quarter1","quarter3","quarter4","VAT1","VAT2","VAT3","Recession","Trend")
+}
+
+regression <- lapply(1:122, function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+lag4[,x]+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+ quarter1+quarter3+quarter4+VAT1+VAT2+VAT3+Recession+Trend)
+)
+for (i in 1:122) {
+  names(regression[[i]]$coefficients)<-c('Constant','lag1','lag2',"lag3","lag4",
+                                         "CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4",
+                                         "quarter1","quarter3","quarter4",
+                                         "VAT1","VAT2","VAT3","Recession","Trend")
+}
+
+
+# rename regression list --------------------------------------------------
+
+names(regression) <- c(colnames(COPY))
+# Extract divisions  ------------------------------------------------------
+
+
+CPI_ <- reg.model[[1]]
+FB01 <- regression[[2]]
+AT02 <- regression[[16]]
+CF03 <- regression[[22]]
+HW04 <- regression[[28]]
+FH05 <- regression[[41]]
+HL06 <- regression[[54]]
+TR07 <- regression[[62]]
+CM08 <- regression[[77]]
+RC09 <- regression[[80]]
+ED10 <- regression[[102]]
+RH11 <- regression[[103]]
+MS12 <- regression[[108]]
+# replace & with AND---------------------------------------------------------------
+
+colnames(COPY) = gsub("&", "and", colnames(COPY))
+# how to find na value in col position ------------------------------------
+misscolname <- colnames(COPY)[colSums(is.na(COPY)) > 0]
+
+for (i in 1:19) {
+  print(grep(misscolname[i],colnames(COPY))) 
+}
+```
+
+```{r}
+percent <- function(x, digits = 2, format = "f", ...) {
+  paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
+}
+percent(1)
+a=list()
+
+
+length(a)
+```
+
+
+```{r 0.05 CPI}
+for (i in 1:4) {
+  a[[i]] <- lapply(regression[2:122], function(x) summary(x)$coefficients[paste0("CPI_lag",i), 4])
+  print(percent(length(which(a[[i]] < 0.05))/121))
+  #print(a[[i]])
+}
+```
+
+
+```{r 0.01 CPI}
+for (i in 1:4) {
+  a[[i]] <- lapply(regression[2:122], function(x) summary(x)$coefficients[paste0("CPI_lag",i), 4])
+  
+  print(percent(length(which(a[[i]] < 0.01))/121))
+}
+```
+
+
+```{r 0.05 lag}
+for (i in 1:4) {
+  a[[i]] <- lapply(regression[2:122], function(x) summary(x)$coefficients[paste0("lag",i), 4])
+  print(percent(length(which(a[[i]] < 0.05))/121))
+  #print(a[[i]])
+}
+```
+
+
+```{r 0.01 lag}
+for (i in 1:4) {
+  a[[i]] <- lapply(regression[2:122], function(x) summary(x)$coefficients[paste0("lag",i), 4])
+  
+  print(percent(length(which(a[[i]] < 0.01))/121))
+}
+```
+
+```{r}
+stargazer(regression[2:6],
+          star.cutoffs = c(0.05, 0.01),
+          
+          report = "vc*",
+          align=TRUE,           
+          header = FALSE,
+          model.numbers=FALSE,
+          column.labels = c(colnames(COPY[2:15])),
+          df=FALSE, 
+          digits=2, single.row = TRUE,
+          summary=FALSE,
+          se = NULL, type = "text")
+
+for (i in 1:4) {
+  a[[i]] <- lapply(regression[2:6], function(x) summary(x)$coefficients[paste0("lag",i), 4])
+  print(length(which(a[[i]] <0.01)))
+  print(percent(length(which(a[[i]] < 0.01))/121))
+}
+
+```
+
