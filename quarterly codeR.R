@@ -110,12 +110,7 @@ for (i in 1:122) {
                                          "VAT1","VAT2","VAT3","Recession","Trend")
 }
 
-lm(`REPAIR OF HOUSEHOLD APPLIANCES1` ~ `CPI ALL ITEMS1`,data = furniture48)
-lm(formula = `REPAIR OF HOUSEHOLD APPLIANCES1`~ `REPAIR OF HOUSEHOLD APPLIANCES2`, data = furniture48)
-lm(`OTHER MEDICAL & THERAPEUTIC EQUIPMENT1`~`OTHER MEDICAL & THERAPEUTIC EQUIPMENT2`, data=furniture48)
-lm(``~``, data=furniture48)
-lm(`OUT-PATIENT SERVICES1`~`OUT-PATIENT SERVICES2`, data=furniture48)
-lm(`REPAIR OF HOUSEHOLD APPLIANCES1` ~`OUT-PATIENT SERVICES2`, data = newdata )
+
 # rename regression list --------------------------------------------------
 
 names(regression) <- c(colnames(COPY))
@@ -160,7 +155,7 @@ stargazer(regression[2:15],
           summary=FALSE,
           se = NULL, type = "html")
 
-# ?????ж??ٸ???��??0.01??0.05????(??һ?ű?) ----------------------------------------------
+# 递归之前的显著比例----------------------------------------------
 percent <- function(x, digits = 2, format = "f", ...) {
   paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
 }
@@ -636,6 +631,24 @@ for (i in 1:length(slr.total)) {
   names(slr.total[[i]]$coefficients)[names(slr.total[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
 }
 # -------------------------------------------------------------------------
+
+# table 4 stepwise  -------------------------------------------------------
+# 显著百分比 -------------------------------------------------------------------
+
+percent <- function(x, digits = 2, format = "f", ...) {
+  paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
+}
+percent(1)
+
+# loop --------------------------------------------------------------------
+
+
+a=list()
+for (i in 1:4) {
+  a[[i]] <- lapply(slr.total[1:89], function(x) summary(x)$coefficients[paste0("CPI_lag",i), 4])
+  print(percent(length(which(a[[i]] < 0.05))/121))
+  #print(a[[i]])
+}
 
 
 # 01FOOD and their lower level------------------------------------------------------------------
