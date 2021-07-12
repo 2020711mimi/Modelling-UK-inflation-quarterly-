@@ -609,7 +609,7 @@ length( which(lengths(slr.total)==0))#统计slr.total缺失了多少个.
 
 
 #
-search_for_these <- c("lag1[, x]", "lag2[, x]", "lag3[, x]", "lag4[, x]")
+search_for_these <- c("lag1[, x]", "lag2[, x]", "lag3[, x]", "lag4[, x]")1
 replace_with_these <- c("lag1", "lag2", "lag3", "lag4")
 found <- list()
 #把名字他妈的一个个给我改了
