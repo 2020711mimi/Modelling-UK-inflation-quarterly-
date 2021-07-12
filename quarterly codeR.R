@@ -155,7 +155,7 @@ stargazer(regression[2:15],
           summary=FALSE,
           se = NULL, type = "html")
 
-# 递归之前的显著比例----------------------------------------------
+ # 递归之前的显著比例----------------------------------------------
 percent <- function(x, digits = 2, format = "f", ...) {
   paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
 }
@@ -633,22 +633,35 @@ for (i in 1:length(slr.total)) {
 # -------------------------------------------------------------------------
 
 # table 4 stepwise  -------------------------------------------------------
-# 显著百分比 -------------------------------------------------------------------
+# 递归之后显著百分比 -------------------------------------------------------------------
 
 percent <- function(x, digits = 2, format = "f", ...) {
   paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
 }
 percent(1)
 
-# loop --------------------------------------------------------------------
+#--------------------------------------------------------------------
+library(broom)
+tidy_mods <- lapply(slr.total, tidy)
+# add names to each data frame and combine into one big data frame
+for (i in 1:length(tidy_mods)) tidy_mods[[i]]$mod <- names(tidy_mods[i])
+a <- do.call(rbind.data.frame, tidy_mods)
+length(grep(x = a$term, pattern ="\\bCPI_lag1\\b"))
 
-
-a=list()
+# -------------------------------------------------------------------------
 for (i in 1:4) {
-  a[[i]] <- lapply(slr.total[1:89], function(x) summary(x)$coefficients[paste0("CPI_lag",i), 4])
-  print(percent(length(which(a[[i]] < 0.05))/121))
-  #print(a[[i]])
+  #print(length(grep(x = a$term, pattern =paste0("\\blag",i,"\\b"))))
+  print(percent(length(grep(x = a$term,  pattern =paste0("\\blag",i,"\\b")))/121))
 }
+#  -----------------------------------------------------------------------
+for (i in 1:12) {
+  print(percent(length(grep(x = a$term,  pattern =paste0("\\bCPI_lag",i,"\\b")))/121))
+  #print(percent(length(which(a[[i]] < 0.05))/121))
+}
+
+
+
+# -------------------------------------------------------------------------
 
 
 # 01FOOD and their lower level------------------------------------------------------------------
