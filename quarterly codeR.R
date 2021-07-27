@@ -596,6 +596,67 @@ keep.dummies <- c("quarter1","quarter3","quarter4",
 
 slr.cpi <- model.select(CPI_,keep = keep.dummies,sig = 0.05,verbose = F)
 
+# 0.05 slr.total=105个--------------------------------------------------------------------
+s0.05 <- list()
+for (i in 2:length(regression)) {
+  s0.05[[i]] <- model.select(regression[[i]], keep = keep.dummies, sig = 0.05, verbose = F)
+}
+which(lengths(s0.05)==0)#显示哪个是缺失的
+length( which(lengths(s0.05)==0))#统计s0.05缺失了多少个.
+
+
+#
+search_for_these <- c("lag1[, x]", "lag2[, x]", "lag3[, x]", "lag4[, x]")
+replace_with_these <- c("lag1", "lag2", "lag3", "lag4")
+found <- list()
+#把名字他妈的一个个给我改了
+#change lag[,1] entirely
+for (i in 1:122) {
+  found[[i]] <- match(names(regression[[i]]$coefficients), search_for_these, nomatch = 0)
+  names(regression[[i]]$coefficients)[names(regression[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
+for (i in 1:length(s0.05)) {
+  found[[i]] <- match(names(s0.05[[i]]$coefficients), search_for_these, nomatch = 0)
+  names(s0.05[[i]]$coefficients)[names(s0.05[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
+for (i in 1:length(s0.05)) {
+  found[[i]] <- match(names(s0.05[[i]]$coefficients), search_for_these, nomatch = 0)
+  names(s0.05[[i]]$coefficients)[names(s0.05[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
+for (i in 1:length(s0.05)) {
+  found[[i]] <- match(names(s0.05[[i]]$coefficients), search_for_these, nomatch = 0)
+  names(s0.05[[i]]$coefficients)[names(s0.05[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
+
+percent <- function(x, digits = 2, format = "f", ...) {
+  paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
+}
+percent(1)
+
+#--------------------------------------------------------------------
+library(broom)
+tidy_mods <- lapply(s0.05, tidy)
+# add names to each data frame and combine into one big data frame
+for (i in 1:length(tidy_mods)) tidy_mods[[i]]$mod <- names(tidy_mods[i])
+a <- do.call(rbind.data.frame, tidy_mods)
+length(grep(x = a$term, pattern ="\\bCPI_lag1\\b"))
+
+# Table 4 Stepwise Summary Table (Quarterly data) 第一列结果-------------------------------------------------------------------------
+for (i in 1:4) {
+  #print(length(grep(x = a$term, pattern =paste0("\\blag",i,"\\b"))))
+  print(percent(length(grep(x = a$term,  pattern =paste0("\\blag",i,"\\b")))/121))
+}
+#  -----------------------------------------------------------------------
+for (i in 1:4) {
+  print(percent(length(grep(x = a$term,  pattern =paste0("\\bCPI_lag",i,"\\b")))/121))
+  #print(percent(length(which(a[[i]] < 0.05))/121))
+}
+
+# 01 ----------------------------------------------------------------------
+
+d1 <- a[1:305,]
+length(which(a$term=="Trend"))
+which(a$term=="Trend")
 
 
 # 0.01 --------------------------------------------------------------------
@@ -609,7 +670,7 @@ length( which(lengths(slr.total)==0))#统计slr.total缺失了多少个.
 
 
 #
-search_for_these <- c("lag1[, x]", "lag2[, x]", "lag3[, x]", "lag4[, x]")1
+search_for_these <- c("lag1[, x]", "lag2[, x]", "lag3[, x]", "lag4[, x]")
 replace_with_these <- c("lag1", "lag2", "lag3", "lag4")
 found <- list()
 #把名字他妈的一个个给我改了
@@ -633,7 +694,8 @@ for (i in 1:length(slr.total)) {
 # -------------------------------------------------------------------------
 
 # table 4 stepwise  -------------------------------------------------------
-# 递归之后显著百分比 -------------------------------------------------------------------
+
+# 递归之后显著百分比#only for 0.01 -------------------------------------------------------------------
 
 percent <- function(x, digits = 2, format = "f", ...) {
   paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
@@ -648,13 +710,13 @@ for (i in 1:length(tidy_mods)) tidy_mods[[i]]$mod <- names(tidy_mods[i])
 a <- do.call(rbind.data.frame, tidy_mods)
 length(grep(x = a$term, pattern ="\\bCPI_lag1\\b"))
 
-# -------------------------------------------------------------------------
+# Table 4 Stepwise Summary Table (Quarterly data) 第一列结果-------------------------------------------------------------------------
 for (i in 1:4) {
   #print(length(grep(x = a$term, pattern =paste0("\\blag",i,"\\b"))))
   print(percent(length(grep(x = a$term,  pattern =paste0("\\blag",i,"\\b")))/121))
 }
 #  -----------------------------------------------------------------------
-for (i in 1:12) {
+for (i in 1:4) {
   print(percent(length(grep(x = a$term,  pattern =paste0("\\bCPI_lag",i,"\\b")))/121))
   #print(percent(length(which(a[[i]] < 0.05))/121))
 }
