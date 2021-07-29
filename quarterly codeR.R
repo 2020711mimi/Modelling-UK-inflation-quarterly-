@@ -654,9 +654,59 @@ for (i in 1:4) {
 
 # 01 ----------------------------------------------------------------------
 
-d1 <- a[1:305,]
+
 length(which(a$term=="Trend"))
-which(a$term=="Trend")
+which(a$term=="Trend")[[13]]#the Food and non-alcoholic beverages end with Line 142 
+d1 <- a[1:142,]
+length(which(d1$term=="Trend"))
+
+d1lag0.01<-list()
+d1cpi0.01<-list()
+d1lag0.05<-list()
+d1cpi0.05<-list()
+for (i in 1:4) {
+  
+  my.data.frame <- d1[(d1$term ==paste0("lag",i)) & (d1$p.value < 0.01), ]
+  d1lag0.01[i] <- nrow(my.data.frame)*weight[[1]]
+  
+  my.data.frame <- d1[(d1$term ==paste0("CPI_lag",i)) & (d1$p.value < 0.01), ]
+  d1cpi0.01[i] <- nrow(my.data.frame)*weight[[1]]
+  
+  my.data.frame <- d1[(d1$term ==paste0("lag",i)) & (d1$p.value < 0.05), ]
+  d1lag0.05[i] <- nrow(my.data.frame)*weight[[1]]
+  
+  my.data.frame <- d1[(d1$term ==paste0("CPI_lag",i)) & (d1$p.value < 0.05), ]
+  d1cpi0.05[i] <- nrow(my.data.frame)*weight[[1]]
+  
+  
+}
+
+# 02 ----------------------------------------------------------------------
+which(a$term=="Trend")[[19]]#212
+d2 <- a[143:212,]
+length(which(d2$term=="Trend"))#6
+d2lag0.01<-list()
+d2cpi0.01<-list()
+d2lag0.05<-list()
+d2cpi0.05<-list()
+for (i in 1:4) {
+  
+  my.data.frame <- d2[(d2$term ==paste0("lag",i)) & (d2$p.value < 0.01), ]
+  d2lag0.01[i] <- nrow(my.data.frame)*weight[[2]]
+  
+  my.data.frame <- d2[(d2$term ==paste0("CPI_lag",i)) & (d2$p.value < 0.01), ]
+  d2cpi0.01[i] <- nrow(my.data.frame)*weight[[2]]
+  
+  my.data.frame <- d2[(d2$term ==paste0("lag",i)) & (d2$p.value < 0.05), ]
+  d2lag0.05[i] <- nrow(my.data.frame)*weight[[2]]
+  
+  my.data.frame <- d2[(d2$term ==paste0("CPI_lag",i)) & (d2$p.value < 0.05), ]
+  d2cpi0.05[i] <- nrow(my.data.frame)*weight[[2]]
+  
+  
+}
+
+# -------------------------------------------------------------------------
 
 
 # 0.01 --------------------------------------------------------------------
