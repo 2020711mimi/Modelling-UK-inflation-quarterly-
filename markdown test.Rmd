@@ -97,15 +97,18 @@ COPY = subset(COPY, select = -c(time1) )
 #lag
 ```
 
-
+## lag 是2:13 代表1:12. newdata里的1代表的是原数据.
 ```{r}
 # LAG ---------------------------------------------------------------------
+thesecols<-c(paste0("lag",3:12))
 
+lag4<-newdata[,grep("4:13",names(newdata))]
 
 zlag1 <- newdata %>% 
   select(matches("(2)$"))
 zlag2 <- newdata %>% 
   select(matches("(3)$"))
+
 lag3 <- newdata %>% 
   select(matches("(4)$"))
 lag4 <- newdata %>% 
@@ -148,7 +151,7 @@ for (i in 1:length(monthname)) {
 }
 ```
 
-
+## Create time_Apr etc.
 ```{r   }
 for (i in 2251:2261) {
   for (j in 1:11) {
@@ -158,7 +161,7 @@ for (i in 2251:2261) {
   }
 }
 ```
-## CPI LDV variable position
+## CPI LDV variables position
 
 ```{r simply lag and cpi}
 
@@ -183,7 +186,7 @@ for (i in 1:12) {
   for (j in 2:13) {
     
  
-  assign(cpi.list[i],newdata[,..j])
+  assign(paste0("CPI_lag",i),as.numeric(unlist(newdata[,..j])))
   }
 }
 
