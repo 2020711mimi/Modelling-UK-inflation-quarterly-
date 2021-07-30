@@ -102,6 +102,30 @@ COPY = subset(COPY, select = -c(time1) )
 # LAG ---------------------------------------------------------------------
 
 
+zlag1 <- newdata %>% 
+  select(matches("(2)$"))
+zlag2 <- newdata %>% 
+  select(matches("(3)$"))
+lag3 <- newdata %>% 
+  select(matches("(4)$"))
+lag4 <- newdata %>% 
+  select(matches("(5)$"))
+lag5 <- newdata %>% 
+  select(matches("(6)$"))
+lag6 <- newdata %>% 
+  select(matches("(7)$"))
+lag7 <- newdata %>% 
+  select(matches("(8)$"))
+lag8 <- newdata %>% 
+  select(matches("(9)$"))
+lag9 <- newdata %>% 
+  select(matches("(10)$"))
+lag10 <- newdata %>% 
+  select(matches("(11)$"))
+lag11 <- newdata %>% 
+  select(matches("(12)$"))
+lag12 <- newdata %>% 
+  select(matches("(13)$"))
 
 
 lag1 <- zlag1 %>% select(-contains("12"))
