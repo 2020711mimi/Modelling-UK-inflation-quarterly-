@@ -136,11 +136,9 @@ VAT2 <- as.numeric(newdata$`time1` == "2010-01-01")
 VAT3 <- as.numeric(newdata$`time1` == "2011-01-01")
 Recession <- as.numeric(newdata$`time1` >= "2008-04-01" & newdata$`time1`<= "2009-06-01")
 ```
+## Monthly dummies variable position
 
-
-```{r}
-# MONTYHLY DUMMIES --------------------------------------------------------
-
+```{r  MONTYHLY DUMMIES }
 monthname<-c("time_Apr","time_Aug", "time_Dec",  "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep")
 
 for (i in 1:length(monthname)) {
@@ -148,9 +146,10 @@ for (i in 1:length(monthname)) {
  which(colnames(newdata)==monthname[i])
 )
 }
+```
 
 
-
+```{r   }
 for (i in 2251:2261) {
   for (j in 1:11) {
     
@@ -158,40 +157,36 @@ for (i in 2251:2261) {
   assign(monthname[j],as.numeric(unlist(newdata[, ..i]))  )
   }
 }
+```
+## CPI LDV variable position
+
+```{r simply lag and cpi}
+
+lag.list <- mget(paste0("lag", 1:12))
 
 
-
+for (i in 1:12) {
+  assign(paste0("lag",i),as.data.frame(lag.list[[i]]))
+}
 
 COPY <- as.data.frame(COPY)
-lag1 <- as.data.frame(lag1)
-lag2 <- as.data.frame(lag2)
-lag3 <- as.data.frame(lag3)
-lag4 <- as.data.frame(lag4)
-lag5 <- as.data.frame(lag5)
-lag6 <- as.data.frame(lag6)
-lag7 <- as.data.frame(lag7)
-lag8 <- as.data.frame(lag8)
-lag9 <- as.data.frame(lag9)
-lag10 <- as.data.frame(lag10)
-lag11 <- as.data.frame(lag11)#174 ????��һ??????Ϊvat1??2??3
-lag12 <- as.data.frame(lag12)
+
 #if add vat dummmies in cpi step, lag1 2 would be exist vat1,2
 
 # CPI-LAGS ----------------------------------------------------------------
+cpi.list<-c(paste0("CPI ALL ITEMS",2:13))
+for (i in 1:length(cpi.list)) {
+  print(which(colnames(newdata)==cpi.list[i]))
+  
+}               
+for (i in 1:12) {
+  for (j in 2:13) {
+    
+ 
+  assign(cpi.list[i],newdata[,..j])
+  }
+}
 
-
-CPI_lag1 <- (newdata$"CPI ALL ITEMS2")
-CPI_lag2 <- (newdata$"CPI ALL ITEMS3")
-CPI_lag3 <- (newdata$"CPI ALL ITEMS4")
-CPI_lag4 <- (newdata$"CPI ALL ITEMS5")
-CPI_lag5 <- (newdata$"CPI ALL ITEMS6")
-CPI_lag6 <- (newdata$"CPI ALL ITEMS7")
-CPI_lag7 <- (newdata$"CPI ALL ITEMS8")
-CPI_lag8 <- (newdata$"CPI ALL ITEMS9")
-CPI_lag9 <- (newdata$"CPI ALL ITEMS10")
-CPI_lag10 <- (newdata$"CPI ALL ITEMS11")
-CPI_lag11 <- (newdata$"CPI ALL ITEMS12")
-CPI_lag12 <- (newdata$"CPI ALL ITEMS13")
 ```
 
 
@@ -218,7 +213,7 @@ regression <- lapply(1:173, function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]
                                              lag8[,x]+lag9[,x]+lag10[,x]+lag11[,x]+lag12[,x]+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+CPI_lag5+CPI_lag6+CPI_lag7+
                                              CPI_lag8+CPI_lag9+
                                              CPI_lag10+CPI_lag11+CPI_lag12+ time_Aug + 
-                                             time_Dec+ time_Feb+ time_Jan+time_Jul+time_Jun +time_Mar+
+                                             time_Dec+ time_Apr+ time_Jan+time_Jul+time_Jun +time_Mar+
                                              time_May+time_Nov+time_Oct+time_Sep+VAT1+VAT2+VAT3+Recession+Trend)
 )
 for (i in 1:173) {
