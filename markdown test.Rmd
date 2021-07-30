@@ -149,10 +149,7 @@ for (i in 1:length(monthname)) {
 )
 }
 
- for(i in monthname) { 
- nam <- paste( i)
- assign(nam, newdata$monthname[i])
- }
+
 
 for (i in 2251:2261) {
   for (j in 1:11) {
