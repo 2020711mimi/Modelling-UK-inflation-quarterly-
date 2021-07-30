@@ -155,7 +155,7 @@ for (i in 2251:2261) {
   for (j in 1:11) {
     
   
-  assign(monthname[j],(newdata[, ..i]) )
+  assign(monthname[j],as.numeric(unlist(newdata[, ..i]))  )
   }
 }
 
@@ -203,7 +203,7 @@ CPI_lag12 <- (newdata$"CPI ALL ITEMS13")
 reg.model <- lapply(1:173, function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+lag4[,x]+
                                             lag5[,x]+lag6[,x]+lag7[,x]+lag8[,x]+lag9[,x]+
                                             lag10[,x]+lag11[,x]+lag12[,x]+ time_Aug + 
-                                            time_Dec+ time_Feb+ time_Jan+time_Jul+time_Jun +
+                                            time_Dec+ time_Apr+ time_Jan+time_Jul+time_Jun +
                                             time_Mar+time_May+time_Nov+time_Oct+time_Sep+VAT1+VAT2+VAT3+Recession+Trend)
 )
 
