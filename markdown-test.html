@@ -172,42 +172,31 @@ pre code {
 
 
 <pre class="r"><code> rm(list = ls())</code></pre>
-<pre class="r"><code># LAG ---------------------------------------------------------------------
+<div id="lag-是213-代表112.-newdata里的1代表的是原数据." class="section level2">
+<h2>lag 是2:13 代表1:12. newdata里的1代表的是原数据.</h2>
+</div>
+<div id="首先把213-存储起来-用paste0213加上用来匹配以213数字结尾的列" class="section level2">
+<h2>首先把2:13 存储起来, 用paste0(2:13,加上”$“)用来匹配以2:13数字结尾的列?</h2>
+<pre class="r"><code>select(x,starts_with(&quot;s&quot;)) or select(df,end_with(&quot;string&quot;)) 句法 等同于df%&gt;%select(matches(&quot;$&quot;))</code></pre>
+</div>
+<div id="这两种做法都和之前是完全相等.-都只针对列操作对表格内容无关.-在此只保留" class="section level2">
+<h2>这两种做法都和之前是完全相等. 都只针对列操作,对表格内容无关. 在此只保留</h2>
+<pre class="r"><code>select(df,end_with(&quot;s&quot;))</code></pre>
+<p>,</p>
+<p>后续可以查看git 完全匹配字段的两种算法 commit</p>
+<pre class="r"><code>old13&lt;-c(2:13)
+for (i in 1:12) {
 
+  assign(paste0(&quot;lag&quot;,i),select(newdata,ends_with(paste0(old13[i]))))
 
-zlag1 &lt;- newdata %&gt;% 
-  select(matches(&quot;(2)$&quot;))
-zlag2 &lt;- newdata %&gt;% 
-  select(matches(&quot;(3)$&quot;))
-lag3 &lt;- newdata %&gt;% 
-  select(matches(&quot;(4)$&quot;))
-lag4 &lt;- newdata %&gt;% 
-  select(matches(&quot;(5)$&quot;))
-lag5 &lt;- newdata %&gt;% 
-  select(matches(&quot;(6)$&quot;))
-lag6 &lt;- newdata %&gt;% 
-  select(matches(&quot;(7)$&quot;))
-lag7 &lt;- newdata %&gt;% 
-  select(matches(&quot;(8)$&quot;))
-lag8 &lt;- newdata %&gt;% 
-  select(matches(&quot;(9)$&quot;))
-lag9 &lt;- newdata %&gt;% 
-  select(matches(&quot;(10)$&quot;))
-lag10 &lt;- newdata %&gt;% 
-  select(matches(&quot;(11)$&quot;))
-lag11 &lt;- newdata %&gt;% 
-  select(matches(&quot;(12)$&quot;))
-lag12 &lt;- newdata %&gt;% 
-  select(matches(&quot;(13)$&quot;))
-
-
-lag1 &lt;- zlag1 %&gt;% select(-contains(&quot;12&quot;))
-
-lag2 &lt;- zlag2 %&gt;% select(-contains(&quot;13&quot;))
+}
+lag1 &lt;- lag1 %&gt;% select(-contains(&quot;12&quot;))
+lag2 &lt;- lag2 %&gt;% select(-contains(&quot;13&quot;))
 VAT1 &lt;- as.numeric(newdata$`time1` == &quot;2008-12-01&quot;)
 VAT2 &lt;- as.numeric(newdata$`time1` == &quot;2010-01-01&quot;)
 VAT3 &lt;- as.numeric(newdata$`time1` == &quot;2011-01-01&quot;)
 Recession &lt;- as.numeric(newdata$`time1` &gt;= &quot;2008-04-01&quot; &amp; newdata$`time1`&lt;= &quot;2009-06-01&quot;)</code></pre>
+</div>
 <div id="monthly-dummies-variable-position" class="section level2">
 <h2>Monthly dummies variable position</h2>
 <pre class="r"><code>monthname&lt;-c(&quot;time_Apr&quot;,&quot;time_Aug&quot;, &quot;time_Dec&quot;,  &quot;time_Jan&quot;,&quot;time_Jul&quot;,&quot;time_Jun&quot; ,&quot;time_Mar&quot;,&quot;time_May&quot;,&quot;time_Nov&quot;,&quot;time_Oct&quot;,&quot;time_Sep&quot;)
@@ -228,6 +217,9 @@ for (i in 1:length(monthname)) {
 ## [1] 2259
 ## [1] 2260
 ## [1] 2261</code></pre>
+</div>
+<div id="create-time_apr-etc." class="section level2">
+<h2>Create time_Apr etc.</h2>
 <pre class="r"><code>for (i in 2251:2261) {
   for (j in 1:11) {
     
@@ -236,8 +228,8 @@ for (i in 1:length(monthname)) {
   }
 }</code></pre>
 </div>
-<div id="cpi-ldv-variable-position" class="section level2">
-<h2>CPI LDV variable position</h2>
+<div id="cpi-ldv-variables-position" class="section level2">
+<h2>CPI LDV variables position</h2>
 <pre class="r"><code>lag.list &lt;- mget(paste0(&quot;lag&quot;, 1:12))
 
 
