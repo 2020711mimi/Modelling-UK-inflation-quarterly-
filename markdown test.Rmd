@@ -99,27 +99,60 @@ COPY = subset(COPY, select = -c(time1) )
 
 ## lag 是2:13 代表1:12. newdata里的1代表的是原数据.
 ## 首先把2:13 存储起来, 用paste0(2:13,加上"$")用来匹配以2:13数字结尾的列? 
-
-```{r eval=FALSE, echo=TRUE}
-select(x,starts_with("s")) or select(df,end_with("string")) 句法 等同于df%>%select(matches("$"))
-```
-
-## 这两种做法都和之前是完全相等. 都只针对列操作,对表格内容无关. 在此只保留
-```{r eval=FALSE, echo=TRUE}
-select(df,end_with("s"))
-```
-,
-
-后续可以查看git 完全匹配字段的两种算法 commit
+## select(x,starts_with("s"))
 ```{r}
+
+
+
+
+
 old13<-c(2:13)
+
+
+  for (j in 1:12) {
+    
+  
+  assign(paste0("lag",j),newdata%>%
+           select(matches(paste0(old13[j],"$"))))
+  
+}
+n2<-select(newdata,ends_with("2"))
 for (i in 1:12) {
 
-  assign(paste0("lag",i),select(newdata,ends_with(paste0(old13[i]))))
+  assign(paste("lag",i),select(newdata,ends_with(paste0(old13[i]))))
 
 }
-lag1 <- lag1 %>% select(-contains("12"))
-lag2 <- lag2 %>% select(-contains("13"))
+
+zlag1 <- newdata %>% 
+  select(matches("(2)$"))
+zlag2 <- newdata %>% 
+  select(matches("(3)$"))
+
+lag3 <- newdata %>% 
+  select(matches("(4)$"))
+lag4 <- newdata %>% 
+  select(matches("(5)$"))
+lag5 <- newdata %>% 
+  select(matches("(6)$"))
+lag6 <- newdata %>% 
+  select(matches("(7)$"))
+lag7 <- newdata %>% 
+  select(matches("(8)$"))
+lag8 <- newdata %>% 
+  select(matches("(9)$"))
+lag9 <- newdata %>% 
+  select(matches("(10)$"))
+lag10 <- newdata %>% 
+  select(matches("(11)$"))
+lag11 <- newdata %>% 
+  select(matches("(12)$"))
+lag12 <- newdata %>% 
+  select(matches("(13)$"))
+
+
+lag1 <- zlag1 %>% select(-contains("12"))
+
+lag2 <- zlag2 %>% select(-contains("13"))
 VAT1 <- as.numeric(newdata$`time1` == "2008-12-01")
 VAT2 <- as.numeric(newdata$`time1` == "2010-01-01")
 VAT3 <- as.numeric(newdata$`time1` == "2011-01-01")
