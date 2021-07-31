@@ -99,6 +99,7 @@ COPY = subset(COPY, select = -c(time1) )
 
 ## lag 是2:13 代表1:12. newdata里的1代表的是原数据.
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## 首先把2:13 存储起来, 用paste0(2:13,加上"$")用来匹配以2:13数字结尾的列? 
 ## select(x,starts_with("s"))
 ```{r}
@@ -124,11 +125,16 @@ for (i in 1:12) {
 
 }
 =======
+=======
+>>>>>>> parent of faeefb7 (LAG END WITH 1 INCLUDING LAG11)
 ```{r}
 # LAG ---------------------------------------------------------------------
 thesecols<-c(paste0("lag",3:12))
 
 lag4<-newdata[,grep("4:13",names(newdata))]
+<<<<<<< HEAD
+>>>>>>> parent of faeefb7 (LAG END WITH 1 INCLUDING LAG11)
+=======
 >>>>>>> parent of faeefb7 (LAG END WITH 1 INCLUDING LAG11)
 
 zlag1 <- newdata %>% 
