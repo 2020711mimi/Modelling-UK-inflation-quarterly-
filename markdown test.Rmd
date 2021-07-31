@@ -1,8 +1,10 @@
 ---
-title: "test"
+title: "病历本"
 author: "Yiyi"
 date: "2021/7/30"
-output: html_document
+output: 
+  html_document:
+  toc: true
 ---
 
 ```{r setup, include=FALSE}
@@ -104,11 +106,10 @@ COPY = subset(COPY, select = -c(time1) )
 select(x,starts_with("s")) or select(df,end_with("string")) 句法 等同于df%>%select(matches("$"))
 ```
 
-## 这两种做法都和之前是完全相等. 都只针对列操作,对表格内容无关. 在此只保留
+## 这两种做法都和之前是完全相等. 都只针对**列**操作,对表格内容无关. 在此只保留
 ```{r eval=FALSE, echo=TRUE}
 select(df,end_with("s"))
 ```
-,
 
 后续可以查看git 完全匹配字段的两种算法 commit
 ```{r}
@@ -138,14 +139,16 @@ for (i in 1:length(monthname)) {
 ```
 
 ## Create time_Apr etc.
+the correct version. 首先把月度虚拟变量存储到cpilag 里. 然后用同一迭代变量 送到各自的time_下.
+**注意, 双迭代变量还未完全掌握, i 和j 一起用 必出错**
 ```{r   }
-for (i in 2251:2261) {
-  for (j in 1:11) {
-    
-  
-  assign(monthname[j],as.numeric(unlist(newdata[, ..i]))  )
+monthdummies<-newdata[,2251:2261]
+
+  for (i in 1:11) {
+  assign(colnames(monthdummies)[i],as.numeric(unlist(monthdummies[[i]])))
   }
-}
+
+
 ```
 ## CPI LDV variables position
 
@@ -160,25 +163,28 @@ for (i in 1:12) {
 
 COPY <- as.data.frame(COPY)
 
-#if add vat dummmies in cpi step, lag1 2 would be exist vat1,2
+
 
 # CPI-LAGS ----------------------------------------------------------------
 cpi.list<-c(paste0("CPI ALL ITEMS",2:13))
+
 for (i in 1:length(cpi.list)) {
   print(which(colnames(newdata)==cpi.list[i]))
   
-}               
+}   
+cpilag<-newdata[,2:13]
 for (i in 1:12) {
-  for (j in 2:13) {
+
     
  
-  assign(paste0("CPI_lag",i),as.numeric(unlist(newdata[,..j])))
-  }
+  assign(paste0("CPI_lag",i),as.numeric(unlist(cpilag[,..i])))
+  
 }
+
 
 ```
 
-
+## Rgression
 
 ```{r model}
 # Regression Equation -----------------------------------------------------
@@ -198,14 +204,14 @@ for (i in 1:173) {
                                         "time_May","time_Nov","time_Oct","time_Sep","VAT1","VAT2","VAT3","Recession","Trend")
 }
 
-regression <- lapply(1:173, function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+lag4[,x]+lag5[,x]+lag6[,x]+lag7[,x]+
+regression <- lapply(1:122, function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+lag4[,x]+lag5[,x]+lag6[,x]+lag7[,x]+
                                              lag8[,x]+lag9[,x]+lag10[,x]+lag11[,x]+lag12[,x]+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+CPI_lag5+CPI_lag6+CPI_lag7+
                                              CPI_lag8+CPI_lag9+
                                              CPI_lag10+CPI_lag11+CPI_lag12+ time_Aug + 
                                              time_Dec+ time_Apr+ time_Jan+time_Jul+time_Jun +time_Mar+
                                              time_May+time_Nov+time_Oct+time_Sep+VAT1+VAT2+VAT3+Recession+Trend)
 )
-for (i in 1:173) {
+for (i in 1:122) {
   names(regression[[i]]$coefficients)<-c('Constant','lag1','lag2',"lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12",
                                          "CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7","CPI_lag8","CPI_lag9",
                                          "CPI_lag10","CPI_lag11","CPI_lag12","time_Aug" , 
@@ -214,4 +220,41 @@ for (i in 1:173) {
 }
 
 ```
+显著百分比
+```{r}
+
+
+percent <- function(x, digits = 2, format = "f", ...) {
+  paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
+}
+percent(1)
+```
+1.4	Table 1 Summary table before stepwise 前两列
+```{r}
+a=list()
+for (i in 1:12) {
+  a[[i]] <- lapply(regression[2:122], function(x) summary(x)$coefficients[paste0("CPI_lag",i), 4])
+  print(percent(length(which(a[[i]] < 0.05))/121))
+  #print(a[[i]])
+}
+for (i in 1:12) {
+  a[[i]] <- lapply(regression[2:122], function(x) summary(x)$coefficients[paste0("CPI_lag",i), 4])
+  
+  print(percent(length(which(a[[i]] < 0.01))/121))
+}
+
+for (i in 1:12) {
+  a[[i]] <- lapply(regression[2:122], function(x) summary(x)$coefficients[paste0("lag",i), 4])
+  print(percent(length(which(a[[i]] < 0.05))/121))
+  #print(a[[i]])
+}
+for (i in 1:12) {
+  a[[i]] <- lapply(regression[2:122], function(x) summary(x)$coefficients[paste0("lag",i), 4])
+  
+  print(percent(length(which(a[[i]] < 0.01))/121))
+}
+```
+
+
+
 
