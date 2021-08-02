@@ -354,19 +354,19 @@ for (i in 1:12) {
 
 ```{r}
 dend<-c(2,15,16,21,22,27,28,40,41,53,54,61,62,76,77,79,80,101,102,107,103,107,108,122)
-dend<-c(2,16,22,28,41,54,62,77,80,102,103,108)
+dend<-c(2,16,22,28,41,54,62,77,80,102,103,108,122)
 for (i in 1:length(dend)) {print(dend[i+1])
     
 }
 
 length(dend)
-for (i in 1:length(dend)) {
-  a[i]<-a[(which(a$term=="Constant")[dend[i]]):(which(a$term=="Trend")[dend[i+1]-1]),]
+for (i in 1:12) {
+  assign(paste0("a",i),
+         a[(which(a$term=="Constant")[dend[i]]):(which(a$term=="Trend")[dend[i+1]-1]),])
 }
-for(i in 1:12){
-  print{
-which(a$term=="Constant")[dend[i+1]]
-  }
-  }
+
+which(a$term=="Constant")[108]
+which(a$term=="Trend")[dend[12+1]]
+
 ```
 
