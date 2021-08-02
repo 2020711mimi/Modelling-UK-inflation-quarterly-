@@ -11,7 +11,7 @@ output:
     highlight: tango  # specifies the syntax highlighting style
 
 ---
-# 1
+# 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -19,13 +19,14 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
  rm(list = ls())
 ```
-
+## Packages
 ```{r Library, include=FALSE}
 library(readxl)
 library(data.table)
 library(lubridate)#extract cpi time to newdata(furniture48)
 library(dplyr) 
 library(tidyverse) 
+library(broom)
 ```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
@@ -104,19 +105,21 @@ COPY = subset(COPY, select = -c(time1) )
 #lag
 ```
 
-## lag 是2:13 代表1:12. newdata里的1代表的是原数据.
-## 首先把2:13 存储起来, 用paste0(2:13,加上"$")用来匹配以2:13数字结尾的列? 
+lag 是2:13 代表1:12. newdata里的1代表的是原数据.
+首先把2:13 存储起来, 用paste0(2:13,加上"$")用来匹配以2:13数字结尾的列? 
 
 ```{r eval=FALSE, echo=TRUE}
 select(x,starts_with("s")) or select(df,end_with("string")) 句法 等同于df%>%select(matches("$"))
 ```
 
-## 这两种做法都和之前是完全相等. 都只针对**列**操作,对表格内容无关. 在此只保留
+这两种做法都和之前是完全相等. 都只针对**列**操作,对表格内容无关. 在此只保留
 ```{r eval=FALSE, echo=TRUE}
 select(df,end_with("s"))
 ```
 
 后续可以查看git 完全匹配字段的两种算法 commit
+
+## Lag and VAT
 ```{r}
 old13<-c(2:13)
 for (i in 1:12) {
@@ -225,7 +228,7 @@ for (i in 1:122) {
 }
 
 ```
-显著百分比
+##显著百分比 
 ```{r}
 
 
@@ -234,7 +237,17 @@ percent <- function(x, digits = 2, format = "f", ...) {
 }
 percent(1)
 ```
-1.4	Table 1 Summary table before stepwise 前两列
+##	Table 1 Summary table before stepwise 前两列
+<center>
+|![论文第一表](F:/R workspace/Modelling-UK-inflation-quarterly-/table1.jpg)|
+|:--:|
+| <b>论文第一表</b>|
+
+<center>
+
+
+
+
 ```{r}
 a=list()
 for (i in 1:12) {
@@ -259,7 +272,101 @@ for (i in 1:12) {
   print(percent(length(which(a[[i]] < 0.01))/121))
 }
 ```
+## 后两列(Weight)
+例如,01部门属于2-15.
 
+```{r}
+# Weight ------------------------------------------------------------------
+weight<- list(0.109,	0.042,	0.063,	0.115,	0.067,	0.022,	0.152,	0.023,	0.152,	0.019,	0.137,	0.099
+              
+)
+Reduce("+",weight)
+```
+用lapply 把regression 这个list 化成长数据框类型.(多行,5列:term,estimate,std,statitc, pvalue)
+```{r}
 
+tidy_mods <- lapply(regression, tidy)
 
+for (i in 1:length(tidy_mods)) tidy_mods[[i]]$mod <- names(tidy_mods[i])
+a <- do.call(rbind.data.frame, tidy_mods)
+str(a)
+```
+数数a里面有多少个vat1,就有多少个数据.which(a$term=="Trend")[1]代表第一个trend在哪个位置.
+每个部门的参数开始于constant,结束于Trend.
+```{r}
+length(
+  which(a$term =="Trend")
+)
+which(a$term=="Trend")[1:15]
+```
+```{r}
+which(a$term=="Constant")[2:15]
+```
+```{r}
+atest1<-a[(which(a$term=="Constant")[dend[1]]):(which(a$term=="Trend")[dend[2]-1]),]
+identical(a1,atest1)
+which(a$term=="Constant")[2]
+which(a$term=="Trend")[15]
+which(a$term=="Trend")[dend[2]-1]
+```
+
+42:615行之间lag[n]且p<0.05的*weight[1]的length
+```{r eval=FALSE, include=FALSE}
+a1<-a[42:615,]
+
+length(which(a1$term=="lag1"&a1$p.value<0.01))
+
+for (i in 1:12) {
+  print(length(
+    which(a1$term==paste0("lag",i) &a1$p.value<0.01)
+  )*weight[[1]]
+  )
+
+}
+```
+想用新方法有点吃力, 还是复制之前的吧.
+01 Food and non-alcoholic beverages
+2-15
+02 Alcoholic beverages, tobacco and narcotics
+16-21
+03 Clothing and footwear
+22-27
+04 Housing, water, electricity, gas and other fuels
+28:40 
+05 Furnishings, household equipment and routine household maintenance
+41:53 
+06 Health
+54:61 
+07 Transport
+62:76 
+08 Communication
+77:79 
+09 Recreation and culture
+[80:101
+10 Education
+102
+11 Restaurants and hotels
+103：107
+12 Miscellaneous goods and services
+108：122
+上一个的Trend 位置加1 : 最后一个trend的位置.
+第一个constant的位置,到下一个Trend-1的位置.
+
+```{r}
+dend<-c(2,15,16,21,22,27,28,40,41,53,54,61,62,76,77,79,80,101,102,107,103,107,108,122)
+dend<-c(2,16,22,28,41,54,62,77,80,102,103,108)
+for (i in 1:length(dend)) {print(dend[i+1])
+    
+}
+
+length(dend)
+for (i in 1:length(dend)) {
+  a[i]<-a[(which(a$term=="Constant")[dend[i]]):(which(a$term=="Trend")[dend[i+1]-1]),]
+}
+for(i in 1:12){
+  print{
+which(a$term=="Constant")[dend[i+1]]
+  }
+  }
+```
 
