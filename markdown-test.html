@@ -256,13 +256,14 @@ pre code {
 <ul>
 <li><a href="#section"><span class="toc-section-number">1</span> </a>
 <ul>
-<li><a href="#lag-and-vat"><span class="toc-section-number">1.1</span> Lag and VAT</a></li>
-<li><a href="#monthly-dummies-variable-position"><span class="toc-section-number">1.2</span> Monthly dummies variable position</a></li>
-<li><a href="#create-time_apr-etc."><span class="toc-section-number">1.3</span> Create time_Apr etc.</a></li>
-<li><a href="#cpi-ldv-variables-position"><span class="toc-section-number">1.4</span> CPI LDV variables position</a></li>
-<li><a href="#rgression"><span class="toc-section-number">1.5</span> Rgression</a></li>
-<li><a href="#table-1-summary-table-before-stepwise-前两列"><span class="toc-section-number">1.6</span> Table 1 Summary table before stepwise 前两列</a></li>
-<li><a href="#后两列"><span class="toc-section-number">1.7</span> 后两列</a></li>
+<li><a href="#packages"><span class="toc-section-number">1.1</span> Packages</a></li>
+<li><a href="#lag-and-vat"><span class="toc-section-number">1.2</span> Lag and VAT</a></li>
+<li><a href="#monthly-dummies-variable-position"><span class="toc-section-number">1.3</span> Monthly dummies variable position</a></li>
+<li><a href="#create-time_apr-etc."><span class="toc-section-number">1.4</span> Create time_Apr etc.</a></li>
+<li><a href="#cpi-ldv-variables-position"><span class="toc-section-number">1.5</span> CPI LDV variables position</a></li>
+<li><a href="#rgression"><span class="toc-section-number">1.6</span> Rgression</a></li>
+<li><a href="#table-1-summary-table-before-stepwise-前两列"><span class="toc-section-number">1.7</span> Table 1 Summary table before stepwise 前两列</a></li>
+<li><a href="#后两列weight"><span class="toc-section-number">1.8</span> 后两列(Weight)</a></li>
 </ul></li>
 </ul>
 </div>
@@ -270,13 +271,16 @@ pre code {
 <div id="section" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> </h1>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a> <span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span></code></pre></div>
+<div id="packages" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> Packages</h2>
 <p>lag 是2:13 代表1:12. newdata里的1代表的是原数据. 首先把2:13 存储起来, 用paste0(2:13,加上”$“)用来匹配以2:13数字结尾的列?</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">select</span>(x,<span class="fu">starts_with</span>(<span class="st">&quot;s&quot;</span>)) or <span class="fu">select</span>(df,<span class="fu">end_with</span>(<span class="st">&quot;string&quot;</span>)) 句法 等同于df<span class="sc">%&gt;%</span><span class="fu">select</span>(<span class="fu">matches</span>(<span class="st">&quot;$&quot;</span>))</span></code></pre></div>
 <p>这两种做法都和之前是完全相等. 都只针对<strong>列</strong>操作,对表格内容无关. 在此只保留</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">select</span>(df,<span class="fu">end_with</span>(<span class="st">&quot;s&quot;</span>))</span></code></pre></div>
 <p>后续可以查看git 完全匹配字段的两种算法 commit</p>
-<div id="lag-and-vat" class="section level2" number="1.1">
-<h2><span class="header-section-number">1.1</span> Lag and VAT</h2>
+</div>
+<div id="lag-and-vat" class="section level2" number="1.2">
+<h2><span class="header-section-number">1.2</span> Lag and VAT</h2>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>old13<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">13</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -290,8 +294,8 @@ pre code {
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>VAT3 <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(newdata<span class="sc">$</span><span class="st">`</span><span class="at">time1</span><span class="st">`</span> <span class="sc">==</span> <span class="st">&quot;2011-01-01&quot;</span>)</span>
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>Recession <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(newdata<span class="sc">$</span><span class="st">`</span><span class="at">time1</span><span class="st">`</span> <span class="sc">&gt;=</span> <span class="st">&quot;2008-04-01&quot;</span> <span class="sc">&amp;</span> newdata<span class="sc">$</span><span class="st">`</span><span class="at">time1</span><span class="st">`</span><span class="sc">&lt;=</span> <span class="st">&quot;2009-06-01&quot;</span>)</span></code></pre></div>
 </div>
-<div id="monthly-dummies-variable-position" class="section level2" number="1.2">
-<h2><span class="header-section-number">1.2</span> Monthly dummies variable position</h2>
+<div id="monthly-dummies-variable-position" class="section level2" number="1.3">
+<h2><span class="header-section-number">1.3</span> Monthly dummies variable position</h2>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>monthname<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="st">&quot;time_Apr&quot;</span>,<span class="st">&quot;time_Aug&quot;</span>, <span class="st">&quot;time_Dec&quot;</span>,  <span class="st">&quot;time_Jan&quot;</span>,<span class="st">&quot;time_Jul&quot;</span>,<span class="st">&quot;time_Jun&quot;</span> ,<span class="st">&quot;time_Mar&quot;</span>,<span class="st">&quot;time_May&quot;</span>,<span class="st">&quot;time_Nov&quot;</span>,<span class="st">&quot;time_Oct&quot;</span>,<span class="st">&quot;time_Sep&quot;</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(monthname)) {</span>
@@ -311,8 +315,8 @@ pre code {
 ## [1] 2260
 ## [1] 2261</code></pre>
 </div>
-<div id="create-time_apr-etc." class="section level2" number="1.3">
-<h2><span class="header-section-number">1.3</span> Create time_Apr etc.</h2>
+<div id="create-time_apr-etc." class="section level2" number="1.4">
+<h2><span class="header-section-number">1.4</span> Create time_Apr etc.</h2>
 <p>the correct version. 首先把月度虚拟变量存储到cpilag 里. 然后用同一迭代变量 送到各自的time_下. <strong>注意, 双迭代变量还未完全掌握, i 和j 一起用 必出错</strong></p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>monthdummies<span class="ot">&lt;-</span>newdata[,<span class="dv">2251</span><span class="sc">:</span><span class="dv">2261</span>]</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -320,8 +324,8 @@ pre code {
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">assign</span>(<span class="fu">colnames</span>(monthdummies)[i],<span class="fu">as.numeric</span>(<span class="fu">unlist</span>(monthdummies[[i]])))</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
 </div>
-<div id="cpi-ldv-variables-position" class="section level2" number="1.4">
-<h2><span class="header-section-number">1.4</span> CPI LDV variables position</h2>
+<div id="cpi-ldv-variables-position" class="section level2" number="1.5">
+<h2><span class="header-section-number">1.5</span> CPI LDV variables position</h2>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>lag.list <span class="ot">&lt;-</span> <span class="fu">mget</span>(<span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>))</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -361,8 +365,8 @@ pre code {
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
-<div id="rgression" class="section level2" number="1.5">
-<h2><span class="header-section-number">1.5</span> Rgression</h2>
+<div id="rgression" class="section level2" number="1.6">
+<h2><span class="header-section-number">1.6</span> Rgression</h2>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Regression Equation -----------------------------------------------------</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -401,8 +405,8 @@ pre code {
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">percent</span>(<span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## [1] &quot;100.00%&quot;</code></pre>
 </div>
-<div id="table-1-summary-table-before-stepwise-前两列" class="section level2" number="1.6">
-<h2><span class="header-section-number">1.6</span> Table 1 Summary table before stepwise 前两列</h2>
+<div id="table-1-summary-table-before-stepwise-前两列" class="section level2" number="1.7">
+<h2><span class="header-section-number">1.7</span> Table 1 Summary table before stepwise 前两列</h2>
 <center>
 <table>
 <thead>
@@ -487,8 +491,8 @@ pre code {
 ## [1] &quot;9.09%&quot;
 ## [1] &quot;39.67%&quot;</code></pre>
 </div>
-<div id="后两列" class="section level2" number="1.7">
-<h2><span class="header-section-number">1.7</span> 后两列</h2>
+<div id="后两列weight" class="section level2" number="1.8">
+<h2><span class="header-section-number">1.8</span> 后两列(Weight)</h2>
 <p>例如,01部门属于2-15.</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Weight ------------------------------------------------------------------</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>weight<span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fl">0.109</span>,    <span class="fl">0.042</span>,  <span class="fl">0.063</span>,  <span class="fl">0.115</span>,  <span class="fl">0.067</span>,  <span class="fl">0.022</span>,  <span class="fl">0.152</span>,  <span class="fl">0.023</span>,  <span class="fl">0.152</span>,  <span class="fl">0.019</span>,  <span class="fl">0.137</span>,  <span class="fl">0.099</span></span>
@@ -496,6 +500,31 @@ pre code {
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="fu">Reduce</span>(<span class="st">&quot;+&quot;</span>,weight)</span></code></pre></div>
 <pre><code>## [1] 1</code></pre>
+<p>用lapply 把regression 这个list 化成长数据框类型.(多行,5列:term,estimate,std,statitc, pvalue)</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>tidy_mods <span class="ot">&lt;-</span> <span class="fu">lapply</span>(regression, tidy)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(tidy_mods)) tidy_mods[[i]]<span class="sc">$</span>mod <span class="ot">&lt;-</span> <span class="fu">names</span>(tidy_mods[i])</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind.data.frame, tidy_mods)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(a)</span></code></pre></div>
+<pre><code>## tibble[,5] [5,002 x 5] (S3: tbl_df/tbl/data.frame)
+##  $ term     : chr [1:5002] &quot;Constant&quot; &quot;lag1&quot; &quot;lag2&quot; &quot;lag3&quot; ...
+##  $ estimate : num [1:5002] 0.3623 0.1157 -0.0351 0.0517 0.0445 ...
+##  $ std.error: num [1:5002] 0.0754 0.0554 0.0552 0.055 0.0555 ...
+##  $ statistic: num [1:5002] 4.802 2.089 -0.636 0.94 0.801 ...
+##  $ p.value  : num [1:5002] 2.50e-06 3.75e-02 5.25e-01 3.48e-01 4.23e-01 ...</code></pre>
+<p>数数a里面有多少个vat1,就有多少个数据.which(a$term==“Trend”)[1]代表第一个trend在哪个位置. 每个部门的参数开始于constant,结束于Trend.</p>
+<p>42:615行之间lag[n]且p&lt;0.05的*weight[1]的length</p>
+<hr />
+<p>01 Food and non-alcoholic beverages <strong>2-15</strong> 02 Alcoholic beverages, tobacco and narcotics <strong>16-21</strong> 03 Clothing and footwear <strong>22-27</strong> 04 Housing, water, electricity, gas and other fuels <strong>28:40 </strong> 05 Furnishings, household equipment and routine household maintenance <strong>41:53 </strong> 06 Health <strong>54:61 </strong> 07 Transport <strong>62:76 </strong> 08 Communication <strong>77:79 </strong> 09 Recreation and culture <strong>[80:101</strong> 10 Education <strong>102</strong> 11 Restaurants and hotels <strong>103：107</strong> 12 Miscellaneous goods and services <strong>108：122</strong></p>
+<hr />
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>dend<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">16</span>,<span class="dv">22</span>,<span class="dv">28</span>,<span class="dv">41</span>,<span class="dv">54</span>,<span class="dv">62</span>,<span class="dv">77</span>,<span class="dv">80</span>,<span class="dv">102</span>,<span class="dv">103</span>,<span class="dv">108</span>,<span class="dv">122</span>)<span class="co">#这只是每个部门开始的位置</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">assign</span>(<span class="fu">paste0</span>(<span class="st">&quot;a&quot;</span>,i),</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>         a[(<span class="fu">which</span>(a<span class="sc">$</span>term<span class="sc">==</span><span class="st">&quot;Constant&quot;</span>)[dend[i]])<span class="sc">:</span>(<span class="fu">which</span>(a<span class="sc">$</span>term<span class="sc">==</span><span class="st">&quot;Trend&quot;</span>)[dend[i<span class="sc">+</span><span class="dv">1</span>]<span class="sc">-</span><span class="dv">1</span>]),])</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>第一个constant的位置,到下一个Trend-1的位置. 第一个部门是2:15, 开始的标志是第二个constant的位置(dend[1]),结束于第15个Trend的位置(dend[2]-1的trend). <strong>之所以不是直接开始于constant[dend[1]],结束于trend[dend[1]],是因为dend只是开始位置的集合(constant)而并不是结束的位置(trend).</strong></p>
+<p><em>如果constant[dend[1]]—trend[dend[1]],这代表第二个(dend[1]=2) constant的开始到第二个trend的结束.只是一个class.</em></p>
+<p><strong>如果constant[dend[1]]—trend[dend[2]],这代表第二个constant的开始到第16(dend[2]=16) 个trend的结束.我需要的是到第15个结束</strong></p>
 </div>
 </div>
 

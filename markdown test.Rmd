@@ -293,29 +293,73 @@ str(a)
 ```
 数数a里面有多少个vat1,就有多少个数据.which(a$term=="Trend")[1]代表第一个trend在哪个位置.
 每个部门的参数开始于constant,结束于Trend.
-```{r}
-length(
-  which(a$term =="Trend")
-)
-which(a$term=="Trend")[1:15]
-```
-```{r}
-which(a$term=="Constant")[2:15]
-```
-```{r}
-atest1<-a[(which(a$term=="Constant")[dend[1]]):(which(a$term=="Trend")[dend[2]-1]),]
-identical(a1,atest1)
-which(a$term=="Constant")[2]
-which(a$term=="Trend")[15]
-which(a$term=="Trend")[dend[2]-1]
-```
+
+
 
 42:615行之间lag[n]且p<0.05的*weight[1]的length
+
+* * *
+01 Food and non-alcoholic beverages
+**2-15**
+02 Alcoholic beverages, tobacco and narcotics
+**16-21**
+03 Clothing and footwear
+**22-27**
+04 Housing, water, electricity, gas and other fuels
+**28:40 **
+05 Furnishings, household equipment and routine household maintenance
+**41:53 **
+06 Health
+**54:61 **
+07 Transport
+**62:76 **
+08 Communication
+**77:79 **
+09 Recreation and culture
+**[80:101**
+10 Education
+**102**
+11 Restaurants and hotels
+**103：107**
+12 Miscellaneous goods and services
+**108：122**
+
+* * *
+
+
+
+
+```{r}
+dend<-c(2,16,22,28,41,54,62,77,80,102,103,108,122)#这只是每个部门开始的位置
+for (i in 1:12) {
+  assign(paste0("a",i),
+         a[(which(a$term=="Constant")[dend[i]]):(which(a$term=="Trend")[dend[i+1]-1]),])
+}
+```
+第一个constant的位置,到下一个Trend-1的位置.
+第一个部门是2:15, 开始的标志是第二个constant的位置(dend[1]),结束于第15个Trend的位置(dend[2]-1的trend).
+**之所以不是直接开始于constant[dend[1]],结束于trend[dend[1]],是因为dend只是开始位置的集合(constant)而并不是结束的位置(trend).**
+
+*如果constant[dend[1]]---trend[dend[1]],这代表第二个(dend[1]=2) constant的开始到第二个trend的结束.只是一个class.*
+
+**如果constant[dend[1]]---trend[dend[2]],这代表第二个constant的开始到第16(dend[2]=16) 个trend的结束.我需要的是到第15个结束**
+
 ```{r eval=FALSE, include=FALSE}
-a1<-a[42:615,]
+a11111<-a[42:615,]
+identical(a11111,a1)
+length(which(a11111$term=="lag1"&a1$p.value<0.01))
+```
 
-length(which(a1$term=="lag1"&a1$p.value<0.01))
+```{r}
+for (i in 1:12) {
+  print(length(a[i]))
+}
+noquote(paste0(
+  "a",1
+))
+```
 
+```{r eval=FALSE, include=FALSE}
 for (i in 1:12) {
   print(length(
     which(a1$term==paste0("lag",i) &a1$p.value<0.01)
@@ -324,49 +368,18 @@ for (i in 1:12) {
 
 }
 ```
-想用新方法有点吃力, 还是复制之前的吧.
-01 Food and non-alcoholic beverages
-2-15
-02 Alcoholic beverages, tobacco and narcotics
-16-21
-03 Clothing and footwear
-22-27
-04 Housing, water, electricity, gas and other fuels
-28:40 
-05 Furnishings, household equipment and routine household maintenance
-41:53 
-06 Health
-54:61 
-07 Transport
-62:76 
-08 Communication
-77:79 
-09 Recreation and culture
-[80:101
-10 Education
-102
-11 Restaurants and hotels
-103：107
-12 Miscellaneous goods and services
-108：122
-上一个的Trend 位置加1 : 最后一个trend的位置.
-第一个constant的位置,到下一个Trend-1的位置.
-
 ```{r}
-dend<-c(2,15,16,21,22,27,28,40,41,53,54,61,62,76,77,79,80,101,102,107,103,107,108,122)
-dend<-c(2,16,22,28,41,54,62,77,80,102,103,108,122)
-for (i in 1:length(dend)) {print(dend[i+1])
-    
-}
 
-length(dend)
+
+
+
+# One way to recover from that mistake is to grab them all up with ls/mget
 for (i in 1:12) {
-  assign(paste0("a",i),
-         a[(which(a$term=="Constant")[dend[i]]):(which(a$term=="Trend")[dend[i+1]-1]),])
+  alist<-a[i]
+  
 }
-
-which(a$term=="Constant")[108]
-which(a$term=="Trend")[dend[12+1]]
+alist<-cbli
+dat_list <- mget(x = ls(pattern = "dat_[0-9]*_[0-9]*"))
 
 ```
 
