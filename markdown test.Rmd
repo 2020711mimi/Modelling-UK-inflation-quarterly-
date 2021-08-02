@@ -345,41 +345,61 @@ for (i in 1:12) {
 **如果constant[dend[1]]---trend[dend[2]],这代表第二个constant的开始到第16(dend[2]=16) 个trend的结束.我需要的是到第15个结束**
 
 ```{r eval=FALSE, include=FALSE}
-a11111<-a[42:615,]
+a11111<-a[42:615,]#验证环节 循环产生的a1:a12和手算的是否相等.
 identical(a11111,a1)
 length(which(a11111$term=="lag1"&a1$p.value<0.01))
 ```
 
-```{r}
-for (i in 1:12) {
-  print(length(a[i]))
-}
-noquote(paste0(
-  "a",1
-))
-```
 
-```{r eval=FALSE, include=FALSE}
-for (i in 1:12) {
-  print(length(
-    which(a1$term==paste0("lag",i) &a1$p.value<0.01)
-  )*weight[[1]]
-  )
+a1中lag1小于0.01的.a2中lag2小于0.01的.
 
-}
-```
+**我想要的是a1中的lag1-12且小于0.01的个数*weight[1].**
+
+我能不能把a1:a12的lag1 先算了?
+
+这样就是[1]<-a1的lag1且小于0.01的*weight[1],[2]<-a2 lag1且小于0.01的个数*weight[2]
+
+尝试先后循环
+总共应该有多少个结果啊? a1[lag1:12] 12*12=144个
+
 ```{r}
 
-
-
-
-# One way to recover from that mistake is to grab them all up with ls/mget
+#a[1:12]lag 生成.
 for (i in 1:12) {
-  alist<-a[i]
+  assign(paste0("a",i,"lag"),list())
   
 }
-alist<-cbli
-dat_list <- mget(x = ls(pattern = "dat_[0-9]*_[0-9]*"))
+#j=a,i=lag
+for (j in 1:12) {
+  for (i in 1:12) {
+assign(
+  get(paste0("a",j,"lag")),
+         length(
+    which((get(paste0("a",j)))$term==paste0("lag",i) &(get(paste0("a",j)))$p.value<0.01)
+  )*weight[[j]])
 
+
+}
+}
+  
+
+  #a1to12lag1[1]:a1 lag1 且a1<0.01的*weight[1]
+  #j[1]:a1 lag1且a1中小于0.01的*weight1
+  #j[2]:a1 lag2且a1中小于0.01的*weight2
+  #....j[12]:...
+  #back to first
+  #a1to12lag1[2]:a2 lag1 0.01*weight[2]
+  #j[2]:a2 lag小于0.01的个数*weight[2]
+
+    
+  
+
+```
+### 选中a1:a12
+f%02d %02d好像是指前面可以有两个0.
+```{r}
+features <- c(sprintf("a%01d", seq(1,12)))
+colnames(urc_training_norm) <- features
+alist<-list(get(paste0("a",1:12)))
 ```
 
