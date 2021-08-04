@@ -32,6 +32,7 @@ library(knitr)
 library(officer)
 library(flextable)
 library(magrittr)
+library(dplyr)
 ```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
@@ -277,6 +278,8 @@ for (i in 1:12) {
   print(percent(length(which(a[[i]] < 0.01))/121))
 }
 ```
+
+
 ## 后两列(Weight)
 例如,01部门属于2-15.
 
@@ -465,30 +468,54 @@ $$
 首先生成存放结果的 24行×2列的dataframe
 
 
-```{r}
-sum(a_cpi.0.05["CPI_lag1",])/121*100
 
-```
-
+# 所有table1的结果都写入,这次要生成24*4的dataframe
 ```{r}
-table1weight<-data.frame( matrix(nrow=24, ncol=2, )   )
-colnames(table1weight)<-c(0.01,0.05)
+table1weight<-data.frame( matrix(nrow=24, ncol=4, )   )
+colnames(table1weight)<-c("p<0.01","p<0.05","p<0.01(Weight)","p<0.05(Weight)")
 rownames(table1weight)<-c(paste0("CPI_lag",1:12),paste0("lag",1:12))
+```
+写入结果
+一个没有cpi的a dataframe,删除前14行
+```{r}
+nocpi<-a[-c(1:41),]
+```
 
-
-
-
-  for (i in 1:12) {
-    table1weight[i,1]<-percent(sum(a_cpi.0.01[paste0("CPI_lag",i),])      /121)
-    table1weight[i+12,1]<-percent(sum(a_lag.0.01[paste0("lag",i),])/121)
-    table1weight[i,2]<-percent(sum(a_cpi.0.05[paste0("CPI_lag",i),])/121)
-    table1weight[i+12,2]<-percent(sum(a_lag.0.05[paste0("lag",i),])/121)
+```{r}
+for (i in 1:12) {#前两列
+  table1weight[i,1]<-percent((length( which(nocpi$term==paste0("CPI_lag",i)&(nocpi$p.value<0.01))))/121)
+   table1weight[i+12,1]<-percent((length( which(nocpi$term==paste0("lag",i)&(nocpi$p.value<0.01))))/121)
+   table1weight[i,2]<-percent((length( which(nocpi$term==paste0("CPI_lag",i)&(nocpi$p.value<0.05))))/121)
+      table1weight[i+12,2]<-percent((length( which(nocpi$term==paste0("lag",i)&(nocpi$p.value<0.05))))/121)
+      #后两列
+    table1weight[i,3]<-percent(sum(a_cpi.0.01[paste0("CPI_lag",i),])      /121)
+    table1weight[i+12,3]<-percent(sum(a_lag.0.01[paste0("lag",i),])/121)
+    table1weight[i,4]<-percent(sum(a_cpi.0.05[paste0("CPI_lag",i),])/121)
+    table1weight[i+12,4]<-percent(sum(a_lag.0.05[paste0("lag",i),])/121)
     
-  }
-kable(table1weight, caption = "Table 1")
-writeDoc(doc, file = "kable.docx")
-```
+}
+
 
 
 ```
+
+flextable 写入word
+```{r}
+
+ft1<-flextable(table1weight %>% rownames_to_column("column name"))
+
+
+
+
+save_as_docx("Summary table before stepwise" = ft1, path = "F:/R workspace/Modelling-UK-inflation-quarterly-/table1.docx")
+
+
+
+
+```
+
+
+***************
+
+
 

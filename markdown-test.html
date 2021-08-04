@@ -269,6 +269,7 @@ pre code {
 <li><a href="#a_cpi.0.01"><span class="toc-section-number">1.11</span> a_cpi.0.01</a></li>
 <li><a href="#a_cpi.0.05"><span class="toc-section-number">1.12</span> a_cpi.0.05</a></li>
 </ul></li>
+<li><a href="#所有table1的结果都写入这次要生成244的dataframe"><span class="toc-section-number">2</span> 所有table1的结果都写入,这次要生成24*4的dataframe</a></li>
 </ul>
 </div>
 
@@ -658,157 +659,36 @@ pre code {
 <p><span class="math display">\[
 \frac{\text{部门}1\text{显著个数}*weight\left[ 1 \right] +.....+}{121}
 \]</span> 把a_cpi.0.05这四个表, 每行加起来/121 就是结果. 一行一个结果,每个表有12行,共4个表,<strong>4×12=48</strong>个结果. 首先生成存放结果的 24行×2列的dataframe</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(a_cpi.<span class="fl">0.05</span>[<span class="st">&quot;CPI_lag1&quot;</span>,])<span class="sc">/</span><span class="dv">121</span><span class="sc">*</span><span class="dv">100</span></span></code></pre></div>
-<pre><code>## [1] 1.250413</code></pre>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>table1weight<span class="ot">&lt;-</span><span class="fu">data.frame</span>( <span class="fu">matrix</span>(<span class="at">nrow=</span><span class="dv">24</span>, <span class="at">ncol=</span><span class="dv">2</span>, )   )</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(table1weight)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="fl">0.01</span>,<span class="fl">0.05</span>)</span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(table1weight)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>),<span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>))</span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    table1weight[i,<span class="dv">1</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>(<span class="fu">sum</span>(a_cpi.<span class="fl">0.01</span>[<span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,i),])      <span class="sc">/</span><span class="dv">121</span>)</span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    table1weight[i<span class="sc">+</span><span class="dv">12</span>,<span class="dv">1</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>(<span class="fu">sum</span>(a_lag.<span class="fl">0.01</span>[<span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,i),])<span class="sc">/</span><span class="dv">121</span>)</span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    table1weight[i,<span class="dv">2</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>(<span class="fu">sum</span>(a_cpi.<span class="fl">0.05</span>[<span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,i),])<span class="sc">/</span><span class="dv">121</span>)</span>
-<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>    table1weight[i<span class="sc">+</span><span class="dv">12</span>,<span class="dv">2</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>(<span class="fu">sum</span>(a_lag.<span class="fl">0.05</span>[<span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,i),])<span class="sc">/</span><span class="dv">121</span>)</span>
-<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(table1weight, <span class="at">caption =</span> <span class="st">&quot;Table 1&quot;</span>)</span></code></pre></div>
-<table>
-<caption>Table 1</caption>
-<thead>
-<tr class="header">
-<th align="left"></th>
-<th align="left">0.01</th>
-<th align="left">0.05</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">CPI_lag1</td>
-<td align="left">0.51%</td>
-<td align="left">1.25%</td>
-</tr>
-<tr class="even">
-<td align="left">CPI_lag2</td>
-<td align="left">0.56%</td>
-<td align="left">1.53%</td>
-</tr>
-<tr class="odd">
-<td align="left">CPI_lag3</td>
-<td align="left">0.23%</td>
-<td align="left">0.97%</td>
-</tr>
-<tr class="even">
-<td align="left">CPI_lag4</td>
-<td align="left">0.74%</td>
-<td align="left">1.01%</td>
-</tr>
-<tr class="odd">
-<td align="left">CPI_lag5</td>
-<td align="left">0.25%</td>
-<td align="left">0.70%</td>
-</tr>
-<tr class="even">
-<td align="left">CPI_lag6</td>
-<td align="left">0.52%</td>
-<td align="left">1.52%</td>
-</tr>
-<tr class="odd">
-<td align="left">CPI_lag7</td>
-<td align="left">0.38%</td>
-<td align="left">0.97%</td>
-</tr>
-<tr class="even">
-<td align="left">CPI_lag8</td>
-<td align="left">0.09%</td>
-<td align="left">0.51%</td>
-</tr>
-<tr class="odd">
-<td align="left">CPI_lag9</td>
-<td align="left">0.51%</td>
-<td align="left">0.98%</td>
-</tr>
-<tr class="even">
-<td align="left">CPI_lag10</td>
-<td align="left">0.25%</td>
-<td align="left">0.72%</td>
-</tr>
-<tr class="odd">
-<td align="left">CPI_lag11</td>
-<td align="left">0.00%</td>
-<td align="left">0.18%</td>
-</tr>
-<tr class="even">
-<td align="left">CPI_lag12</td>
-<td align="left">0.13%</td>
-<td align="left">0.32%</td>
-</tr>
-<tr class="odd">
-<td align="left">lag1</td>
-<td align="left">5.28%</td>
-<td align="left">6.23%</td>
-</tr>
-<tr class="even">
-<td align="left">lag2</td>
-<td align="left">2.24%</td>
-<td align="left">3.38%</td>
-</tr>
-<tr class="odd">
-<td align="left">lag3</td>
-<td align="left">1.74%</td>
-<td align="left">3.05%</td>
-</tr>
-<tr class="even">
-<td align="left">lag4</td>
-<td align="left">1.08%</td>
-<td align="left">2.09%</td>
-</tr>
-<tr class="odd">
-<td align="left">lag5</td>
-<td align="left">0.70%</td>
-<td align="left">1.33%</td>
-</tr>
-<tr class="even">
-<td align="left">lag6</td>
-<td align="left">1.70%</td>
-<td align="left">2.78%</td>
-</tr>
-<tr class="odd">
-<td align="left">lag7</td>
-<td align="left">0.47%</td>
-<td align="left">1.29%</td>
-</tr>
-<tr class="even">
-<td align="left">lag8</td>
-<td align="left">0.65%</td>
-<td align="left">1.58%</td>
-</tr>
-<tr class="odd">
-<td align="left">lag9</td>
-<td align="left">0.68%</td>
-<td align="left">2.20%</td>
-</tr>
-<tr class="even">
-<td align="left">lag10</td>
-<td align="left">0.70%</td>
-<td align="left">1.67%</td>
-</tr>
-<tr class="odd">
-<td align="left">lag11</td>
-<td align="left">0.92%</td>
-<td align="left">1.53%</td>
-</tr>
-<tr class="even">
-<td align="left">lag12</td>
-<td align="left">3.94%</td>
-<td align="left">5.86%</td>
-</tr>
-</tbody>
-</table>
-<p>```</p>
 </div>
+</div>
+<div id="所有table1的结果都写入这次要生成244的dataframe" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> 所有table1的结果都写入,这次要生成24*4的dataframe</h1>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>table1weight<span class="ot">&lt;-</span><span class="fu">data.frame</span>( <span class="fu">matrix</span>(<span class="at">nrow=</span><span class="dv">24</span>, <span class="at">ncol=</span><span class="dv">4</span>, )   )</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(table1weight)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="st">&quot;p&lt;0.01&quot;</span>,<span class="st">&quot;p&lt;0.05&quot;</span>,<span class="st">&quot;p&lt;0.01(Weight)&quot;</span>,<span class="st">&quot;p&lt;0.05(Weight)&quot;</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(table1weight)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>),<span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>))</span></code></pre></div>
+<p>写入结果 一个没有cpi的a dataframe,删除前14行</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>nocpi<span class="ot">&lt;-</span>a[<span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">41</span>),]</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {<span class="co">#前两列</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  table1weight[i,<span class="dv">1</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>((<span class="fu">length</span>( <span class="fu">which</span>(nocpi<span class="sc">$</span>term<span class="sc">==</span><span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,i)<span class="sc">&amp;</span>(nocpi<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.01</span>))))<span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>   table1weight[i<span class="sc">+</span><span class="dv">12</span>,<span class="dv">1</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>((<span class="fu">length</span>( <span class="fu">which</span>(nocpi<span class="sc">$</span>term<span class="sc">==</span><span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,i)<span class="sc">&amp;</span>(nocpi<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.01</span>))))<span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>   table1weight[i,<span class="dv">2</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>((<span class="fu">length</span>( <span class="fu">which</span>(nocpi<span class="sc">$</span>term<span class="sc">==</span><span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,i)<span class="sc">&amp;</span>(nocpi<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.05</span>))))<span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>      table1weight[i<span class="sc">+</span><span class="dv">12</span>,<span class="dv">2</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>((<span class="fu">length</span>( <span class="fu">which</span>(nocpi<span class="sc">$</span>term<span class="sc">==</span><span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,i)<span class="sc">&amp;</span>(nocpi<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.05</span>))))<span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>      <span class="co">#后两列</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    table1weight[i,<span class="dv">3</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>(<span class="fu">sum</span>(a_cpi.<span class="fl">0.01</span>[<span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,i),])      <span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    table1weight[i<span class="sc">+</span><span class="dv">12</span>,<span class="dv">3</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>(<span class="fu">sum</span>(a_lag.<span class="fl">0.01</span>[<span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,i),])<span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    table1weight[i,<span class="dv">4</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>(<span class="fu">sum</span>(a_cpi.<span class="fl">0.05</span>[<span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,i),])<span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    table1weight[i<span class="sc">+</span><span class="dv">12</span>,<span class="dv">4</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>(<span class="fu">sum</span>(a_lag.<span class="fl">0.05</span>[<span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,i),])<span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>flextable 写入word</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>ft1<span class="ot">&lt;-</span><span class="fu">flextable</span>(table1weight <span class="sc">%&gt;%</span> <span class="fu">rownames_to_column</span>(<span class="st">&quot;column name&quot;</span>))</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="fu">save_as_docx</span>(<span class="st">&quot;Summary table before stepwise&quot;</span> <span class="ot">=</span> ft1, <span class="at">path =</span> <span class="st">&quot;F:/R workspace/Modelling-UK-inflation-quarterly-/table1.docx&quot;</span>)</span></code></pre></div>
+<hr />
+<p>123123123</p>
 </div>
 
 
