@@ -1,15 +1,17 @@
 ---
 title: "病历本"
 author: "Yiyi"
-date: "2021/7/30"
-output: 
+date: "`r Sys.Date()`"
+output:
   html_document:
-    toc: true # table of content true
-    toc_depth: 3  # upto three depths of headings (specified by #, ## and ###)
-    number_sections: true  ## if you want number sections at each table header
-    theme: united  # many options for theme, this one is my favorite.
-    highlight: tango  # specifies the syntax highlighting style
-
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 3
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
 ---
 # 
 ```{r setup, include=FALSE}
@@ -234,7 +236,7 @@ for (i in 1:122) {
 }
 
 ```
-##显著百分比 
+##前两列显著百分比 
 ```{r}
 
 
@@ -295,7 +297,8 @@ Reduce("+",weight)
 
 tidy_mods <- lapply(regression, tidy)
 
-for (i in 1:length(tidy_mods)) tidy_mods[[i]]$mod <- names(tidy_mods[i])
+for (i in 1:length(tidy_mods)) 
+  tidy_mods[[i]]$mod <- names(tidy_mods[i])
 a <- do.call(rbind.data.frame, tidy_mods)
 str(a)
 ```
@@ -373,7 +376,7 @@ a1中lag1小于0.01的.a2中lag2小于0.01的.
 首先生成一个12*12的dataframe, 行是lag1-12, 列是a1:a12 十二个部门.
 双循环,每个部门循环把lag1-lag12 循环一边存储在a_lag_0.01[,i]列里,然后再循环剩下11个部门.
 
-## a_lag.0.01
+### a_lag.0.01
 ```{r}
 
 a_lag.0.01<-data.frame( row.names =  paste0("lag",1:12),
@@ -406,7 +409,7 @@ stargazer(regression[77:79],
           summary=FALSE,
           se = NULL, type = "text")
 ```
-## a_lag.0.05
+### a_lag.0.05
 ```{r}
 a_lag.0.05<-data.frame( row.names =  paste0("lag",1:12),
                    matrix(nrow=12, ncol=12, ) ) 
@@ -423,7 +426,7 @@ while (i <=12) {
 }
 ```
 
-## a_cpi.0.01
+### a_cpi.0.01
 
 ```{r}
 a_cpi.0.01<-data.frame( row.names =  paste0("CPI_lag",1:12),
@@ -441,7 +444,7 @@ while (i <=12) {
 }
 ```
 
-## a_cpi.0.05
+### a_cpi.0.05
 ```{r}
 a_cpi.0.05<-data.frame( row.names =  paste0("CPI_lag",1:12),
                    matrix(nrow=12, ncol=12, ) ) 
@@ -518,4 +521,300 @@ save_as_docx("Summary table before stepwise" = ft1, path = "F:/R workspace/Model
 ***************
 
 
+
+# Table 2 Stepwise Summary Table
+
+## stepwise function
+```{r}
+# function ----------------------------------------------------------------
+
+
+# Automated model selection
+# Author      : Joris Meys
+# version     : 0.2
+# date        : 12/01/09
+
+#CHANGE LOG
+# 0.2   : check for empty scopevar vector
+
+# #CHANGE LOG -------------------------------------------------------------
+
+
+
+# Function has.interaction checks whether x is part of a term in terms
+# terms is a vector with names of terms from a model
+has.interaction <- function(x,terms){
+  out <- sapply(terms,function(i){
+    sum(1-(strsplit(x,":")[[1]] %in% strsplit(i,":")[[1]]))==0
+  })
+  return(sum(out)>0)
+}
+
+# Function Model.select
+# model is the lm object of the full model
+# keep is a list of model terms to keep in the model at all times
+# sig gives the significance for removal of a variable. Can be 0.1 too (see SPSS)
+# verbose=T gives the F-tests, dropped var and resulting model after 
+model.select <- function(model,keep,sig=0.05,verbose=F){
+  counter=1
+  # check input
+  if(!is(model,"lm")) stop(paste(deparse(substitute(model)),"is not an lm object\n"))
+  # calculate scope for drop1 function
+  terms <- attr(model$terms,"term.labels")
+  if(missing(keep)){ # set scopevars to all terms
+    scopevars <- terms
+  } else{            # select the scopevars if keep is used
+    index <- match(keep,terms)
+    # check if all is specified correctly
+    if(sum(is.na(index))>0){
+      novar <- keep[is.na(index)]
+      warning(paste(
+        c(novar,"cannot be found in the model",
+          "\nThese terms are ignored in the model selection."),
+        collapse=" "))
+      index <- as.vector(na.omit(index))
+    }
+    scopevars <- terms[-index]
+  }
+  
+  # Backward model selection : 
+  
+  while(T){
+    # extract the test statistics from drop.
+    test <- drop1(model, scope=scopevars,test="F")
+    
+    if(verbose){
+      cat("-------------STEP ",counter,"-------------\n",
+          "The drop statistics : \n")
+      print(test)
+    }
+    
+    pval <- test[,dim(test)[2]]
+    
+    names(pval) <- rownames(test)
+    pval <- sort(pval,decreasing=T)
+    
+    if(sum(is.na(pval))>0) stop(paste("Model",
+                                      deparse(substitute(model)),"is invalid. Check if all coefficients are estimated."))
+    
+    # check if all significant
+    if(pval[1]<sig) break # stops the loop if all remaining vars are sign.
+    
+    # select var to drop
+    i=1
+    while(T){
+      dropvar <- names(pval)[i]
+      check.terms <- terms[-match(dropvar,terms)]
+      x <- has.interaction(dropvar,check.terms)
+      if(x){i=i+1;next} else {break}              
+    } # end while(T) drop var
+    
+    if(pval[i]<sig) break # stops the loop if var to remove is significant
+    
+    if(verbose){
+      cat("\n--------\nTerm dropped in step",counter,":",dropvar,"\n--------\n\n")              
+    }
+    
+    #update terms, scopevars and model
+    scopevars <- scopevars[-match(dropvar,scopevars)]
+    terms <- terms[-match(dropvar,terms)]
+    
+    formul <- as.formula(paste(".~.-",dropvar))
+    model <- update(model,formul)
+    
+    if(length(scopevars)==0) {
+      warning("All variables are thrown out of the model.\n",
+              "No model could be specified.")
+      return()
+    }
+    counter=counter+1
+  } # end while(T) main loop
+  return(model)
+}
+
+```
+
+**如果简化到0.01, 所有变量都在0.01显著了, 那0.05的列就全是0了.** 所以只有个 stepwsie function, 那就是到0.05.
+```{r}
+slr.total <- list()
+keep.dummies <- c("time_Aug","time_Apr",
+                  "time_Dec",  "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                  "VAT1","VAT2","VAT3","Recession","Trend")
+for (i in 2:122) {
+  slr.total[[i]] <- model.select(regression[[i]], keep = keep.dummies, sig = 0.05, verbose = F)
+}
+
+```
+
+**这个地方会卡一下**
+在没换名字之前slr.total=122个,1和86是空集. 替换完名字就变成121了(1仍然空集.)
+```{r}
+#把1和86扔了
+slr.total[sapply(slr.total, is.null)] <- NULL
+
+#替换名称
+search_for_these <- c("lag1[, x]","lag2[, x]","lag3[, x]","lag4[, x]","lag5[, x]","lag6[, x]","lag7[, x]","lag8[, x]","lag9[, x]","lag10[, x]","lag11[, x]","lag12[, x]")
+ replace_with_these <- c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12")
+ found<-list()
+for (i in 1:length(slr.total)) {
+  found[[i]] <- match(names(slr.total[[i]]$coefficients), search_for_these, nomatch = 0)
+  names(slr.total[[i]]$coefficients)[names(slr.total[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
+```
+
+
+```{r}
+#化成长数据类型
+ tidy_stepwsie <- lapply(slr.total, tidy)
+  stepwsie_a<- do.call(rbind.data.frame, tidy_stepwsie)
+```
+因为已经删减过cpi and 86, 所以stepwsie_a只剩下120个项目了.
+```{r}
+length(which(stepwsie_a$term=="VAT1"))
+```
+**因为1和86是空集,所以每个部门开始的位置也变了. 86之前的变量-1,86之后的-2.**
+```{r}
+dend<-c(2,16,22,28,41,54,62,77,80,102,103,108,122)#这只是每个部门开始的位置
+dend_stepwise<-c(dend[1:9]-1,dend[10:13]-2)
+
+for (i in 1:12) {
+  assign(paste0("stepwsie_a",i),
+         stepwsie_a[(which(stepwsie_a$term=="(Intercept)")[dend_stepwise[i]]):(which(stepwsie_a$term=="Trend")[dend_stepwise[i+1]-1]),])
+}
+```
+
+## 创建	Table 2 Stepwise Summary Table 存储结果
+同样是24*4.
+```{r}
+stepwise_table_yearly<-data.frame( matrix(nrow=24, ncol=4, )   )
+colnames(stepwise_table_yearly)<-c("p<0.01","p<0.05","p<0.01(Weight)","p<0.05(Weight)")
+rownames(stepwise_table_yearly)<-c(paste0("CPI_lag",1:12),paste0("lag",1:12))
+```
+
+### stepwise_lag_0.01_yearly
+```{r}
+
+stepwise_lag_0.01_yearly<-data.frame( row.names =  paste0("lag",1:12),
+                   matrix(nrow=12, ncol=12, ) ) 
+
+colnames(stepwise_lag_0.01_yearly)<-c(paste0("a",1:12))
+i<-1#i=a,j=lag
+while (i <=12) {
+  for (j in 1:12) {
+ stepwise_lag_0.01_yearly [j,i]  <-
+  length( which((get(paste0("stepwsie_a",i)))$term==paste0("lag",j)&(get(paste0("stepwsie_a",i)))$p.value<0.01)
+  )*weight[[i]]
+  }
+  i<-i+1
+}
+```
+### stepwise_lag_0.05_yearly
+```{r}
+
+stepwise_lag_0.05_yearly<-data.frame( row.names =  paste0("lag",1:12),
+                   matrix(nrow=12, ncol=12, ) ) 
+
+colnames(stepwise_lag_0.05_yearly)<-c(paste0("a",1:12))
+i<-1#i=a,j=lag
+while (i <=12) {
+  for (j in 1:12) {
+ stepwise_lag_0.05_yearly [j,i]  <-
+  length( which((get(paste0("stepwsie_a",i)))$term==paste0("lag",j)&(get(paste0("stepwsie_a",i)))$p.value<0.05)
+  )*weight[[i]]
+  }
+  i<-i+1
+}
+```
+### stepwise_cpi_0.01_yearly
+```{r}
+stepwise_cpi_0.01_yearly<-data.frame( row.names =  paste0("CPI_lag",1:12),
+                   matrix(nrow=12, ncol=12, ) ) 
+
+colnames(stepwise_cpi_0.01_yearly)<-c(paste0("a",1:12))
+i<-1#i=a,j=lag
+while (i <=12) {
+  for (j in 1:12) {
+ stepwise_cpi_0.01_yearly [j,i]  <-
+  length( which((get(paste0("stepwsie_a",i)))$term==paste0("CPI_lag",j)&(get(paste0("stepwsie_a",i)))$p.value<0.01)
+  )*weight[[i]]
+  }
+  i<-i+1
+}
+```
+### stepwise_cpi_0.05_yearly
+```{r}
+stepwise_cpi_0.05_yearly<-data.frame( row.names =  paste0("CPI_lag",1:12),
+                   matrix(nrow=12, ncol=12, ) ) 
+
+colnames(stepwise_cpi_0.05_yearly)<-c(paste0("a",1:12))
+i<-1#i=a,j=lag
+while (i <=12) {
+  for (j in 1:12) {
+ stepwise_cpi_0.05_yearly [j,i]  <-
+  length( which((get(paste0("stepwsie_a",i)))$term==paste0("CPI_lag",j)&(get(paste0("stepwsie_a",i)))$p.value<0.05)
+  )*weight[[i]]
+  }
+  i<-i+1
+}
+```
+# 写入table2
+```{r}
+for (i in 1:12) {#前两列
+  stepwise_table_yearly[i,1]<-percent((length( which(stepwsie_a$term==paste0("CPI_lag",i)&(stepwsie_a$p.value<0.01))))/121)
+   stepwise_table_yearly[i+12,1]<-percent((length( which(stepwsie_a$term==paste0("lag",i)&(stepwsie_a$p.value<0.01))))/121)
+   stepwise_table_yearly[i,2]<-percent((length( which(stepwsie_a$term==paste0("CPI_lag",i)&(stepwsie_a$p.value<0.05))))/121)
+      stepwise_table_yearly[i+12,2]<-percent((length( which(stepwsie_a$term==paste0("lag",i)&(stepwsie_a$p.value<0.05))))/121)
+      #后两列
+    stepwise_table_yearly[i,3]<-percent(sum(stepwise_cpi_0.01_yearly[paste0("CPI_lag",i),])      /121)
+    stepwise_table_yearly[i+12,3]<-percent(sum(stepwise_lag_0.01_yearly[paste0("lag",i),])/121)
+    stepwise_table_yearly[i,4]<-percent(sum(stepwise_cpi_0.05_yearly[paste0("CPI_lag",i),])/121)
+    stepwise_table_yearly[i+12,4]<-percent(sum(stepwise_lag_0.05_yearly[paste0("lag",i),])/121)
+    
+}
+```
+## flextable 写入word
+```{r}
+
+
+
+ft1<-flextable(stepwise_table_yearly %>% rownames_to_column("column name"))
+
+
+
+
+save_as_docx("1.5	Table 2 Stepwise Summary Table" = ft1, path = "F:/R workspace/Modelling-UK-inflation-quarterly-/table2.docx")
+
+
+
+
+```
+
+**验证是否和word的表相等**
+```{r}
+stargazer(slr.total[2:7],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(colnames(COPY[2:7])),
+          summary = FALSE,
+          out = "F:/R workspace/Modelling-UK-inflation-quarterly-/Table 2 Stepwise Summary Table/1-1.html",
+          flip = FALSE,
+          se = NULL,type = "text"
+)
+```
+
+
+# Table 3  Summary table before stepwise (Quarterly data)
 

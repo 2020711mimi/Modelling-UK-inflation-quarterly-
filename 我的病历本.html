@@ -273,6 +273,22 @@ pre code {
 </ul></li>
 </ul></li>
 <li><a href="#所有table1的结果都写入这次要生成244的dataframe"><span class="toc-section-number">2</span> 所有table1的结果都写入,这次要生成24*4的dataframe</a></li>
+<li><a href="#table-2-stepwise-summary-table"><span class="toc-section-number">3</span> Table 2 Stepwise Summary Table</a>
+<ul>
+<li><a href="#stepwise-function"><span class="toc-section-number">3.1</span> stepwise function</a></li>
+<li><a href="#创建-table-2-stepwise-summary-table-存储结果"><span class="toc-section-number">3.2</span> 创建 Table 2 Stepwise Summary Table 存储结果</a>
+<ul>
+<li><a href="#stepwise_lag_0.01_yearly"><span class="toc-section-number">3.2.1</span> stepwise_lag_0.01_yearly</a></li>
+<li><a href="#stepwise_lag_0.05_yearly"><span class="toc-section-number">3.2.2</span> stepwise_lag_0.05_yearly</a></li>
+<li><a href="#stepwise_cpi_0.01_yearly"><span class="toc-section-number">3.2.3</span> stepwise_cpi_0.01_yearly</a></li>
+<li><a href="#stepwise_cpi_0.05_yearly"><span class="toc-section-number">3.2.4</span> stepwise_cpi_0.05_yearly</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#写入table2"><span class="toc-section-number">4</span> 写入table2</a>
+<ul>
+<li><a href="#flextable-写入word"><span class="toc-section-number">4.1</span> flextable 写入word</a></li>
+</ul></li>
+<li><a href="#table-3-summary-table-before-stepwise-quarterly-data"><span class="toc-section-number">5</span> 1.6 Table 3 Summary table before stepwise (Quarterly data)</a></li>
 </ul>
 </div>
 
@@ -511,9 +527,10 @@ pre code {
 <p>用lapply 把regression 这个list 化成长数据框类型.(多行,5列:term,estimate,std,statitc, pvalue)</p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>tidy_mods <span class="ot">&lt;-</span> <span class="fu">lapply</span>(regression, tidy)</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(tidy_mods)) tidy_mods[[i]]<span class="sc">$</span>mod <span class="ot">&lt;-</span> <span class="fu">names</span>(tidy_mods[i])</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind.data.frame, tidy_mods)</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(a)</span></code></pre></div>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(tidy_mods)) </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  tidy_mods[[i]]<span class="sc">$</span>mod <span class="ot">&lt;-</span> <span class="fu">names</span>(tidy_mods[i])</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind.data.frame, tidy_mods)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(a)</span></code></pre></div>
 <pre><code>## tibble[,5] [5,002 x 5] (S3: tbl_df/tbl/data.frame)
 ##  $ term     : chr [1:5002] &quot;Constant&quot; &quot;lag1&quot; &quot;lag2&quot; &quot;lag3&quot; ...
 ##  $ estimate : num [1:5002] 0.3623 0.1157 -0.0351 0.0517 0.0445 ...
@@ -691,6 +708,302 @@ pre code {
 <span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="fu">save_as_docx</span>(<span class="st">&quot;Summary table before stepwise&quot;</span> <span class="ot">=</span> ft1, <span class="at">path =</span> <span class="st">&quot;F:/R workspace/Modelling-UK-inflation-quarterly-/table1.docx&quot;</span>)</span></code></pre></div>
 <hr />
+</div>
+<div id="table-2-stepwise-summary-table" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Table 2 Stepwise Summary Table</h1>
+<div id="stepwise-function" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> stepwise function</h2>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># function ----------------------------------------------------------------</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Automated model selection</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Author      : Joris Meys</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a><span class="co"># version     : 0.2</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="co"># date        : 12/01/09</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="co">#CHANGE LOG</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 0.2   : check for empty scopevar vector</span></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a><span class="co"># #CHANGE LOG -------------------------------------------------------------</span></span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Function has.interaction checks whether x is part of a term in terms</span></span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a><span class="co"># terms is a vector with names of terms from a model</span></span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>has.interaction <span class="ot">&lt;-</span> <span class="cf">function</span>(x,terms){</span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">sapply</span>(terms,<span class="cf">function</span>(i){</span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum</span>(<span class="dv">1</span><span class="sc">-</span>(<span class="fu">strsplit</span>(x,<span class="st">&quot;:&quot;</span>)[[<span class="dv">1</span>]] <span class="sc">%in%</span> <span class="fu">strsplit</span>(i,<span class="st">&quot;:&quot;</span>)[[<span class="dv">1</span>]]))<span class="sc">==</span><span class="dv">0</span></span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">sum</span>(out)<span class="sc">&gt;</span><span class="dv">0</span>)</span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Function Model.select</span></span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a><span class="co"># model is the lm object of the full model</span></span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a><span class="co"># keep is a list of model terms to keep in the model at all times</span></span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a><span class="co"># sig gives the significance for removal of a variable. Can be 0.1 too (see SPSS)</span></span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a><span class="co"># verbose=T gives the F-tests, dropped var and resulting model after </span></span>
+<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a>model.select <span class="ot">&lt;-</span> <span class="cf">function</span>(model,keep,<span class="at">sig=</span><span class="fl">0.05</span>,<span class="at">verbose=</span>F){</span>
+<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a>  counter<span class="ot">=</span><span class="dv">1</span></span>
+<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a>  <span class="co"># check input</span></span>
+<span id="cb36-33"><a href="#cb36-33" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is</span>(model,<span class="st">&quot;lm&quot;</span>)) <span class="fu">stop</span>(<span class="fu">paste</span>(<span class="fu">deparse</span>(<span class="fu">substitute</span>(model)),<span class="st">&quot;is not an lm object</span><span class="sc">\n</span><span class="st">&quot;</span>))</span>
+<span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calculate scope for drop1 function</span></span>
+<span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a>  terms <span class="ot">&lt;-</span> <span class="fu">attr</span>(model<span class="sc">$</span>terms,<span class="st">&quot;term.labels&quot;</span>)</span>
+<span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">missing</span>(keep)){ <span class="co"># set scopevars to all terms</span></span>
+<span id="cb36-37"><a href="#cb36-37" aria-hidden="true" tabindex="-1"></a>    scopevars <span class="ot">&lt;-</span> terms</span>
+<span id="cb36-38"><a href="#cb36-38" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span>{            <span class="co"># select the scopevars if keep is used</span></span>
+<span id="cb36-39"><a href="#cb36-39" aria-hidden="true" tabindex="-1"></a>    index <span class="ot">&lt;-</span> <span class="fu">match</span>(keep,terms)</span>
+<span id="cb36-40"><a href="#cb36-40" aria-hidden="true" tabindex="-1"></a>    <span class="co"># check if all is specified correctly</span></span>
+<span id="cb36-41"><a href="#cb36-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">sum</span>(<span class="fu">is.na</span>(index))<span class="sc">&gt;</span><span class="dv">0</span>){</span>
+<span id="cb36-42"><a href="#cb36-42" aria-hidden="true" tabindex="-1"></a>      novar <span class="ot">&lt;-</span> keep[<span class="fu">is.na</span>(index)]</span>
+<span id="cb36-43"><a href="#cb36-43" aria-hidden="true" tabindex="-1"></a>      <span class="fu">warning</span>(<span class="fu">paste</span>(</span>
+<span id="cb36-44"><a href="#cb36-44" aria-hidden="true" tabindex="-1"></a>        <span class="fu">c</span>(novar,<span class="st">&quot;cannot be found in the model&quot;</span>,</span>
+<span id="cb36-45"><a href="#cb36-45" aria-hidden="true" tabindex="-1"></a>          <span class="st">&quot;</span><span class="sc">\n</span><span class="st">These terms are ignored in the model selection.&quot;</span>),</span>
+<span id="cb36-46"><a href="#cb36-46" aria-hidden="true" tabindex="-1"></a>        <span class="at">collapse=</span><span class="st">&quot; &quot;</span>))</span>
+<span id="cb36-47"><a href="#cb36-47" aria-hidden="true" tabindex="-1"></a>      index <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(<span class="fu">na.omit</span>(index))</span>
+<span id="cb36-48"><a href="#cb36-48" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb36-49"><a href="#cb36-49" aria-hidden="true" tabindex="-1"></a>    scopevars <span class="ot">&lt;-</span> terms[<span class="sc">-</span>index]</span>
+<span id="cb36-50"><a href="#cb36-50" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb36-51"><a href="#cb36-51" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-52"><a href="#cb36-52" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Backward model selection : </span></span>
+<span id="cb36-53"><a href="#cb36-53" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-54"><a href="#cb36-54" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span>(T){</span>
+<span id="cb36-55"><a href="#cb36-55" aria-hidden="true" tabindex="-1"></a>    <span class="co"># extract the test statistics from drop.</span></span>
+<span id="cb36-56"><a href="#cb36-56" aria-hidden="true" tabindex="-1"></a>    test <span class="ot">&lt;-</span> <span class="fu">drop1</span>(model, <span class="at">scope=</span>scopevars,<span class="at">test=</span><span class="st">&quot;F&quot;</span>)</span>
+<span id="cb36-57"><a href="#cb36-57" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb36-58"><a href="#cb36-58" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(verbose){</span>
+<span id="cb36-59"><a href="#cb36-59" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">&quot;-------------STEP &quot;</span>,counter,<span class="st">&quot;-------------</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb36-60"><a href="#cb36-60" aria-hidden="true" tabindex="-1"></a>          <span class="st">&quot;The drop statistics : </span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb36-61"><a href="#cb36-61" aria-hidden="true" tabindex="-1"></a>      <span class="fu">print</span>(test)</span>
+<span id="cb36-62"><a href="#cb36-62" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb36-63"><a href="#cb36-63" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb36-64"><a href="#cb36-64" aria-hidden="true" tabindex="-1"></a>    pval <span class="ot">&lt;-</span> test[,<span class="fu">dim</span>(test)[<span class="dv">2</span>]]</span>
+<span id="cb36-65"><a href="#cb36-65" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb36-66"><a href="#cb36-66" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(pval) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(test)</span>
+<span id="cb36-67"><a href="#cb36-67" aria-hidden="true" tabindex="-1"></a>    pval <span class="ot">&lt;-</span> <span class="fu">sort</span>(pval,<span class="at">decreasing=</span>T)</span>
+<span id="cb36-68"><a href="#cb36-68" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb36-69"><a href="#cb36-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">sum</span>(<span class="fu">is.na</span>(pval))<span class="sc">&gt;</span><span class="dv">0</span>) <span class="fu">stop</span>(<span class="fu">paste</span>(<span class="st">&quot;Model&quot;</span>,</span>
+<span id="cb36-70"><a href="#cb36-70" aria-hidden="true" tabindex="-1"></a>                                      <span class="fu">deparse</span>(<span class="fu">substitute</span>(model)),<span class="st">&quot;is invalid. Check if all coefficients are estimated.&quot;</span>))</span>
+<span id="cb36-71"><a href="#cb36-71" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb36-72"><a href="#cb36-72" aria-hidden="true" tabindex="-1"></a>    <span class="co"># check if all significant</span></span>
+<span id="cb36-73"><a href="#cb36-73" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(pval[<span class="dv">1</span>]<span class="sc">&lt;</span>sig) <span class="cf">break</span> <span class="co"># stops the loop if all remaining vars are sign.</span></span>
+<span id="cb36-74"><a href="#cb36-74" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb36-75"><a href="#cb36-75" aria-hidden="true" tabindex="-1"></a>    <span class="co"># select var to drop</span></span>
+<span id="cb36-76"><a href="#cb36-76" aria-hidden="true" tabindex="-1"></a>    i<span class="ot">=</span><span class="dv">1</span></span>
+<span id="cb36-77"><a href="#cb36-77" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span>(T){</span>
+<span id="cb36-78"><a href="#cb36-78" aria-hidden="true" tabindex="-1"></a>      dropvar <span class="ot">&lt;-</span> <span class="fu">names</span>(pval)[i]</span>
+<span id="cb36-79"><a href="#cb36-79" aria-hidden="true" tabindex="-1"></a>      check.terms <span class="ot">&lt;-</span> terms[<span class="sc">-</span><span class="fu">match</span>(dropvar,terms)]</span>
+<span id="cb36-80"><a href="#cb36-80" aria-hidden="true" tabindex="-1"></a>      x <span class="ot">&lt;-</span> <span class="fu">has.interaction</span>(dropvar,check.terms)</span>
+<span id="cb36-81"><a href="#cb36-81" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(x){i<span class="ot">=</span>i<span class="sc">+</span><span class="dv">1</span>;<span class="cf">next</span>} <span class="cf">else</span> {<span class="cf">break</span>}              </span>
+<span id="cb36-82"><a href="#cb36-82" aria-hidden="true" tabindex="-1"></a>    } <span class="co"># end while(T) drop var</span></span>
+<span id="cb36-83"><a href="#cb36-83" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb36-84"><a href="#cb36-84" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(pval[i]<span class="sc">&lt;</span>sig) <span class="cf">break</span> <span class="co"># stops the loop if var to remove is significant</span></span>
+<span id="cb36-85"><a href="#cb36-85" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb36-86"><a href="#cb36-86" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(verbose){</span>
+<span id="cb36-87"><a href="#cb36-87" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">--------</span><span class="sc">\n</span><span class="st">Term dropped in step&quot;</span>,counter,<span class="st">&quot;:&quot;</span>,dropvar,<span class="st">&quot;</span><span class="sc">\n</span><span class="st">--------</span><span class="sc">\n\n</span><span class="st">&quot;</span>)              </span>
+<span id="cb36-88"><a href="#cb36-88" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb36-89"><a href="#cb36-89" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb36-90"><a href="#cb36-90" aria-hidden="true" tabindex="-1"></a>    <span class="co">#update terms, scopevars and model</span></span>
+<span id="cb36-91"><a href="#cb36-91" aria-hidden="true" tabindex="-1"></a>    scopevars <span class="ot">&lt;-</span> scopevars[<span class="sc">-</span><span class="fu">match</span>(dropvar,scopevars)]</span>
+<span id="cb36-92"><a href="#cb36-92" aria-hidden="true" tabindex="-1"></a>    terms <span class="ot">&lt;-</span> terms[<span class="sc">-</span><span class="fu">match</span>(dropvar,terms)]</span>
+<span id="cb36-93"><a href="#cb36-93" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb36-94"><a href="#cb36-94" aria-hidden="true" tabindex="-1"></a>    formul <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste</span>(<span class="st">&quot;.~.-&quot;</span>,dropvar))</span>
+<span id="cb36-95"><a href="#cb36-95" aria-hidden="true" tabindex="-1"></a>    model <span class="ot">&lt;-</span> <span class="fu">update</span>(model,formul)</span>
+<span id="cb36-96"><a href="#cb36-96" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb36-97"><a href="#cb36-97" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(scopevars)<span class="sc">==</span><span class="dv">0</span>) {</span>
+<span id="cb36-98"><a href="#cb36-98" aria-hidden="true" tabindex="-1"></a>      <span class="fu">warning</span>(<span class="st">&quot;All variables are thrown out of the model.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb36-99"><a href="#cb36-99" aria-hidden="true" tabindex="-1"></a>              <span class="st">&quot;No model could be specified.&quot;</span>)</span>
+<span id="cb36-100"><a href="#cb36-100" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>()</span>
+<span id="cb36-101"><a href="#cb36-101" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb36-102"><a href="#cb36-102" aria-hidden="true" tabindex="-1"></a>    counter<span class="ot">=</span>counter<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb36-103"><a href="#cb36-103" aria-hidden="true" tabindex="-1"></a>  } <span class="co"># end while(T) main loop</span></span>
+<span id="cb36-104"><a href="#cb36-104" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(model)</span>
+<span id="cb36-105"><a href="#cb36-105" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><strong>如果简化到0.01, 所有变量都在0.01显著了, 那0.05的列就全是0了.</strong> 所以只有个 stepwsie function, 那就是到0.05.</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>slr.total <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>keep.dummies <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;time_Aug&quot;</span>,<span class="st">&quot;time_Apr&quot;</span>,</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>                  <span class="st">&quot;time_Dec&quot;</span>,  <span class="st">&quot;time_Jan&quot;</span>,<span class="st">&quot;time_Jul&quot;</span>,<span class="st">&quot;time_Jun&quot;</span> ,<span class="st">&quot;time_Mar&quot;</span>,<span class="st">&quot;time_May&quot;</span>,<span class="st">&quot;time_Nov&quot;</span>,<span class="st">&quot;time_Oct&quot;</span>,<span class="st">&quot;time_Sep&quot;</span>,</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>                  <span class="st">&quot;VAT1&quot;</span>,<span class="st">&quot;VAT2&quot;</span>,<span class="st">&quot;VAT3&quot;</span>,<span class="st">&quot;Recession&quot;</span>,<span class="st">&quot;Trend&quot;</span>)</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">122</span>) {</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>  slr.total[[i]] <span class="ot">&lt;-</span> <span class="fu">model.select</span>(regression[[i]], <span class="at">keep =</span> keep.dummies, <span class="at">sig =</span> <span class="fl">0.05</span>, <span class="at">verbose =</span> F)</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<pre><code>## Warning in model.select(regression[[i]], keep = keep.dummies, sig = 0.05, : All variables are thrown out of the model.
+## No model could be specified.</code></pre>
+<p><strong>这个地方会卡一下</strong> 在没换名字之前slr.total=122个,1和86是空集. 替换完名字就变成121了(1仍然空集.)</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co">#把1和86扔了</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>slr.total[<span class="fu">sapply</span>(slr.total, is.null)] <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="co">#替换名称</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>search_for_these <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;lag1[, x]&quot;</span>,<span class="st">&quot;lag2[, x]&quot;</span>,<span class="st">&quot;lag3[, x]&quot;</span>,<span class="st">&quot;lag4[, x]&quot;</span>,<span class="st">&quot;lag5[, x]&quot;</span>,<span class="st">&quot;lag6[, x]&quot;</span>,<span class="st">&quot;lag7[, x]&quot;</span>,<span class="st">&quot;lag8[, x]&quot;</span>,<span class="st">&quot;lag9[, x]&quot;</span>,<span class="st">&quot;lag10[, x]&quot;</span>,<span class="st">&quot;lag11[, x]&quot;</span>,<span class="st">&quot;lag12[, x]&quot;</span>)</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a> replace_with_these <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;lag1&quot;</span>,<span class="st">&quot;lag2&quot;</span>,<span class="st">&quot;lag3&quot;</span>,<span class="st">&quot;lag4&quot;</span>,<span class="st">&quot;lag5&quot;</span>,<span class="st">&quot;lag6&quot;</span>,<span class="st">&quot;lag7&quot;</span>,<span class="st">&quot;lag8&quot;</span>,<span class="st">&quot;lag9&quot;</span>,<span class="st">&quot;lag10&quot;</span>,<span class="st">&quot;lag11&quot;</span>,<span class="st">&quot;lag12&quot;</span>)</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a> found<span class="ot">&lt;-</span><span class="fu">list</span>()</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(slr.total)) {</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>  found[[i]] <span class="ot">&lt;-</span> <span class="fu">match</span>(<span class="fu">names</span>(slr.total[[i]]<span class="sc">$</span>coefficients), search_for_these, <span class="at">nomatch =</span> <span class="dv">0</span>)</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(slr.total[[i]]<span class="sc">$</span>coefficients)[<span class="fu">names</span>(slr.total[[i]]<span class="sc">$</span>coefficients) <span class="sc">%in%</span> search_for_these] <span class="ot">&lt;-</span> replace_with_these[found[[i]]]</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co">#化成长数据类型</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a> tidy_stepwsie <span class="ot">&lt;-</span> <span class="fu">lapply</span>(slr.total, tidy)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  stepwsie_a<span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind.data.frame, tidy_stepwsie)</span></code></pre></div>
+<p>因为已经删减过cpi and 86, 所以stepwsie_a只剩下120个项目了.</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">which</span>(stepwsie_a<span class="sc">$</span>term<span class="sc">==</span><span class="st">&quot;VAT1&quot;</span>))</span></code></pre></div>
+<pre><code>## [1] 120</code></pre>
+<p><strong>因为1和86是空集,所以每个部门开始的位置也变了. 86之前的变量-1,86之后的-2.</strong></p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>dend<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">16</span>,<span class="dv">22</span>,<span class="dv">28</span>,<span class="dv">41</span>,<span class="dv">54</span>,<span class="dv">62</span>,<span class="dv">77</span>,<span class="dv">80</span>,<span class="dv">102</span>,<span class="dv">103</span>,<span class="dv">108</span>,<span class="dv">122</span>)<span class="co">#这只是每个部门开始的位置</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>dend_stepwise<span class="ot">&lt;-</span><span class="fu">c</span>(dend[<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>]<span class="sc">-</span><span class="dv">1</span>,dend[<span class="dv">10</span><span class="sc">:</span><span class="dv">13</span>]<span class="sc">-</span><span class="dv">2</span>)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">assign</span>(<span class="fu">paste0</span>(<span class="st">&quot;stepwsie_a&quot;</span>,i),</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>         stepwsie_a[(<span class="fu">which</span>(stepwsie_a<span class="sc">$</span>term<span class="sc">==</span><span class="st">&quot;(Intercept)&quot;</span>)[dend_stepwise[i]])<span class="sc">:</span>(<span class="fu">which</span>(stepwsie_a<span class="sc">$</span>term<span class="sc">==</span><span class="st">&quot;Trend&quot;</span>)[dend_stepwise[i<span class="sc">+</span><span class="dv">1</span>]<span class="sc">-</span><span class="dv">1</span>]),])</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="创建-table-2-stepwise-summary-table-存储结果" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> 创建 Table 2 Stepwise Summary Table 存储结果</h2>
+<p>同样是24*4.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>stepwise_table_yearly<span class="ot">&lt;-</span><span class="fu">data.frame</span>( <span class="fu">matrix</span>(<span class="at">nrow=</span><span class="dv">24</span>, <span class="at">ncol=</span><span class="dv">4</span>, )   )</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(stepwise_table_yearly)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="st">&quot;p&lt;0.01&quot;</span>,<span class="st">&quot;p&lt;0.05&quot;</span>,<span class="st">&quot;p&lt;0.01(Weight)&quot;</span>,<span class="st">&quot;p&lt;0.05(Weight)&quot;</span>)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(stepwise_table_yearly)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>),<span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>))</span></code></pre></div>
+<div id="stepwise_lag_0.01_yearly" class="section level3" number="3.2.1">
+<h3><span class="header-section-number">3.2.1</span> stepwise_lag_0.01_yearly</h3>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>stepwise_lag_0<span class="fl">.01</span>_yearly<span class="ot">&lt;-</span><span class="fu">data.frame</span>( <span class="at">row.names =</span>  <span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>),</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">matrix</span>(<span class="at">nrow=</span><span class="dv">12</span>, <span class="at">ncol=</span><span class="dv">12</span>, ) ) </span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(stepwise_lag_0<span class="fl">.01</span>_yearly)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">&quot;a&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>))</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>i<span class="ot">&lt;-</span><span class="dv">1</span><span class="co">#i=a,j=lag</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (i <span class="sc">&lt;=</span><span class="dv">12</span>) {</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a> stepwise_lag_0<span class="fl">.01</span>_yearly [j,i]  <span class="ot">&lt;-</span></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">length</span>( <span class="fu">which</span>((<span class="fu">get</span>(<span class="fu">paste0</span>(<span class="st">&quot;stepwsie_a&quot;</span>,i)))<span class="sc">$</span>term<span class="sc">==</span><span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,j)<span class="sc">&amp;</span>(<span class="fu">get</span>(<span class="fu">paste0</span>(<span class="st">&quot;stepwsie_a&quot;</span>,i)))<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.01</span>)</span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">*</span>weight[[i]]</span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>  i<span class="ot">&lt;-</span>i<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="stepwise_lag_0.05_yearly" class="section level3" number="3.2.2">
+<h3><span class="header-section-number">3.2.2</span> stepwise_lag_0.05_yearly</h3>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>stepwise_lag_0<span class="fl">.05</span>_yearly<span class="ot">&lt;-</span><span class="fu">data.frame</span>( <span class="at">row.names =</span>  <span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>),</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">matrix</span>(<span class="at">nrow=</span><span class="dv">12</span>, <span class="at">ncol=</span><span class="dv">12</span>, ) ) </span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(stepwise_lag_0<span class="fl">.05</span>_yearly)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">&quot;a&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>))</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>i<span class="ot">&lt;-</span><span class="dv">1</span><span class="co">#i=a,j=lag</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (i <span class="sc">&lt;=</span><span class="dv">12</span>) {</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a> stepwise_lag_0<span class="fl">.05</span>_yearly [j,i]  <span class="ot">&lt;-</span></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">length</span>( <span class="fu">which</span>((<span class="fu">get</span>(<span class="fu">paste0</span>(<span class="st">&quot;stepwsie_a&quot;</span>,i)))<span class="sc">$</span>term<span class="sc">==</span><span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,j)<span class="sc">&amp;</span>(<span class="fu">get</span>(<span class="fu">paste0</span>(<span class="st">&quot;stepwsie_a&quot;</span>,i)))<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.05</span>)</span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">*</span>weight[[i]]</span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>  i<span class="ot">&lt;-</span>i<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="stepwise_cpi_0.01_yearly" class="section level3" number="3.2.3">
+<h3><span class="header-section-number">3.2.3</span> stepwise_cpi_0.01_yearly</h3>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>stepwise_cpi_0<span class="fl">.01</span>_yearly<span class="ot">&lt;-</span><span class="fu">data.frame</span>( <span class="at">row.names =</span>  <span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>),</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">matrix</span>(<span class="at">nrow=</span><span class="dv">12</span>, <span class="at">ncol=</span><span class="dv">12</span>, ) ) </span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(stepwise_cpi_0<span class="fl">.01</span>_yearly)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">&quot;a&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>))</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>i<span class="ot">&lt;-</span><span class="dv">1</span><span class="co">#i=a,j=lag</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (i <span class="sc">&lt;=</span><span class="dv">12</span>) {</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a> stepwise_cpi_0<span class="fl">.01</span>_yearly [j,i]  <span class="ot">&lt;-</span></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">length</span>( <span class="fu">which</span>((<span class="fu">get</span>(<span class="fu">paste0</span>(<span class="st">&quot;stepwsie_a&quot;</span>,i)))<span class="sc">$</span>term<span class="sc">==</span><span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,j)<span class="sc">&amp;</span>(<span class="fu">get</span>(<span class="fu">paste0</span>(<span class="st">&quot;stepwsie_a&quot;</span>,i)))<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.01</span>)</span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">*</span>weight[[i]]</span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>  i<span class="ot">&lt;-</span>i<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="stepwise_cpi_0.05_yearly" class="section level3" number="3.2.4">
+<h3><span class="header-section-number">3.2.4</span> stepwise_cpi_0.05_yearly</h3>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>stepwise_cpi_0<span class="fl">.05</span>_yearly<span class="ot">&lt;-</span><span class="fu">data.frame</span>( <span class="at">row.names =</span>  <span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>),</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">matrix</span>(<span class="at">nrow=</span><span class="dv">12</span>, <span class="at">ncol=</span><span class="dv">12</span>, ) ) </span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(stepwise_cpi_0<span class="fl">.05</span>_yearly)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">&quot;a&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>))</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>i<span class="ot">&lt;-</span><span class="dv">1</span><span class="co">#i=a,j=lag</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (i <span class="sc">&lt;=</span><span class="dv">12</span>) {</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a> stepwise_cpi_0<span class="fl">.05</span>_yearly [j,i]  <span class="ot">&lt;-</span></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">length</span>( <span class="fu">which</span>((<span class="fu">get</span>(<span class="fu">paste0</span>(<span class="st">&quot;stepwsie_a&quot;</span>,i)))<span class="sc">$</span>term<span class="sc">==</span><span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,j)<span class="sc">&amp;</span>(<span class="fu">get</span>(<span class="fu">paste0</span>(<span class="st">&quot;stepwsie_a&quot;</span>,i)))<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.05</span>)</span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">*</span>weight[[i]]</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>  i<span class="ot">&lt;-</span>i<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+</div>
+</div>
+<div id="写入table2" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> 写入table2</h1>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {<span class="co">#前两列</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  stepwise_table_yearly[i,<span class="dv">1</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>((<span class="fu">length</span>( <span class="fu">which</span>(stepwsie_a<span class="sc">$</span>term<span class="sc">==</span><span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,i)<span class="sc">&amp;</span>(stepwsie_a<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.01</span>))))<span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>   stepwise_table_yearly[i<span class="sc">+</span><span class="dv">12</span>,<span class="dv">1</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>((<span class="fu">length</span>( <span class="fu">which</span>(stepwsie_a<span class="sc">$</span>term<span class="sc">==</span><span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,i)<span class="sc">&amp;</span>(stepwsie_a<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.01</span>))))<span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>   stepwise_table_yearly[i,<span class="dv">2</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>((<span class="fu">length</span>( <span class="fu">which</span>(stepwsie_a<span class="sc">$</span>term<span class="sc">==</span><span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,i)<span class="sc">&amp;</span>(stepwsie_a<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.05</span>))))<span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>      stepwise_table_yearly[i<span class="sc">+</span><span class="dv">12</span>,<span class="dv">2</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>((<span class="fu">length</span>( <span class="fu">which</span>(stepwsie_a<span class="sc">$</span>term<span class="sc">==</span><span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,i)<span class="sc">&amp;</span>(stepwsie_a<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.05</span>))))<span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>      <span class="co">#后两列</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>    stepwise_table_yearly[i,<span class="dv">3</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>(<span class="fu">sum</span>(stepwise_cpi_0<span class="fl">.01</span>_yearly[<span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,i),])      <span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>    stepwise_table_yearly[i<span class="sc">+</span><span class="dv">12</span>,<span class="dv">3</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>(<span class="fu">sum</span>(stepwise_lag_0<span class="fl">.01</span>_yearly[<span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,i),])<span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>    stepwise_table_yearly[i,<span class="dv">4</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>(<span class="fu">sum</span>(stepwise_cpi_0<span class="fl">.05</span>_yearly[<span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,i),])<span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>    stepwise_table_yearly[i<span class="sc">+</span><span class="dv">12</span>,<span class="dv">4</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>(<span class="fu">sum</span>(stepwise_lag_0<span class="fl">.05</span>_yearly[<span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,i),])<span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div id="flextable-写入word" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> flextable 写入word</h2>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>ft1<span class="ot">&lt;-</span><span class="fu">flextable</span>(stepwise_table_yearly <span class="sc">%&gt;%</span> <span class="fu">rownames_to_column</span>(<span class="st">&quot;column name&quot;</span>))</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a><span class="fu">save_as_docx</span>(<span class="st">&quot;1.5   Table 2 Stepwise Summary Table&quot;</span> <span class="ot">=</span> ft1, <span class="at">path =</span> <span class="st">&quot;F:/R workspace/Modelling-UK-inflation-quarterly-/table2.docx&quot;</span>)</span></code></pre></div>
+<p><strong>验证是否和word的表相等</strong></p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stargazer</span>(slr.total[<span class="dv">2</span><span class="sc">:</span><span class="dv">7</span>],</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">star.char =</span> <span class="fu">c</span>(<span class="st">&quot;*&quot;</span>),</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">star.cutoffs =</span> <span class="fu">c</span>(<span class="fl">0.01</span>),</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">notes =</span> <span class="fu">c</span>(<span class="st">&quot; * p&lt;0.01; &quot;</span>),</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">omit =</span> <span class="fu">c</span>(<span class="st">&quot;time_Aug&quot;</span>,<span class="st">&quot;time_Dec&quot;</span>, <span class="st">&quot;time_Apr&quot;</span>, <span class="st">&quot;time_Jan&quot;</span>,<span class="st">&quot;time_Jul&quot;</span>,<span class="st">&quot;time_Jun&quot;</span> ,<span class="st">&quot;time_Mar&quot;</span>,<span class="st">&quot;time_May&quot;</span>,<span class="st">&quot;time_Nov&quot;</span>,<span class="st">&quot;time_Oct&quot;</span>,<span class="st">&quot;time_Sep&quot;</span>,</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>                   <span class="st">&quot;VAT1&quot;</span>,<span class="st">&quot;VAT2&quot;</span>,<span class="st">&quot;VAT3&quot;</span>,<span class="st">&quot;Recession&quot;</span>,<span class="st">&quot;Trend&quot;</span>,<span class="st">&#39;Constant&#39;</span>),</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>          </span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">dep.var.labels.include =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>          <span class="at">notes.append =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>          <span class="co"># order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),</span></span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>          <span class="at">report =</span> <span class="st">&quot;vc*&quot;</span>,</span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>          <span class="at">align =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>          <span class="at">header =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a>          <span class="at">df =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a>          <span class="at">digits =</span> <span class="dv">2</span>, <span class="at">single.row =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a>          <span class="at">model.numbers =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a>          <span class="at">column.labels =</span> <span class="fu">c</span>(<span class="fu">colnames</span>(COPY[<span class="dv">2</span><span class="sc">:</span><span class="dv">7</span>])),</span>
+<span id="cb51-18"><a href="#cb51-18" aria-hidden="true" tabindex="-1"></a>          <span class="at">summary =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb51-19"><a href="#cb51-19" aria-hidden="true" tabindex="-1"></a>          <span class="at">out =</span> <span class="st">&quot;F:/R workspace/Modelling-UK-inflation-quarterly-/Table 2 Stepwise Summary Table/1-1.html&quot;</span>,</span>
+<span id="cb51-20"><a href="#cb51-20" aria-hidden="true" tabindex="-1"></a>          <span class="at">flip =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb51-21"><a href="#cb51-21" aria-hidden="true" tabindex="-1"></a>          <span class="at">se =</span> <span class="cn">NULL</span>,<span class="at">type =</span> <span class="st">&quot;text&quot;</span></span>
+<span id="cb51-22"><a href="#cb51-22" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## 
+## ================================================================================================================
+##                                                         Dependent variable:                                     
+##                     --------------------------------------------------------------------------------------------
+##                     FOOD AND NON-ALCOHOLIC BEVERAGES  FOOD  BREAD and CEREALS  MEAT  FISH  MILK, CHEESE and EGGS
+## ----------------------------------------------------------------------------------------------------------------
+## lag1                             0.15*               -0.27*                   -0.32*              -0.33*        
+## lag12                             0.13                                                                          
+## lag8                                                 0.20*                                                      
+## lag11                                                -0.11                                                      
+## lag2                                                              0.21*       -0.20*               -0.14        
+## lag4                                                              -0.12                                         
+## CPI_lag1                                             0.63*        0.57*                                         
+## CPI_lag4                                              0.50        0.65*                                         
+## CPI_lag8                                                          0.44                                          
+## lag5                                                                                              -0.17*        
+## lag7                                                                           0.13                0.14*        
+## CPI_lag3                                                                       0.81                1.30         
+## CPI_lag5                                                                       0.80                             
+## lag9                                                                                 0.16*         0.15*        
+## ----------------------------------------------------------------------------------------------------------------
+## Observations                      324                 324          324         324    324           324         
+## R2                                0.25                0.32        0.24         0.22  0.11          0.22         
+## Adjusted R2                       0.21                0.27        0.19         0.17  0.06          0.16         
+## Residual Std. Error               0.62                0.70        0.76         1.29  0.83          2.15         
+## F Statistic                      5.74*               6.74*        4.52*       4.08*  2.21*         3.90*        
+## ================================================================================================================
+## Note:                                                                                                  * p&lt;0.01;</code></pre>
+</div>
+</div>
+<div id="table-3-summary-table-before-stepwise-quarterly-data" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> 1.6 Table 3 Summary table before stepwise (Quarterly data)</h1>
 </div>
 
 
