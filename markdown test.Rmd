@@ -27,6 +27,11 @@ library(lubridate)#extract cpi time to newdata(furniture48)
 library(dplyr) 
 library(tidyverse) 
 library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
 ```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
@@ -347,59 +352,143 @@ for (i in 1:12) {
 ```{r eval=FALSE, include=FALSE}
 a11111<-a[42:615,]#验证环节 循环产生的a1:a12和手算的是否相等.
 identical(a11111,a1)
-length(which(a11111$term=="lag1"&a1$p.value<0.01))
+length(which(a11111$term=="VAT1"))
 ```
 
 
 a1中lag1小于0.01的.a2中lag2小于0.01的.
 
-**我想要的是a1中的lag1-12且小于0.01的个数*weight[1].**
+**我想要的是a1中的lag1-12且小于0.01的个数×weight[1].**
 
-我能不能把a1:a12的lag1 先算了?
 
 这样就是[1]<-a1的lag1且小于0.01的*weight[1],[2]<-a2 lag1且小于0.01的个数*weight[2]
 
 尝试先后循环
 总共应该有多少个结果啊? a1[lag1:12] 12*12=144个
 
+
+首先生成一个12*12的dataframe, 行是lag1-12, 列是a1:a12 十二个部门.
+双循环,每个部门循环把lag1-lag12 循环一边存储在a_lag_0.01[,i]列里,然后再循环剩下11个部门.
+
+## a_lag.0.01
 ```{r}
 
-#a[1:12]lag 生成.
-for (i in 1:12) {
-  assign(paste0("a",i,"lag"),list())
-  
+a_lag.0.01<-data.frame( row.names =  paste0("lag",1:12),
+                   matrix(nrow=12, ncol=12, ) ) 
+
+colnames(a_lag.0.01)<-c(paste0("a",1:12))
+i<-1#i=a,j=lag
+while (i <=12) {
+  for (j in 1:12) {
+ a_lag.0.01 [j,i]  <-
+  length( which((get(paste0("a",i)))$term==paste0("lag",j)&(get(paste0("a",i)))$p.value<0.01)
+  )*weight[[i]]
+  }
+  i<-i+1
 }
-#j=a,i=lag
-for (j in 1:12) {
-  for (i in 1:12) {
-assign(
-  get(paste0("a",j,"lag")),
-         length(
-    which((get(paste0("a",j)))$term==paste0("lag",i) &(get(paste0("a",j)))$p.value<0.01)
-  )*weight[[j]])
+```
 
+a8全都是0. 证实了一下确实. 有在0.05显著的,但是没有在0.01显著的.
+```{r echo=FALSE}
+stargazer(regression[77:79],
+          star.cutoffs = c(0.05, 0.01),
+          
+          report = "vc*",
+          align=TRUE,           
+          header = FALSE,
+          model.numbers=FALSE,
+          column.labels = c(colnames(COPY[2:15])),
+          df=FALSE, 
+          digits=2, single.row = TRUE,
+          summary=FALSE,
+          se = NULL, type = "text")
+```
+## a_lag.0.05
+```{r}
+a_lag.0.05<-data.frame( row.names =  paste0("lag",1:12),
+                   matrix(nrow=12, ncol=12, ) ) 
 
+colnames(a_lag.0.05)<-c(paste0("a",1:12))
+i<-1#i=a,j=lag
+while (i <=12) {
+  for (j in 1:12) {
+ a_lag.0.05 [j,i]  <-
+  length( which((get(paste0("a",i)))$term==paste0("lag",j)&(get(paste0("a",i)))$p.value<0.05)
+  )*weight[[i]]
+  }
+  i<-i+1
 }
+```
+
+## a_cpi.0.01
+
+```{r}
+a_cpi.0.01<-data.frame( row.names =  paste0("CPI_lag",1:12),
+                   matrix(nrow=12, ncol=12, ) ) 
+
+colnames(a_cpi.0.01)<-c(paste0("a",1:12))
+i<-1#i=a,j=lag
+while (i <=12) {
+  for (j in 1:12) {
+ a_cpi.0.01 [j,i]  <-
+  length( which((get(paste0("a",i)))$term==paste0("CPI_lag",j)&(get(paste0("a",i)))$p.value<0.01)
+  )*weight[[i]]
+  }
+  i<-i+1
 }
-  
+```
 
-  #a1to12lag1[1]:a1 lag1 且a1<0.01的*weight[1]
-  #j[1]:a1 lag1且a1中小于0.01的*weight1
-  #j[2]:a1 lag2且a1中小于0.01的*weight2
-  #....j[12]:...
-  #back to first
-  #a1to12lag1[2]:a2 lag1 0.01*weight[2]
-  #j[2]:a2 lag小于0.01的个数*weight[2]
+## a_cpi.0.05
+```{r}
+a_cpi.0.05<-data.frame( row.names =  paste0("CPI_lag",1:12),
+                   matrix(nrow=12, ncol=12, ) ) 
 
-    
-  
+colnames(a_cpi.0.05)<-c(paste0("a",1:12))
+i<-1#i=a,j=lag
+while (i <=12) {
+  for (j in 1:12) {
+ a_cpi.0.05 [j,i]  <-
+  length( which((get(paste0("a",i)))$term==paste0("CPI_lag",j)&(get(paste0("a",i)))$p.value<0.05)
+  )*weight[[i]]
+  }
+  i<-i+1
+}
+```
+
+
+
+$$
+\frac{\text{部门}1\text{显著个数}*weight\left[ 1 \right] +.....+}{121}
+$$
+把a_cpi.0.05这四个表, 每行加起来/121 就是结果.
+一行一个结果,每个表有12行,共4个表,**4×12=48**个结果.
+首先生成存放结果的 24行×2列的dataframe
+
+
+```{r}
+sum(a_cpi.0.05["CPI_lag1",])/121*100
 
 ```
-### 选中a1:a12
-f%02d %02d好像是指前面可以有两个0.
+
 ```{r}
-features <- c(sprintf("a%01d", seq(1,12)))
-colnames(urc_training_norm) <- features
-alist<-list(get(paste0("a",1:12)))
+table1weight<-data.frame( matrix(nrow=24, ncol=2, )   )
+colnames(table1weight)<-c(0.01,0.05)
+rownames(table1weight)<-c(paste0("CPI_lag",1:12),paste0("lag",1:12))
+
+
+
+
+  for (i in 1:12) {
+    table1weight[i,1]<-percent(sum(a_cpi.0.01[paste0("CPI_lag",i),])      /121)
+    table1weight[i+12,1]<-percent(sum(a_lag.0.01[paste0("lag",i),])/121)
+    table1weight[i,2]<-percent(sum(a_cpi.0.05[paste0("CPI_lag",i),])/121)
+    table1weight[i+12,2]<-percent(sum(a_lag.0.05[paste0("lag",i),])/121)
+    
+  }
+kable(table1weight, caption = "Table 1")
+writeDoc(doc, file = "kable.docx")
+```
+
+
 ```
 

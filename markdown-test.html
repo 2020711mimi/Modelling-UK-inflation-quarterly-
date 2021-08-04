@@ -264,6 +264,10 @@ pre code {
 <li><a href="#rgression"><span class="toc-section-number">1.6</span> Rgression</a></li>
 <li><a href="#table-1-summary-table-before-stepwise-前两列"><span class="toc-section-number">1.7</span> Table 1 Summary table before stepwise 前两列</a></li>
 <li><a href="#后两列weight"><span class="toc-section-number">1.8</span> 后两列(Weight)</a></li>
+<li><a href="#a_lag.0.01"><span class="toc-section-number">1.9</span> a_lag.0.01</a></li>
+<li><a href="#a_lag.0.05"><span class="toc-section-number">1.10</span> a_lag.0.05</a></li>
+<li><a href="#a_cpi.0.01"><span class="toc-section-number">1.11</span> a_cpi.0.01</a></li>
+<li><a href="#a_cpi.0.05"><span class="toc-section-number">1.12</span> a_cpi.0.05</a></li>
 </ul></li>
 </ul>
 </div>
@@ -525,6 +529,285 @@ pre code {
 <p>第一个constant的位置,到下一个Trend-1的位置. 第一个部门是2:15, 开始的标志是第二个constant的位置(dend[1]),结束于第15个Trend的位置(dend[2]-1的trend). <strong>之所以不是直接开始于constant[dend[1]],结束于trend[dend[1]],是因为dend只是开始位置的集合(constant)而并不是结束的位置(trend).</strong></p>
 <p><em>如果constant[dend[1]]—trend[dend[1]],这代表第二个(dend[1]=2) constant的开始到第二个trend的结束.只是一个class.</em></p>
 <p><strong>如果constant[dend[1]]—trend[dend[2]],这代表第二个constant的开始到第16(dend[2]=16) 个trend的结束.我需要的是到第15个结束</strong></p>
+<p>a1中lag1小于0.01的.a2中lag2小于0.01的.</p>
+<p><strong>我想要的是a1中的lag1-12且小于0.01的个数×weight[1].</strong></p>
+<p>这样就是[1]&lt;-a1的lag1且小于0.01的<em>weight[1],[2]&lt;-a2 lag1且小于0.01的个数</em>weight[2]</p>
+<p>尝试先后循环 总共应该有多少个结果啊? a1[lag1:12] 12*12=144个</p>
+<p>首先生成一个12*12的dataframe, 行是lag1-12, 列是a1:a12 十二个部门. 双循环,每个部门循环把lag1-lag12 循环一边存储在a_lag_0.01[,i]列里,然后再循环剩下11个部门.</p>
+</div>
+<div id="a_lag.0.01" class="section level2" number="1.9">
+<h2><span class="header-section-number">1.9</span> a_lag.0.01</h2>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>a_lag.<span class="fl">0.01</span><span class="ot">&lt;-</span><span class="fu">data.frame</span>( <span class="at">row.names =</span>  <span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>),</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">matrix</span>(<span class="at">nrow=</span><span class="dv">12</span>, <span class="at">ncol=</span><span class="dv">12</span>, ) ) </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(a_lag.<span class="fl">0.01</span>)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">&quot;a&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>))</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>i<span class="ot">&lt;-</span><span class="dv">1</span><span class="co">#i=a,j=lag</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (i <span class="sc">&lt;=</span><span class="dv">12</span>) {</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a> a_lag.<span class="fl">0.01</span> [j,i]  <span class="ot">&lt;-</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">length</span>( <span class="fu">which</span>((<span class="fu">get</span>(<span class="fu">paste0</span>(<span class="st">&quot;a&quot;</span>,i)))<span class="sc">$</span>term<span class="sc">==</span><span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,j)<span class="sc">&amp;</span>(<span class="fu">get</span>(<span class="fu">paste0</span>(<span class="st">&quot;a&quot;</span>,i)))<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.01</span>)</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">*</span>weight[[i]]</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>  i<span class="ot">&lt;-</span>i<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>a8全都是0. 证实了一下确实. 有在0.05显著的,但是没有在0.01显著的.</p>
+<pre><code>## 
+## =============================================================================
+##                                        Dependent variable:                   
+##                     ---------------------------------------------------------
+##                                             COPY[, x]                        
+##                     FOOD AND NON-ALCOHOLIC BEVERAGES  FOOD  BREAD and CEREALS
+## -----------------------------------------------------------------------------
+## Constant                         -0.42               -1.66*       -0.39      
+## lag1                             0.002               -0.15*       0.01       
+## lag2                              0.08               -0.03        0.07       
+## lag3                              0.07               -0.01        0.06       
+## lag4                             -0.09               -0.04        -0.07      
+## lag5                             -0.06               -0.02        -0.06      
+## lag6                             -0.03               -0.04        -0.04      
+## lag7                              0.01               -0.04        0.04       
+## lag8                             -0.03               -0.05        -0.04      
+## lag9                             0.12*               0.003        0.13*      
+## lag10                             0.09               0.002        0.08       
+## lag11                            -0.06                0.06        -0.05      
+## lag12                            -0.03                0.08        -0.06      
+## CPI_lag1                         -0.16               -0.46        -0.15      
+## CPI_lag2                         -0.06                0.63        -0.12      
+## CPI_lag3                         0.49*                0.46        0.52*      
+## CPI_lag4                         -0.23                0.35        -0.25      
+## CPI_lag5                          0.38                0.30        0.41       
+## CPI_lag6                         -0.16                0.58        -0.20      
+## CPI_lag7                         -0.06               -0.88        -0.07      
+## CPI_lag8                          0.26                0.75        0.25       
+## CPI_lag9                         -0.13                0.70        -0.21      
+## CPI_lag10                        -0.02                0.89        -0.05      
+## CPI_lag11                         0.19               -0.27        0.27       
+## CPI_lag12                         0.04               -0.50        0.09       
+## time_Aug                         -0.04                0.22        -0.11      
+## time_Dec                          0.25                0.78        0.26       
+## time_Feb                          0.61               4.27**       0.40       
+## time_Jan                         -0.21                0.53        -0.24      
+## time_Jul                         -0.42                1.18        -0.51      
+## time_Jun                          0.35                0.61        0.39       
+## time_Mar                         -0.06               2.04*        -0.23      
+## time_May                         -0.27               2.74**       -0.39      
+## time_Nov                         -0.22                1.75        -0.31      
+## time_Oct                          0.12                1.39        0.05       
+## time_Sep                          0.24               2.28*        0.13       
+## VAT1                            -2.24**              -1.05       -2.35**     
+## VAT2                              0.88                0.10        0.98       
+## VAT3                              0.81               -0.02        0.94       
+## Recession                         0.15                0.35        0.14       
+## Trend                           0.002**              0.001       0.002**     
+## -----------------------------------------------------------------------------
+## Observations                      324                 324          324       
+## R2                                0.23                0.27        0.22       
+## Adjusted R2                       0.12                0.17        0.11       
+## Residual Std. Error               0.65                1.63        0.70       
+## F Statistic                      2.14**              2.63**      2.04**      
+## =============================================================================
+## Note:                                         *p&lt;0.05; **p&lt;0.01; ***p&lt;[0.***]</code></pre>
+</div>
+<div id="a_lag.0.05" class="section level2" number="1.10">
+<h2><span class="header-section-number">1.10</span> a_lag.0.05</h2>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>a_lag.<span class="fl">0.05</span><span class="ot">&lt;-</span><span class="fu">data.frame</span>( <span class="at">row.names =</span>  <span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>),</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">matrix</span>(<span class="at">nrow=</span><span class="dv">12</span>, <span class="at">ncol=</span><span class="dv">12</span>, ) ) </span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(a_lag.<span class="fl">0.05</span>)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">&quot;a&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>))</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>i<span class="ot">&lt;-</span><span class="dv">1</span><span class="co">#i=a,j=lag</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (i <span class="sc">&lt;=</span><span class="dv">12</span>) {</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a> a_lag.<span class="fl">0.05</span> [j,i]  <span class="ot">&lt;-</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">length</span>( <span class="fu">which</span>((<span class="fu">get</span>(<span class="fu">paste0</span>(<span class="st">&quot;a&quot;</span>,i)))<span class="sc">$</span>term<span class="sc">==</span><span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,j)<span class="sc">&amp;</span>(<span class="fu">get</span>(<span class="fu">paste0</span>(<span class="st">&quot;a&quot;</span>,i)))<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.05</span>)</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">*</span>weight[[i]]</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>  i<span class="ot">&lt;-</span>i<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="a_cpi.0.01" class="section level2" number="1.11">
+<h2><span class="header-section-number">1.11</span> a_cpi.0.01</h2>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>a_cpi.<span class="fl">0.01</span><span class="ot">&lt;-</span><span class="fu">data.frame</span>( <span class="at">row.names =</span>  <span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>),</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">matrix</span>(<span class="at">nrow=</span><span class="dv">12</span>, <span class="at">ncol=</span><span class="dv">12</span>, ) ) </span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(a_cpi.<span class="fl">0.01</span>)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">&quot;a&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>))</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>i<span class="ot">&lt;-</span><span class="dv">1</span><span class="co">#i=a,j=lag</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (i <span class="sc">&lt;=</span><span class="dv">12</span>) {</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a> a_cpi.<span class="fl">0.01</span> [j,i]  <span class="ot">&lt;-</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">length</span>( <span class="fu">which</span>((<span class="fu">get</span>(<span class="fu">paste0</span>(<span class="st">&quot;a&quot;</span>,i)))<span class="sc">$</span>term<span class="sc">==</span><span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,j)<span class="sc">&amp;</span>(<span class="fu">get</span>(<span class="fu">paste0</span>(<span class="st">&quot;a&quot;</span>,i)))<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.01</span>)</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">*</span>weight[[i]]</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>  i<span class="ot">&lt;-</span>i<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="a_cpi.0.05" class="section level2" number="1.12">
+<h2><span class="header-section-number">1.12</span> a_cpi.0.05</h2>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>a_cpi.<span class="fl">0.05</span><span class="ot">&lt;-</span><span class="fu">data.frame</span>( <span class="at">row.names =</span>  <span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>),</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">matrix</span>(<span class="at">nrow=</span><span class="dv">12</span>, <span class="at">ncol=</span><span class="dv">12</span>, ) ) </span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(a_cpi.<span class="fl">0.05</span>)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">&quot;a&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>))</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>i<span class="ot">&lt;-</span><span class="dv">1</span><span class="co">#i=a,j=lag</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (i <span class="sc">&lt;=</span><span class="dv">12</span>) {</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a> a_cpi.<span class="fl">0.05</span> [j,i]  <span class="ot">&lt;-</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">length</span>( <span class="fu">which</span>((<span class="fu">get</span>(<span class="fu">paste0</span>(<span class="st">&quot;a&quot;</span>,i)))<span class="sc">$</span>term<span class="sc">==</span><span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,j)<span class="sc">&amp;</span>(<span class="fu">get</span>(<span class="fu">paste0</span>(<span class="st">&quot;a&quot;</span>,i)))<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.05</span>)</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">*</span>weight[[i]]</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>  i<span class="ot">&lt;-</span>i<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><span class="math display">\[
+\frac{\text{部门}1\text{显著个数}*weight\left[ 1 \right] +.....+}{121}
+\]</span> 把a_cpi.0.05这四个表, 每行加起来/121 就是结果. 一行一个结果,每个表有12行,共4个表,<strong>4×12=48</strong>个结果. 首先生成存放结果的 24行×2列的dataframe</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(a_cpi.<span class="fl">0.05</span>[<span class="st">&quot;CPI_lag1&quot;</span>,])<span class="sc">/</span><span class="dv">121</span><span class="sc">*</span><span class="dv">100</span></span></code></pre></div>
+<pre><code>## [1] 1.250413</code></pre>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>table1weight<span class="ot">&lt;-</span><span class="fu">data.frame</span>( <span class="fu">matrix</span>(<span class="at">nrow=</span><span class="dv">24</span>, <span class="at">ncol=</span><span class="dv">2</span>, )   )</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(table1weight)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="fl">0.01</span>,<span class="fl">0.05</span>)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(table1weight)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>),<span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>))</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    table1weight[i,<span class="dv">1</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>(<span class="fu">sum</span>(a_cpi.<span class="fl">0.01</span>[<span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,i),])      <span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    table1weight[i<span class="sc">+</span><span class="dv">12</span>,<span class="dv">1</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>(<span class="fu">sum</span>(a_lag.<span class="fl">0.01</span>[<span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,i),])<span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    table1weight[i,<span class="dv">2</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>(<span class="fu">sum</span>(a_cpi.<span class="fl">0.05</span>[<span class="fu">paste0</span>(<span class="st">&quot;CPI_lag&quot;</span>,i),])<span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>    table1weight[i<span class="sc">+</span><span class="dv">12</span>,<span class="dv">2</span>]<span class="ot">&lt;-</span><span class="fu">percent</span>(<span class="fu">sum</span>(a_lag.<span class="fl">0.05</span>[<span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>,i),])<span class="sc">/</span><span class="dv">121</span>)</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(table1weight, <span class="at">caption =</span> <span class="st">&quot;Table 1&quot;</span>)</span></code></pre></div>
+<table>
+<caption>Table 1</caption>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="left">0.01</th>
+<th align="left">0.05</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">CPI_lag1</td>
+<td align="left">0.51%</td>
+<td align="left">1.25%</td>
+</tr>
+<tr class="even">
+<td align="left">CPI_lag2</td>
+<td align="left">0.56%</td>
+<td align="left">1.53%</td>
+</tr>
+<tr class="odd">
+<td align="left">CPI_lag3</td>
+<td align="left">0.23%</td>
+<td align="left">0.97%</td>
+</tr>
+<tr class="even">
+<td align="left">CPI_lag4</td>
+<td align="left">0.74%</td>
+<td align="left">1.01%</td>
+</tr>
+<tr class="odd">
+<td align="left">CPI_lag5</td>
+<td align="left">0.25%</td>
+<td align="left">0.70%</td>
+</tr>
+<tr class="even">
+<td align="left">CPI_lag6</td>
+<td align="left">0.52%</td>
+<td align="left">1.52%</td>
+</tr>
+<tr class="odd">
+<td align="left">CPI_lag7</td>
+<td align="left">0.38%</td>
+<td align="left">0.97%</td>
+</tr>
+<tr class="even">
+<td align="left">CPI_lag8</td>
+<td align="left">0.09%</td>
+<td align="left">0.51%</td>
+</tr>
+<tr class="odd">
+<td align="left">CPI_lag9</td>
+<td align="left">0.51%</td>
+<td align="left">0.98%</td>
+</tr>
+<tr class="even">
+<td align="left">CPI_lag10</td>
+<td align="left">0.25%</td>
+<td align="left">0.72%</td>
+</tr>
+<tr class="odd">
+<td align="left">CPI_lag11</td>
+<td align="left">0.00%</td>
+<td align="left">0.18%</td>
+</tr>
+<tr class="even">
+<td align="left">CPI_lag12</td>
+<td align="left">0.13%</td>
+<td align="left">0.32%</td>
+</tr>
+<tr class="odd">
+<td align="left">lag1</td>
+<td align="left">5.28%</td>
+<td align="left">6.23%</td>
+</tr>
+<tr class="even">
+<td align="left">lag2</td>
+<td align="left">2.24%</td>
+<td align="left">3.38%</td>
+</tr>
+<tr class="odd">
+<td align="left">lag3</td>
+<td align="left">1.74%</td>
+<td align="left">3.05%</td>
+</tr>
+<tr class="even">
+<td align="left">lag4</td>
+<td align="left">1.08%</td>
+<td align="left">2.09%</td>
+</tr>
+<tr class="odd">
+<td align="left">lag5</td>
+<td align="left">0.70%</td>
+<td align="left">1.33%</td>
+</tr>
+<tr class="even">
+<td align="left">lag6</td>
+<td align="left">1.70%</td>
+<td align="left">2.78%</td>
+</tr>
+<tr class="odd">
+<td align="left">lag7</td>
+<td align="left">0.47%</td>
+<td align="left">1.29%</td>
+</tr>
+<tr class="even">
+<td align="left">lag8</td>
+<td align="left">0.65%</td>
+<td align="left">1.58%</td>
+</tr>
+<tr class="odd">
+<td align="left">lag9</td>
+<td align="left">0.68%</td>
+<td align="left">2.20%</td>
+</tr>
+<tr class="even">
+<td align="left">lag10</td>
+<td align="left">0.70%</td>
+<td align="left">1.67%</td>
+</tr>
+<tr class="odd">
+<td align="left">lag11</td>
+<td align="left">0.92%</td>
+<td align="left">1.53%</td>
+</tr>
+<tr class="even">
+<td align="left">lag12</td>
+<td align="left">3.94%</td>
+<td align="left">5.86%</td>
+</tr>
+</tbody>
+</table>
+<p>```</p>
 </div>
 </div>
 
