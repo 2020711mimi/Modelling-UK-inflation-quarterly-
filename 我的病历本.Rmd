@@ -245,6 +245,7 @@ percent <- function(x, digits = 2, format = "f", ...) {
   paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
 }
 percent(1)
+
 ```
 ##	Table 1 Summary table before stepwise 前两列
 <center>
@@ -287,6 +288,9 @@ for (i in 1:12) {
 例如,01部门属于2-15.
 
 ```{r}
+percent <- function(x, digits = 2, format = "f", ...) {
+  paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
+}
 # Weight ------------------------------------------------------------------
 weight<- list(0.109,	0.042,	0.063,	0.115,	0.067,	0.022,	0.152,	0.023,	0.152,	0.019,	0.137,	0.099
               
@@ -815,9 +819,18 @@ stargazer(slr.total[2:7],
           se = NULL,type = "text"
 )
 ```
+***
+
 
 
 # Table 3  Summary table before stepwise (Quarterly data)
+
+
+```{r}
+rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+
 ```{r}
 cpi <- read_excel("correct quarter cpi.xlsx")#108
 cols.num <- c(colnames(cpi))#cols.列名
@@ -899,4 +912,171 @@ CPI_lag4 <- (newdata$"CPI ALL ITEMS5")
 
 COPY<-COPY[-1:-4,]
 ```
+## Regression
+```{r}
+regression <- lapply(1:122, function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+lag4[,x]+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+ quarter1+quarter3+quarter4+VAT1+VAT2+VAT3+Recession+Trend)
+)
+for (i in 1:122) {
+  names(regression[[i]]$coefficients)<-c('Constant','lag1','lag2',"lag3","lag4",
+                                         "CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4",
+                                         "quarter1","quarter3","quarter4",
+                                         "VAT1","VAT2","VAT3","Recession","Trend")
+}
+```
 
+```{r}
+regression <- lapply(1:122, function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+lag4[,x]+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+ quarter1+quarter3+quarter4+VAT1+VAT2+VAT3+Recession+Trend)
+)
+for (i in 1:122) {
+  names(regression[[i]]$coefficients)<-c('Constant','lag1','lag2',"lag3","lag4",
+                                         "CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4",
+                                         "quarter1","quarter3","quarter4",
+                                         "VAT1","VAT2","VAT3","Recession","Trend")
+}
+```
+
+可以重复了
+下面是重复yearly 部分
+```{r}
+
+percent <- function(x, digits = 2, format = "f", ...) {
+  paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
+}
+# Weight ------------------------------------------------------------------
+weight<- list(0.109,	0.042,	0.063,	0.115,	0.067,	0.022,	0.152,	0.023,	0.152,	0.019,	0.137,	0.099
+              
+)
+Reduce("+",weight)
+```
+用lapply 把regression 这个list 化成长数据框类型.(多行,5列:term,estimate,std,statitc, pvalue)
+```{r}
+
+tidy_mods <- lapply(regression, tidy)
+
+for (i in 1:length(tidy_mods)) 
+  tidy_mods[[i]]$mod <- names(tidy_mods[i])
+a <- do.call(rbind.data.frame, tidy_mods)
+str(a)
+```
+
+```{r}
+dend<-c(2,16,22,28,41,54,62,77,80,102,103,108,122)#这只是每个部门开始的位置
+for (i in 1:12) {
+  assign(paste0("a",i),
+         a[(which(a$term=="Constant")[dend[i]]):(which(a$term=="Trend")[dend[i+1]-1]),])
+}
+```
+### a_lag.0.01
+```{r}
+
+a_lag.0.01<-data.frame( row.names =  paste0("lag",1:12),
+                   matrix(nrow=12, ncol=12, ) ) 
+
+colnames(a_lag.0.01)<-c(paste0("a",1:12))
+i<-1#i=a,j=lag
+while (i <=12) {
+  for (j in 1:12) {
+ a_lag.0.01 [j,i]  <-
+  length( which((get(paste0("a",i)))$term==paste0("lag",j)&(get(paste0("a",i)))$p.value<0.01)
+  )*weight[[i]]
+  }
+  i<-i+1
+}
+```
+### a_lag.0.05
+```{r}
+a_lag.0.05<-data.frame( row.names =  paste0("lag",1:12),
+                   matrix(nrow=12, ncol=12, ) ) 
+
+colnames(a_lag.0.05)<-c(paste0("a",1:12))
+i<-1#i=a,j=lag
+while (i <=12) {
+  for (j in 1:12) {
+ a_lag.0.05 [j,i]  <-
+  length( which((get(paste0("a",i)))$term==paste0("lag",j)&(get(paste0("a",i)))$p.value<0.05)
+  )*weight[[i]]
+  }
+  i<-i+1
+}
+```
+### a_cpi.0.01
+
+```{r}
+a_cpi.0.01<-data.frame( row.names =  paste0("CPI_lag",1:12),
+                   matrix(nrow=12, ncol=12, ) ) 
+
+colnames(a_cpi.0.01)<-c(paste0("a",1:12))
+i<-1#i=a,j=lag
+while (i <=12) {
+  for (j in 1:12) {
+ a_cpi.0.01 [j,i]  <-
+  length( which((get(paste0("a",i)))$term==paste0("CPI_lag",j)&(get(paste0("a",i)))$p.value<0.01)
+  )*weight[[i]]
+  }
+  i<-i+1
+}
+```
+### a_cpi.0.05
+```{r}
+a_cpi.0.05<-data.frame( row.names =  paste0("CPI_lag",1:12),
+                   matrix(nrow=12, ncol=12, ) ) 
+
+colnames(a_cpi.0.05)<-c(paste0("a",1:12))
+i<-1#i=a,j=lag
+while (i <=12) {
+  for (j in 1:12) {
+ a_cpi.0.05 [j,i]  <-
+  length( which((get(paste0("a",i)))$term==paste0("CPI_lag",j)&(get(paste0("a",i)))$p.value<0.05)
+  )*weight[[i]]
+  }
+  i<-i+1
+}
+```
+
+# 所有table3的结果都写入,这次要生成8*4的dataframe
+```{r}
+table3Quarterlydata<-data.frame( matrix(nrow=8, ncol=4, )   )
+colnames(table3Quarterlydata)<-c("p<0.01","p<0.05","p<0.01(Weight)","p<0.05(Weight)")
+rownames(table3Quarterlydata)<-c(paste0("CPI_lag",1:4),paste0("lag",1:4))
+```
+写入结果
+一个没有cpi的a dataframe,删除前41行
+```{r}
+nocpi<-a[-c(1:41),]
+```
+
+```{r}
+for (i in 1:4) {#前两列
+  table3Quarterlydata[i,1]<-percent((length( which(nocpi$term==paste0("CPI_lag",i)&(nocpi$p.value<0.01))))/121)
+   table3Quarterlydata[i+4,1]<-percent((length( which(nocpi$term==paste0("lag",i)&(nocpi$p.value<0.01))))/121)
+   table3Quarterlydata[i,2]<-percent((length( which(nocpi$term==paste0("CPI_lag",i)&(nocpi$p.value<0.05))))/121)
+      table3Quarterlydata[i+4,2]<-percent((length( which(nocpi$term==paste0("lag",i)&(nocpi$p.value<0.05))))/121)
+      #后两列
+    table3Quarterlydata[i,3]<-percent(sum(a_cpi.0.01[paste0("CPI_lag",i),])      /121)
+    table3Quarterlydata[i+4,3]<-percent(sum(a_lag.0.01[paste0("lag",i),])/121)
+    table3Quarterlydata[i,4]<-percent(sum(a_cpi.0.05[paste0("CPI_lag",i),])/121)
+    table3Quarterlydata[i+4,4]<-percent(sum(a_lag.0.05[paste0("lag",i),])/121)
+    
+}
+
+
+
+```
+
+flextable 写入word
+```{r}
+
+ft1<-flextable(table3Quarterlydata %>% rownames_to_column("column name"))
+
+
+
+
+save_as_docx("Summary table before stepwise (Quarterly data)" = ft1, path = "F:/R workspace/Modelling-UK-inflation-quarterly-/table3.docx")
+
+
+
+
+```
+
+
+***
