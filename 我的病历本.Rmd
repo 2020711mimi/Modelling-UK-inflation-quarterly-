@@ -825,17 +825,18 @@ stargazer(slr.total[2:7],
 ```{r}
 CPI_ <- reg.model[[1]]
 slr.cpi <- model.select(CPI_,keep = keep.dummies,sig = 0.05,verbose = F)
+names(slr.cpi$coefficients)[2:3]<-c("lag1","lag2")
 
 #替换名称
 
-slr.cpi$coefficients
+
 
 
 stargazer(CPI_, slr.cpi,
           star.char = c("*"), 
           star.cutoffs = c(0.05, 0.01),
           notes = c(" * p<0.05; ** p<0.01; "),
-          omit = c("time_Aug","time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,
+          omit = c("time_Aug","time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Apr",
                    "time_Mar","time_May","time_Nov","time_Oct","time_Sep", "VAT1","VAT2",
                    "VAT3","Recession","Trend",'Constant'), 
           dep.var.labels.include = FALSE, 
@@ -846,6 +847,20 @@ stargazer(CPI_, slr.cpi,
  out = "F:/R workspace/Modelling-UK-inflation-quarterly-/CPI Summary Table.html",          flip = FALSE, se = NULL, type = "html" )
 
 ```
+```{r}
+stargazer( slr.cpi,
+          star.char = c("*"), 
+          star.cutoffs = c(0.05, 0.01),
+          notes = c(" * p<0.05; ** p<0.01; "),
+
+          dep.var.labels.include = FALSE, 
+          notes.append = FALSE, # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20), 
+          report = "vc*", align = TRUE, header = FALSE, df = FALSE, digits = 2, single.row = TRUE,
+          model.numbers = FALSE, column.labels = c("CPI","CPI(Stepwise)"), 
+          summary = FALSE, 
+          flip = FALSE, se = NULL, type = "text" )
+```
+
 
 
 ***
