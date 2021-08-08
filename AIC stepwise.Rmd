@@ -1,0 +1,67 @@
+---
+title: "AIC stepwise"
+author: "Yiyi"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 3
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+ rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+## Packages
+```{r Library, include=FALSE}
+library(readxl)
+library(data.table)
+library(lubridate)#extract cpi time to newdata(furniture48)
+library(dplyr) 
+library(tidyverse) 
+library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
+library(dplyr)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+Sys.setlocale("LC_TIME","English")
+
+cpi <- read_excel("cpi data/cpi+division+group.xlsx")
+
+
+setDF(cpi)#convert to 'data.frame'
+
+#
+cols.num <- c(colnames(cpi))
+cpi[cols.num] <- sapply(cpi[cols.num],as.numeric)
+#sapply(cpi,class)
+
+cpi <- as.data.table(cpi)
+colnames(cpi) = gsub("&", "and", colnames(cpi))
+#class(cpi$`REPAIR OF HOUSEHOLD APPLIANCES1`)
+COPY<-copy(cpi)
+colnames(COPY)[!complete.cases(t(COPY))][1]#显示有na的部门,列
+na_col<-vector()
+for (i in 1:length(colnames(COPY)[!complete.cases(t(COPY))])) {
+   na_col[i]<- ((which(colnames(COPY)==colnames(COPY)[!complete.cases(t(COPY))][i])))
+}
+na_col有na的列名的位置
+not_any_na <- function(x) all(!is.na(x))#把年限不够缺失的部门删掉
+COPY<-COPY %>% select(where(not_any_na))
+
+```
+
+
