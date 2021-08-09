@@ -51,17 +51,258 @@ cpi[cols.num] <- sapply(cpi[cols.num],as.numeric)
 
 cpi <- as.data.table(cpi)
 colnames(cpi) = gsub("&", "and", colnames(cpi))
-#class(cpi$`REPAIR OF HOUSEHOLD APPLIANCES1`)
+
 COPY<-copy(cpi)
 colnames(COPY)[!complete.cases(t(COPY))][1]#显示有na的部门,列
 na_col<-vector()
 for (i in 1:length(colnames(COPY)[!complete.cases(t(COPY))])) {
    na_col[i]<- ((which(colnames(COPY)==colnames(COPY)[!complete.cases(t(COPY))][i])))
 }
-na_col有na的列名的位置
+```
+**新的CoPy是包含cpi的**
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+#na_col有na的列名的位置
+na_col<-na_col[1:(length(na_col)-2)]
+length(na_col)
+```
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
 not_any_na <- function(x) all(!is.na(x))#把年限不够缺失的部门删掉
 COPY<-COPY %>% select(where(not_any_na))
+cpi<-COPY
 
+```
+
+
+```{r}
+tracemem(COPY)==tracemem(cpi)
+
+
+Data_A = as.data.table (cpi)
+#
+
+
+
+#
+Varnames <- copy(names(Data_A))
+Data_A[, (names(Data_A)) := lapply(.SD, as.numeric)][,
+                                                     rn := .I]
+melted <- melt(Data_A, id.vars="rn")[,
+                                     (paste0("lag_", 0:12)) := shift(value, 0:12, type="lag"),
+                                     by=variable][, 
+                                                  value:=NULL][]
+res <- dcast.data.table(melt(melted, id.vars=c("rn", "variable"), variable.name="lag"),
+                        rn ~ variable + lag, sum)
+
+#view results
+res[, ncol(res), with=FALSE]
+# lagged variable generation ----------------------------------------------
+
+
+cpi <- cpi[, unlist(lapply(.SD, shift, n = 0:12), recursive = FALSE)]#lags generation
+
+
+# Monthly Dummies ---------------------------------------------------------
+
+
+cpi$time <- seq.Date(from = as.Date("1988/01/01",format = "%Y/%m/%d"), by = "month", length.out = 387)
+cpi$time <- format(cpi$time, format = "%b")
+Sys.setlocale("LC_TIME","English")
+cpi <- fastDummies::dummy_cols(cpi, select_columns = "time", remove_most_frequent_dummy = TRUE,
+)
+cpi$time1 <- seq.Date(from = as.Date("1988/01/01",format = "%Y/%m/%d"), by = "month", length.out = 387)
+#
+
+
+
+# Extract time from 1993-2019 ---------------------------------------------
+
+
+
+newdata <- with(cpi, cpi[(time1) >= "1993-01-01" & (time1) <= "2019-12-01", ])#start from 93.1
+Trend <- seq_along(newdata$time1)
+#sapply(newdata, class)
+
+
+
+# deal with copy ----------------------------------------------------------
+
+
+COPY$time1 <- seq.Date(from = as.Date("1988/01/01",format = "%Y/%m/%d"), by = "month", length.out = 387)
+COPY <- with(COPY, COPY[(time1) >= "1993-01-01" & (time1) <= "2019-12-01", ])
+COPY = subset(COPY, select = -c(time1) )
+#lag
+```
+
+lag 是2:13 代表1:12. newdata里的1代表的是原数据.
+首先把2:13 存储起来, 用paste0(2:13,加上"$")用来匹配以2:13数字结尾的列? 
+
+
+
+
+
+
+
+## Lag and VAT
+```{r}
+old13<-c(2:13)
+for (i in 1:12) {
+
+  assign(paste0("lag",i),select(newdata,ends_with(paste0(old13[i]))))
+
+}
+lag1 <- lag1 %>% select(-contains("12"))
+lag2 <- lag2 %>% select(-contains("13"))
+VAT1 <- as.numeric(newdata$`time1` == "2008-12-01")
+VAT2 <- as.numeric(newdata$`time1` == "2010-01-01")
+VAT3 <- as.numeric(newdata$`time1` == "2011-01-01")
+Recession <- as.numeric(newdata$`time1` >= "2008-04-01" & newdata$`time1`<= "2009-06-01")
+```
+## Monthly dummies variable position
+
+```{r  MONTYHLY DUMMIES }
+monthname<-c("time_Apr","time_Aug", "time_Dec",  "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep")
+month_dummies_position<-vector()
+for (i in 1:length(monthname)) {
+  month_dummies_position[i]<-
+ which(colnames(newdata)==monthname[i])
+
+}
+```
+
+## Create time_Apr etc.
+the correct version. 首先把月度虚拟变量存储到cpilag 里. 然后用同一迭代变量 送到各自的time_下.
+**注意, 双迭代变量还未完全掌握, i 和j 一起用 必出错**
+```{r   }
+monthdummies<-newdata[,..monthname]
+#monthdummies<-newdata[,1991:2y001]
+
+  for (i in 1:11) {
+  assign(colnames(monthdummies)[i],as.numeric(unlist(monthdummies[[i]]))  )
+  }
+
+
+```
+## CPI LDV variables position
+
+```{r simply lag and cpi}
+
+lag.list <- mget(paste0("lag", 1:12))
+
+
+for (i in 1:12) {
+  assign(paste0("lag",i),as.data.frame(lag.list[[i]]))
+}
+
+COPY <- as.data.frame(COPY)
+
+
+
+# CPI-LAGS ----------------------------------------------------------------
+cpi.list<-c(paste0("CPI ALL ITEMS",2:13))
+
+for (i in 1:length(cpi.list)) {
+  print(which(colnames(newdata)==cpi.list[i]))
+  
+}   
+cpilag<-newdata[,2:13]
+for (i in 1:12) {
+
+    
+ 
+  assign(paste0("CPI_lag",i),as.numeric(unlist(cpilag[,..i])))
+  
+}
+
+
+```
+
+## Rgression
+
+```{r model}
+# Regression Equation -----------------------------------------------------
+
+
+reg.model <- lapply(1:length(COPY), function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+lag4[,x]+
+                                            lag5[,x]+lag6[,x]+lag7[,x]+lag8[,x]+lag9[,x]+
+                                            lag10[,x]+lag11[,x]+lag12[,x]+ time_Aug + 
+                                            time_Dec+ time_Apr+ time_Jan+time_Jul+time_Jun +
+                                            time_Mar+time_May+time_Nov+time_Oct+time_Sep+VAT1+VAT2+VAT3+Recession+Trend)
+)
+
+for (i in 1:length(COPY)) {
+  names(reg.model[[i]]$coefficients)<-c('Constant','lag1','lag2',"lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12",
+                                        "time_Aug" , 
+                                        "time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Mar",
+                                        "time_May","time_Nov","time_Oct","time_Sep","VAT1","VAT2","VAT3","Recession","Trend")
+}
+
+regression <- lapply(1:length(COPY), function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+lag4[,x]+lag5[,x]+lag6[,x]+lag7[,x]+
+                                             lag8[,x]+lag9[,x]+lag10[,x]+lag11[,x]+lag12[,x]+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+CPI_lag5+CPI_lag6+CPI_lag7+
+                                             CPI_lag8+CPI_lag9+
+                                             CPI_lag10+CPI_lag11+CPI_lag12+ time_Aug + 
+                                             time_Dec+ time_Apr+ time_Jan+time_Jul+time_Jun +time_Mar+
+                                             time_May+time_Nov+time_Oct+time_Sep+VAT1+VAT2+VAT3+Recession+Trend)
+)
+for (i in 1:length(COPY)) {
+  names(regression[[i]]$coefficients)<-c('Constant','lag1','lag2',"lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12",
+                                         "CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7","CPI_lag8","CPI_lag9",
+                                         "CPI_lag10","CPI_lag11","CPI_lag12","time_Aug" , 
+                                         "time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Mar",
+                                         "time_May","time_Nov","time_Oct","time_Sep","VAT1","VAT2","VAT3","Recession","Trend")
+}
+
+
+```
+
+## backward 过程.
+```{r}
+
+
+percent <- function(x, digits = 2, format = "f", ...) {
+  paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
+}
+# Weight ------------------------------------------------------------------
+weight<- list(0.109,	0.042,	0.063,	0.115,	0.067,	0.022,	0.152,	0.023,	0.152,	0.019,	0.137,	0.099
+              
+)
+Reduce("+",weight)
+```
+```{r}
+
+tidy_mods <- lapply(regression, tidy)
+
+for (i in 1:length(tidy_mods)) 
+  tidy_mods[[i]]$mod <- names(tidy_mods[i])
+a <- do.call(rbind.data.frame, tidy_mods)
+str(a)
+```
+
+**backward == slr.total**
+```{r}
+backward<-list()
+for (i in 1: length(regression)) {
+    backward[[i]] <- step(regression[[i]], direction='backward', scope=formula(regression[[i]]), trace=0)
+}
+```
+
+```{r}
+backward$anova
+  backward$coefficients
+stargazer(backward,
+          star.cutoffs = c(0.05, 0.01),
+          
+          report = "vc*",
+          align=TRUE,           
+          header = FALSE,
+          model.numbers=FALSE,
+          column.labels = c(colnames(COPY[12])),
+          df=FALSE, 
+          digits=2, single.row = TRUE,
+          summary=FALSE,
+          se = NULL, type = "text")
 ```
 
 

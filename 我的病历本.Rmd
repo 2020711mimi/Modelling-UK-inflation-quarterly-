@@ -526,54 +526,7 @@ save_as_docx("Summary table before stepwise" = ft1, path = "F:/R workspace/Model
 
 
 ***************
-#test stepwise
 
-```{r}
-backward <- lapply(1:122, function(i) step(regression[[i]], direction='backward', scope=formula(regression[[i]]), trace=0)
-)
-backward<-list()#不是324的运行不了 有些部门数据缺失
-colnames(COPY)[!complete.cases(t(COPY))][1]#显示有na的列
-for (i in 1:length(colnames(COPY)[!complete.cases(t(COPY))])) {
-    print(which(colnames(COPY)==colnames(COPY)[!complete.cases(t(COPY))][i]))
-}
-
-which(colnames(COPY)[!complete.cases(t(COPY))])
-not_any_na <- function(x) all(!is.na(x))
-COPY<-COPY %>% select(where(not_any_na))
-which(co)
-for (i in 1: length(regression)) {
-    backward <- step(regression[[i]], direction='backward', scope=formula(regression[[i]]), trace=0)
-}
-
-backward$anova
-  backward$coefficients
-stargazer(backward,
-          star.cutoffs = c(0.05, 0.01),
-          
-          report = "vc*",
-          align=TRUE,           
-          header = FALSE,
-          model.numbers=FALSE,
-          column.labels = c(colnames(COPY[12])),
-          df=FALSE, 
-          digits=2, single.row = TRUE,
-          summary=FALSE,
-          se = NULL, type = "text")
-```
-```{r}
-stargazer(regression[[12]],
-          star.cutoffs = c(0.05, 0.01),
-          
-          report = "vc*",
-          align=TRUE,           
-          header = FALSE,
-          model.numbers=FALSE,
-          column.labels = c(colnames(COPY[12])),
-          df=FALSE, 
-          digits=2, single.row = TRUE,
-          summary=FALSE,
-          se = NULL, type = "text")
-```
 
 # Table 2 Stepwise Summary Table
 
