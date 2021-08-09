@@ -289,20 +289,69 @@ for (i in 1: length(regression)) {
 ```
 
 ```{r}
-backward$anova
-  backward$coefficients
-stargazer(backward,
+stargazer(backward[2:5],
+          star.char = c("*"), 
           star.cutoffs = c(0.05, 0.01),
-          
-          report = "vc*",
-          align=TRUE,           
-          header = FALSE,
-          model.numbers=FALSE,
-          column.labels = c(colnames(COPY[12])),
-          df=FALSE, 
-          digits=2, single.row = TRUE,
-          summary=FALSE,
-          se = NULL, type = "text")
+          notes = c(" * p<0.05; ** p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,
+                   "time_Mar","time_May","time_Nov","time_Oct","time_Sep", "VAT1","VAT2",
+                   "VAT3","Recession","Trend",'Constant'), 
+          omit= backward[[1]]$
+          dep.var.labels.include = FALSE, 
+          notes.append = FALSE, # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20), 
+          report = "vc*", align = TRUE, header = FALSE, df = FALSE, digits = 2, single.row = TRUE,
+          model.numbers = FALSE, 
+          summary = FALSE,  flip = FALSE, se = NULL, type = "text" )
 ```
 
+```{r}
+names((summary(backward[[i]])$coeff[-1,4])<0.05)
+stargazer(backward[2],
+          star.char = c("*"), 
+          star.cutoffs = c(0.05, 0.01),
+          notes = c(" * p<0.05; ** p<0.01; "),
+          omit =as.character(c(summary(backward[[i]])$coeff[-1,4]<0.05)) , 
+          dep.var.labels.include = FALSE, 
+          notes.append = FALSE, # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20), 
+          report = "vc*", align = TRUE, header = FALSE, df = FALSE, digits = 2, single.row = TRUE,
+          model.numbers = FALSE, 
+          summary = FALSE,  flip = FALSE, se = NULL, type = "text" )
+```
+
+
+
+```{r}
+for (i in 1:length(backward)){
+   max_coef[i]<-length(summary(backward[[i]])$coefficients[-1,4])  
+  
+  
+
+  
+}
+for (i in 1:length(regression)){
+   max_coef[i]<-length(summary(regression[[i]])$coefficients[-1,4])  
+  
+  
+
+  
+}
+max(max_coef)
+#12+12+1+11+3+2=41一共41个变量
+names(summary(backward[[2]])$coefficients[-1,4]<0.05)
+```
+
+```{r}
+#x is a 10 x 3 matrix
+x = matrix(rnorm(3*10), ncol=3)
+y = rnorm(10)
+res = glm(y~x)
+#ignore the intercept pval
+summary(res)$coeff[1,4] < 0.05
+names((summary(backward[[2]])$coeff[1,4] < 0.05))
+names(which((summary(backward[[2]])$coeff[-1,4] < 0.05)==TRUE))
+```
+哈哈哈哈找到怎么删除p值小于0.05的coefficients
+```{r}
+names(which((summary(backward[[2]])$coeff[-1,4] < 0.05)==TRUE))
+```
 
