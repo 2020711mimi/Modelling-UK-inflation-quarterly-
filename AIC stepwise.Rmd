@@ -34,6 +34,9 @@ library(officer)
 library(flextable)
 library(magrittr)
 library(dplyr)
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
 ```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
@@ -53,6 +56,7 @@ cpi <- as.data.table(cpi)
 colnames(cpi) = gsub("&", "and", colnames(cpi))
 
 COPY<-copy(cpi)
+col_name<-colnames(COPY)
 colnames(COPY)[!complete.cases(t(COPY))][1]#显示有na的部门,列
 na_col<-vector()
 for (i in 1:length(colnames(COPY)[!complete.cases(t(COPY))])) {
@@ -60,9 +64,10 @@ for (i in 1:length(colnames(COPY)[!complete.cases(t(COPY))])) {
 }
 ```
 **新的CoPy是包含cpi的**
+## na_col有na的列名的位置
 
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
-#na_col有na的列名的位置
+
 na_col<-na_col[1:(length(na_col)-2)]
 length(na_col)
 ```
@@ -270,15 +275,7 @@ weight<- list(0.109,	0.042,	0.063,	0.115,	0.067,	0.022,	0.152,	0.023,	0.152,	0.0
 )
 Reduce("+",weight)
 ```
-```{r}
 
-tidy_mods <- lapply(regression, tidy)
-
-for (i in 1:length(tidy_mods)) 
-  tidy_mods[[i]]$mod <- names(tidy_mods[i])
-a <- do.call(rbind.data.frame, tidy_mods)
-str(a)
-```
 
 **backward == slr.total**
 ```{r}
@@ -288,70 +285,392 @@ for (i in 1: length(regression)) {
 }
 ```
 
-```{r}
-stargazer(backward[2:5],
-          star.char = c("*"), 
-          star.cutoffs = c(0.05, 0.01),
-          notes = c(" * p<0.05; ** p<0.01; "),
-          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,
-                   "time_Mar","time_May","time_Nov","time_Oct","time_Sep", "VAT1","VAT2",
-                   "VAT3","Recession","Trend",'Constant'), 
-          omit= backward[[1]]$
-          dep.var.labels.include = FALSE, 
-          notes.append = FALSE, # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20), 
-          report = "vc*", align = TRUE, header = FALSE, df = FALSE, digits = 2, single.row = TRUE,
-          model.numbers = FALSE, 
-          summary = FALSE,  flip = FALSE, se = NULL, type = "text" )
-```
+## 18个漏网之鱼的, 因为部分数据不全 单独出列
 
 ```{r}
-names((summary(backward[[i]])$coeff[-1,4])<0.05)
-stargazer(backward[2],
-          star.char = c("*"), 
-          star.cutoffs = c(0.05, 0.01),
-          notes = c(" * p<0.05; ** p<0.01; "),
-          omit =as.character(c(summary(backward[[i]])$coeff[-1,4]<0.05)) , 
-          dep.var.labels.include = FALSE, 
-          notes.append = FALSE, # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20), 
-          report = "vc*", align = TRUE, header = FALSE, df = FALSE, digits = 2, single.row = TRUE,
-          model.numbers = FALSE, 
-          summary = FALSE,  flip = FALSE, se = NULL, type = "text" )
-```
-
-
-
-```{r}
-for (i in 1:length(backward)){
-   max_coef[i]<-length(summary(backward[[i]])$coefficients[-1,4])  
-  
-  
-
-  
+b.18<-list()
+for (i in 1: length(na_col)) {
+    b.18[[i]] <- step(regression[[na_col[i]]], direction='backward', scope=formula(regression[[na_col[i]]]), trace=0)
 }
-for (i in 1:length(regression)){
-   max_coef[i]<-length(summary(regression[[i]])$coefficients[-1,4])  
-  
-  
-
-  
-}
-max(max_coef)
-#12+12+1+11+3+2=41一共41个变量
-names(summary(backward[[2]])$coefficients[-1,4]<0.05)
 ```
 
+
+## 替换backward变量名称
 ```{r}
-#x is a 10 x 3 matrix
-x = matrix(rnorm(3*10), ncol=3)
-y = rnorm(10)
-res = glm(y~x)
-#ignore the intercept pval
-summary(res)$coeff[1,4] < 0.05
-names((summary(backward[[2]])$coeff[1,4] < 0.05))
-names(which((summary(backward[[2]])$coeff[-1,4] < 0.05)==TRUE))
+
+backward[sapply(backward, is.null)] <- NULL
+
+#替换名称
+search_for_these <- c("lag1[, x]","lag2[, x]","lag3[, x]","lag4[, x]","lag5[, x]","lag6[, x]","lag7[, x]","lag8[, x]","lag9[, x]","lag10[, x]","lag11[, x]","lag12[, x]")
+ replace_with_these <- c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12")
+ found<-list()
+for (i in 1:length(backward)) {
+  found[[i]] <- match(names(backward[[i]]$coefficients), search_for_these, nomatch = 0)
+  names(backward[[i]]$coefficients)[names(backward[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
 ```
+
+## 替换b18变量名称
+```{r}
+b.18[sapply(b.18, is.null)] <- NULL
+
+#替换名称
+search_for_these <- c("lag1[, x]","lag2[, x]","lag3[, x]","lag4[, x]","lag5[, x]","lag6[, x]","lag7[, x]","lag8[, x]","lag9[, x]","lag10[, x]","lag11[, x]","lag12[, x]")
+ replace_with_these <- c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12")
+ found<-list()
+for (i in 1:length(b.18)) {
+  found[[i]] <- match(names(b.18[[i]]$coefficients), search_for_these, nomatch = 0)
+  names(b.18[[i]]$coefficients)[names(b.18[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
+```
+
+
+**=41最多一共41个变量**
+
+
 哈哈哈哈找到怎么删除p值小于0.05的coefficients
 ```{r}
-names(which((summary(backward[[2]])$coeff[-1,4] < 0.05)==TRUE))
+names(which((summary(regression[[2]])$coeff[-1,4] > 0.01)==TRUE))
 ```
+
+
+
+## 不显著的名字
+```{r}
+typec<-list()
+for(i in 1:length(backward)){
+  typec[[i]]<-names(which(((summary(backward[[i]])$coeff[-1,4])>0.01)==TRUE))
+}
+typec[1]
+
+```
+
+## 剔除不显著变量名字, 保留显著变量
+```{r}
+for(i in 1:length(backward)){
+  backward[[i]]$coefficients <- backward[[i]]$coefficients[!names(backward[[i]]$coefficients) %in% typec[[i]] ]
+
+
+}
+
+for(i in 1:length(b.18)){
+  b.18[[i]]$coefficients <- b.18[[i]]$coefficients[!names(b.18[[i]]$coefficients) %in% typec[[i]] ]
+
+
+}
+```
+# 各部门汇报 
+### 01 Food and non-alcoholic beverages
+
+2-15
+```{r}
+
+tab_model(backward[2:7],
+          rm.terms=c("time_Aug","time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Apr",
+                   "time_Mar","time_May","time_Nov","time_Oct","time_Sep", "VAT1","VAT2",
+                   "VAT3","Recession","Trend",'Constant',"(Intercept)"), 
+            show.ci = FALSE, 
+  show.p = FALSE,
+string.est = "",
+  p.style = "stars",
+  CSS = css_theme("cells"),
+  dv.labels= c(colnames(COPY[2:7]))
+)
+
+```
+
+
+
+```{r}
+tab_model(backward[8:15],
+          rm.terms=c("time_Aug","time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Apr",
+                   "time_Mar","time_May","time_Nov","time_Oct","time_Sep", "VAT1","VAT2",
+                   "VAT3","Recession","Trend",'Constant',"(Intercept)"), 
+            show.ci = FALSE, 
+  show.p = FALSE,
+string.est = "",
+  p.style = "stars",
+  CSS = css_theme("cells"),
+  dv.labels= c(colnames(COPY[8:15]))
+)
+
+```
+
+
+### 02 Alcoholic beverages, tobacco and narcotics
+16-21
+```{r}
+tab_model(backward[16:21],
+          rm.terms=c("time_Aug","time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Apr",
+                   "time_Mar","time_May","time_Nov","time_Oct","time_Sep", "VAT1","VAT2",
+                   "VAT3","Recession","Trend",'Constant',"(Intercept)"), 
+            show.ci = FALSE, 
+  show.p = FALSE,
+string.est = "",
+  p.style = "stars",
+  CSS = css_theme("cells"),
+  dv.labels= c(colnames(COPY[16:21]))
+)
+
+```
+
+### 03 Clothing and footwear
+22-27
+```{r}
+tab_model(backward[22:27],
+          rm.terms=c("time_Aug","time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Apr",
+                   "time_Mar","time_May","time_Nov","time_Oct","time_Sep", "VAT1","VAT2",
+                   "VAT3","Recession","Trend",'Constant',"(Intercept)"), 
+            show.ci = FALSE, 
+  show.p = FALSE,
+string.est = "",
+  p.style = "stars",
+  CSS = css_theme("cells"),
+  dv.labels= c(colnames(col_name[22:27]))
+)
+
+```
+### 04 Housing, water, electricity, gas and other fuels
+28:40
+```{r}
+tab_model(backward[28:34],
+          rm.terms=c("time_Aug","time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Apr",
+                   "time_Mar","time_May","time_Nov","time_Oct","time_Sep", "VAT1","VAT2",
+                   "VAT3","Recession","Trend",'Constant',"(Intercept)"), 
+            show.ci = FALSE, 
+  show.p = FALSE,
+string.est = "",
+  p.style = "stars",
+  CSS = css_theme("cells"),
+  dv.labels= c(colnames(col_name[28:34]))
+)
+
+```
+```{r}
+tab_model(backward[35:40],
+          rm.terms=c("time_Aug","time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Apr",
+                   "time_Mar","time_May","time_Nov","time_Oct","time_Sep", "VAT1","VAT2",
+                   "VAT3","Recession","Trend",'Constant',"(Intercept)"), 
+            show.ci = FALSE, 
+  show.p = FALSE,
+string.est = "",
+  p.style = "stars",
+  CSS = css_theme("cells"),
+  dv.labels= c(colnames(col_name[35:40]))
+)
+
+```
+### 05 Furnishings, household equipment and routine household maintenance
+
+41:53 41:53-1=52 41:52
+48没有
+```{r}
+tab_model(backward[41:47],
+          rm.terms=c("time_Aug","time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Apr",
+                   "time_Mar","time_May","time_Nov","time_Oct","time_Sep", "VAT1","VAT2",
+                   "VAT3","Recession","Trend",'Constant',"(Intercept)"), 
+            show.ci = FALSE, 
+  show.p = FALSE,
+string.est = "",
+  p.style = "stars",
+  CSS = css_theme("cells"),
+  dv.labels= c(colnames(col_name[41:47]))
+)
+
+```
+48
+48 49 50 51 52 53 c
+[1]48 49 50 51 52 b
+```{r}
+stargazer(b.18[1],backward[48:52],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant',"time_Apr"),
+          
+  dep.var.labels.include = FALSE,
+  notes.append = FALSE,
+  # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+  report = "vc*",
+  align = TRUE,
+  header = FALSE,
+  df = FALSE,
+  digits = 2, single.row = TRUE,
+  model.numbers = FALSE,
+  column.labels = c(colnames(col_name[48:53])),
+  summary = FALSE,
+  out = "F:/R workspace/Modelling-UK-inflation-quarterly-/AIC output/5-2.html",
+  omit.stat=c("LL","ser","f"),
+  se = NULL, type = "html"
+)
+```
+
+### 06 Health
+
+54:61 54-1: 61-6 53:55
+54 55 56 *57* 58 59 60 *61* c 
+53 54 55 *2*  3  4  5  *6*  b 
+```{r}
+stargazer(backward[53:55],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant',"time_Apr"),
+          
+  dep.var.labels.include = FALSE,
+  notes.append = FALSE,
+  # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+  report = "vc*",
+  align = TRUE,
+  header = FALSE,
+  df = FALSE,
+  digits = 2, single.row = TRUE,
+  model.numbers = FALSE,
+  column.labels = c(colnames(col_name[54:56])),
+  summary = FALSE,
+  out = "F:/R workspace/Modelling-UK-inflation-quarterly-/AIC output/6-1.html",
+  omit.stat=c("LL","ser","f"),
+  se = NULL, type = "html"
+)
+```
+
+
+```{r}
+stargazer(b.18[2],b.18[3],b.18[4],b.18[5],b.18[6],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant',"time_Apr"),
+          
+  dep.var.labels.include = FALSE,
+  notes.append = FALSE,
+  # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+  report = "vc*",
+  align = TRUE,
+  header = FALSE,
+  df = FALSE,
+  digits = 2, single.row = TRUE,
+  model.numbers = FALSE,
+  column.labels = c(colnames(col_name[57:61])),
+  summary = FALSE,
+  out = "F:/R workspace/Modelling-UK-inflation-quarterly-/AIC output/6-2.html",
+  omit.stat=c("LL","ser","f"),
+  se = NULL, type = "html"
+)
+```
+
+
+### 07 Transport
+
+62:76 62-6:76-9 56:67
+
+62 63 64 *65* 66 67 68 c
+56 57 58 *7*  59 60 61 b
+```{r}
+na_col[7]#65
+
+stargazer(backward[56:58],b.18[7],backward[59:61],#1+6=7
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant',"time_Apr"),
+          
+  dep.var.labels.include = FALSE,
+  notes.append = FALSE,
+  # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+  report = "vc*",
+  align = TRUE,
+  header = FALSE,
+  df = FALSE,
+  digits = 2, single.row = TRUE,
+  model.numbers = FALSE,
+  column.labels = c(colnames(col_name[62:68])),
+  summary = FALSE,
+  out = "F:/R workspace/Modelling-UK-inflation-quarterly-/AIC output/7-1.html",
+  omit.stat=c("LL","ser","f"),
+  se = NULL, type = "html"
+)
+```
+62 63 64 65 66 67 *8* *9* backward
+69 70 71 72 73 74 *75* *76* col_name
+```{r}
+stargazer(backward[62:67],b.18[8],b.18[9],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant',"time_Apr"),
+          
+  dep.var.labels.include = FALSE,
+  notes.append = FALSE,
+  # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+  report = "vc*",
+  align = TRUE,
+  header = FALSE,
+  df = FALSE,
+  digits = 2, single.row = TRUE,
+  model.numbers = FALSE,
+  column.labels = c(colnames(col_name[69:76])),
+  summary = FALSE,
+  out = "F:/R workspace/Modelling-UK-inflation-quarterly-/AIC output/7-2.html",
+  omit.stat=c("LL","ser","f"),
+  se = NULL, type = "html"
+)
+```
+
+
+
+### 08 Communication
+
+77:79 77-9:79-9 68:70
+```{r}
+stargazer(backward[68:70],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant',"time_Apr"),
+          
+  dep.var.labels.include = FALSE,
+  notes.append = FALSE,
+  # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+  report = "vc*",
+  align = TRUE,
+  header = FALSE,
+  df = FALSE,
+  digits = 2, single.row = TRUE,
+  model.numbers = FALSE,
+  column.labels = c(colnames(col_name[77:79])),
+  summary = FALSE,
+  out = "F:/R workspace/Modelling-UK-inflation-quarterly-/AIC output/8.html",
+  omit.stat=c("LL","ser","f"),
+  se = NULL, type = "html"
+)
+```
+
+
+### 09 Recreation and culture
+
+[80:101] 80-9:101-15 71:86
+
+### 10 Education
+
+102 102-15=87
+
+### 11 Restaurants and hotels
+
+103：107 103-15:107-16 88:91
+
+### 12 Miscellaneous goods and services
+
+108：122 108-16:122-18 92:104
+
+
+
+
+
 
