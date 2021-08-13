@@ -259,27 +259,43 @@ percent(1)
 
 
 
+**85部门版本合集生成**
+```{r}
+sig.class<-c(regression[4:12],regression[14:15],#1,
+             regression[18:21],#2
+             regression[24:27],#3
+             regression[29],regression[31:32],regression[34:35],regression[37:40],#4
+             regression[43:45],regression[47:50],regression[52:53],#5
+             regression[56:57],regression[59:61],#6
+             regression[64:66],regression[68:71],regression[73:76],#7
+             regression[78:79],#8
+             regression[82:86],regression[88],regression[90:93],regression[95:96],regression[98:100],regression[101],#9
+             regression[102],#10
+             regression[105:107],#11
+             regression[110:111],regression[113:115],regression[117:119],regression[121:122])#12
+```
+
 
 ```{r}
 a=list()
 for (i in 1:12) {
-  a[[i]] <- lapply(regression[2:122], function(x) summary(x)$coefficients[paste0("CPI_lag",i), 4])
+  a[[i]] <- lapply(sig.class, function(x) summary(x)$coefficients[paste0("CPI_lag",i), 4])
   print(percent(length(which(a[[i]] < 0.05))/121))
   #print(a[[i]])
 }
 for (i in 1:12) {
-  a[[i]] <- lapply(regression[2:122], function(x) summary(x)$coefficients[paste0("CPI_lag",i), 4])
+  a[[i]] <- lapply(sig.class, function(x) summary(x)$coefficients[paste0("CPI_lag",i), 4])
   
   print(percent(length(which(a[[i]] < 0.01))/121))
 }
 
 for (i in 1:12) {
-  a[[i]] <- lapply(regression[2:122], function(x) summary(x)$coefficients[paste0("lag",i), 4])
+  a[[i]] <- lapply(sig.class, function(x) summary(x)$coefficients[paste0("lag",i), 4])
   print(percent(length(which(a[[i]] < 0.05))/121))
   #print(a[[i]])
 }
 for (i in 1:12) {
-  a[[i]] <- lapply(regression[2:122], function(x) summary(x)$coefficients[paste0("lag",i), 4])
+  a[[i]] <- lapply(sig.class, function(x) summary(x)$coefficients[paste0("lag",i), 4])
   
   print(percent(length(which(a[[i]] < 0.01))/121))
 }

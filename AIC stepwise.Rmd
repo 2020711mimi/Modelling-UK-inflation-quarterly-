@@ -374,8 +374,8 @@ tab_model(backward[2:7],
 string.est = "",
   p.style = "stars",
   CSS = css_theme("cells"),
-  dv.labels= c(colnames(COPY[2:7]))
-)
+  dv.labels= c(col_name[2:7]))
+
 
 ```
 
@@ -391,8 +391,8 @@ tab_model(backward[8:15],
 string.est = "",
   p.style = "stars",
   CSS = css_theme("cells"),
-  dv.labels= c(colnames(COPY[8:15]))
-)
+  dv.labels= c(col_name[8:15]))
+
 
 ```
 
@@ -409,8 +409,8 @@ tab_model(backward[16:21],
 string.est = "",
   p.style = "stars",
   CSS = css_theme("cells"),
-  dv.labels= c(colnames(COPY[16:21]))
-)
+  dv.labels= c(col_name[16:21]))
+
 
 ```
 
@@ -426,8 +426,8 @@ tab_model(backward[22:27],
 string.est = "",
   p.style = "stars",
   CSS = css_theme("cells"),
-  dv.labels= c(colnames(col_name[22:27]))
-)
+  dv.labels= c(col_name[22:27]))
+
 
 ```
 ### 04 Housing, water, electricity, gas and other fuels
@@ -442,8 +442,8 @@ tab_model(backward[28:34],
 string.est = "",
   p.style = "stars",
   CSS = css_theme("cells"),
-  dv.labels= c(colnames(col_name[28:34]))
-)
+  dv.labels= c(col_name[28:34]))
+
 
 ```
 ```{r}
@@ -456,8 +456,8 @@ tab_model(backward[35:40],
 string.est = "",
   p.style = "stars",
   CSS = css_theme("cells"),
-  dv.labels= c(colnames(col_name[35:40]))
-)
+  dv.labels= c(col_name[35:40]))
+
 
 ```
 ### 05 Furnishings, household equipment and routine household maintenance
@@ -474,8 +474,8 @@ tab_model(backward[41:47],
 string.est = "",
   p.style = "stars",
   CSS = css_theme("cells"),
-  dv.labels= c(colnames(col_name[41:47]))
-)
+  dv.labels= c(col_name[41:47]))
+
 
 ```
 48
@@ -498,7 +498,7 @@ stargazer(b.18[1],backward[48:52],
   df = FALSE,
   digits = 2, single.row = TRUE,
   model.numbers = FALSE,
-  column.labels = c(colnames(col_name[48:53])),
+  column.labels = c(col_name[48:53]),
   summary = FALSE,
   out = "F:/R workspace/Modelling-UK-inflation-quarterly-/AIC output/5-2.html",
   omit.stat=c("LL","ser","f"),
@@ -528,7 +528,7 @@ stargazer(backward[53:55],
   df = FALSE,
   digits = 2, single.row = TRUE,
   model.numbers = FALSE,
-  column.labels = c(colnames(col_name[54:56])),
+  column.labels = c(col_name[54:56])),
   summary = FALSE,
   out = "F:/R workspace/Modelling-UK-inflation-quarterly-/AIC output/6-1.html",
   omit.stat=c("LL","ser","f"),
@@ -554,7 +554,7 @@ stargazer(b.18[2],b.18[3],b.18[4],b.18[5],b.18[6],
   df = FALSE,
   digits = 2, single.row = TRUE,
   model.numbers = FALSE,
-  column.labels = c(colnames(col_name[57:61])),
+  column.labels = c(col_name[57:61])),
   summary = FALSE,
   out = "F:/R workspace/Modelling-UK-inflation-quarterly-/AIC output/6-2.html",
   omit.stat=c("LL","ser","f"),
@@ -588,7 +588,7 @@ stargazer(backward[56:58],b.18[7],backward[59:61],#1+6=7
   df = FALSE,
   digits = 2, single.row = TRUE,
   model.numbers = FALSE,
-  column.labels = c(colnames(col_name[62:68])),
+  column.labels = c(col_name[62:68])),
   summary = FALSE,
   out = "F:/R workspace/Modelling-UK-inflation-quarterly-/AIC output/7-1.html",
   omit.stat=c("LL","ser","f"),
@@ -614,7 +614,7 @@ stargazer(backward[62:67],b.18[8],b.18[9],
   df = FALSE,
   digits = 2, single.row = TRUE,
   model.numbers = FALSE,
-  column.labels = c(colnames(col_name[69:76])),
+  column.labels = c(col_name[69:76])),
   summary = FALSE,
   out = "F:/R workspace/Modelling-UK-inflation-quarterly-/AIC output/7-2.html",
   omit.stat=c("LL","ser","f"),
@@ -644,7 +644,7 @@ stargazer(backward[68:70],
   df = FALSE,
   digits = 2, single.row = TRUE,
   model.numbers = FALSE,
-  column.labels = c(colnames(col_name[77:79])),
+  column.labels = c(col_name[77:79]),
   summary = FALSE,
   out = "F:/R workspace/Modelling-UK-inflation-quarterly-/AIC output/8.html",
   omit.stat=c("LL","ser","f"),
