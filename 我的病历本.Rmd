@@ -259,7 +259,7 @@ percent(1)
 
 
 
-**85部门版本合集生成**
+## **85部门版本合集生成**
 ```{r}
 sig.class<-c(regression[4:12],regression[14:15],#1,
              regression[18:21],#2
@@ -274,30 +274,61 @@ sig.class<-c(regression[4:12],regression[14:15],#1,
              regression[105:107],#11
              regression[110:111],regression[113:115],regression[117:119],regression[121:122])#12
 ```
+**各部门个数**
 
+```{r}
+###1
+n1<-length(c(4:12,14:15))
+###2
+#2
+n2<-length(c(18:21))
+#3
+n3<-length(c(24:27))
+#4
+n4<-length(c(29,31:32,34:35,37:40))
+#5
+n5<-length(c(43:45,47:50,52:53))
+#6
+n6<-length(c(56:57,59:61))
+#7
+n7<-length(c(64:66,68:71,73:76))
+#8
+n8<-length(c(78:79))
+#9
+n9<-length(c(82:86,88,90:93,95:96,98:100,101))
+#10
+n10<-length(c(102))
+#11
+n11<-length(c(105:107))
+#12
+n12<-length(c(110:111,113:115,117:119,121:122))
+#85
+11+4+4+9+9+5+11+2+16+1+3+10
+```
 
+**/121有double counting的嫌疑,就/85把**
 ```{r}
 a=list()
 for (i in 1:12) {
   a[[i]] <- lapply(sig.class, function(x) summary(x)$coefficients[paste0("CPI_lag",i), 4])
-  print(percent(length(which(a[[i]] < 0.05))/121))
+  print(percent(length(which(a[[i]] < 0.05))/85))
   #print(a[[i]])
 }
 for (i in 1:12) {
   a[[i]] <- lapply(sig.class, function(x) summary(x)$coefficients[paste0("CPI_lag",i), 4])
   
-  print(percent(length(which(a[[i]] < 0.01))/121))
+  print(percent(length(which(a[[i]] < 0.01))/85))
 }
 
 for (i in 1:12) {
   a[[i]] <- lapply(sig.class, function(x) summary(x)$coefficients[paste0("lag",i), 4])
-  print(percent(length(which(a[[i]] < 0.05))/121))
+  print(percent(length(which(a[[i]] < 0.05))/85))
   #print(a[[i]])
 }
 for (i in 1:12) {
   a[[i]] <- lapply(sig.class, function(x) summary(x)$coefficients[paste0("lag",i), 4])
   
-  print(percent(length(which(a[[i]] < 0.01))/121))
+  print(percent(length(which(a[[i]] < 0.01))/85))
 }
 ```
 
@@ -315,22 +346,11 @@ weight<- list(0.109,	0.042,	0.063,	0.115,	0.067,	0.022,	0.152,	0.023,	0.152,	0.0
 )
 Reduce("+",weight)
 ```
-用lapply 把regression 这个list 化成长数据框类型.(多行,5列:term,estimate,std,statitc, pvalue)
-```{r}
-
-tidy_mods <- lapply(regression, tidy)
-
-for (i in 1:length(tidy_mods)) 
-  tidy_mods[[i]]$mod <- names(tidy_mods[i])
-a <- do.call(rbind.data.frame, tidy_mods)
-str(a)
-```
-数数a里面有多少个vat1,就有多少个数据.which(a$term=="Trend")[1]代表第一个trend在哪个位置.
-每个部门的参数开始于constant,结束于Trend.
 
 
 
-42:615行之间lag[n]且p<0.05的*weight[1]的length
+
+
 
 * * *
 01 Food and non-alcoholic beverages
@@ -360,66 +380,110 @@ str(a)
 
 * * *
 
+因为每个部门现在是间断的了,不再连续, 所以之前根据constant转化的办法不行了.
+## 手动生成a1:a12.
+```{r}
+a1<-c(regression[4:12],regression[14:15])
+a2<-c(regression[18:21])
+a3<-c(regression[24:27])
+a4<-c( regression[29],regression[31:32],regression[34:35],regression[37:40])
+a5<-c(regression[43:45],regression[47:50],regression[52:53])
+a6<-c( regression[56:57],regression[59:61])
+a7<-c(regression[64:66],regression[68:71],regression[73:76])
+a8<-c(regression[78:79])
+a9<-c(regression[82:86],regression[88],regression[90:93],regression[95:96],regression[98:100],regression[101])
+a10<-c(regression[102])
+a11<-c(regression[105:107])
+a12<-c(regression[110:111],regression[113:115],regression[117:119],regression[121:122])
+```
+
+用lapply 把regression 这个list 化成长数据框类型.(多行,5列:term,estimate,std,statitc, pvalue)
+**再更新85版本之后, 可以用85版本的sig.class 替代 regression,避免了之后的操作**
+
+```{r}
+
+tidy_mods <- lapply(regression, tidy)
+
+for (i in 1:length(tidy_mods)) 
+  tidy_mods[[i]]$mod <- names(tidy_mods[i])
+
+
+```
+
+
+```{r}
+a1<-c(tidy_mods[4:12],tidy_mods[14:15])
+a2<-c(tidy_mods[18:21])
+a3<-c(tidy_mods[24:27])
+a4<-c( tidy_mods[29],tidy_mods[31:32],tidy_mods[34:35],tidy_mods[37:40])
+a5<-c(tidy_mods[43:45],tidy_mods[47:50],tidy_mods[52:53])
+a6<-c( tidy_mods[56:57],tidy_mods[59:61])
+a7<-c(tidy_mods[64:66],tidy_mods[68:71],tidy_mods[73:76])
+a8<-c(tidy_mods[78:79])
+a9<-c(tidy_mods[82:86],tidy_mods[88],tidy_mods[90:93],tidy_mods[95:96],tidy_mods[98:100],tidy_mods[101])
+a10<-c(tidy_mods[102])
+a11<-c(tidy_mods[105:107])
+a12<-c(tidy_mods[110:111],tidy_mods[113:115],tidy_mods[117:119],tidy_mods[121:122])
+```
 
 
 
 ```{r}
-dend<-c(2,16,22,28,41,54,62,77,80,102,103,108,122)#这只是每个部门开始的位置
+test<-list()
 for (i in 1:12) {
-  assign(paste0("a",i),
-         a[(which(a$term=="Constant")[dend[i]]):(which(a$term=="Trend")[dend[i+1]-1]),])
+test[[i]] <- do.call(rbind.data.frame, get(paste0("a",i)))
 }
-```
-第一个constant的位置,到下一个Trend-1的位置.
-第一个部门是2:15, 开始的标志是第二个constant的位置(dend[1]),结束于第15个Trend的位置(dend[2]-1的trend).
-**之所以不是直接开始于constant[dend[1]],结束于trend[dend[1]],是因为dend只是开始位置的集合(constant)而并不是结束的位置(trend).**
-
-*如果constant[dend[1]]---trend[dend[1]],这代表第二个(dend[1]=2) constant的开始到第二个trend的结束.只是一个class.*
-
-**如果constant[dend[1]]---trend[dend[2]],这代表第二个constant的开始到第16(dend[2]=16) 个trend的结束.我需要的是到第15个结束**
-
-```{r eval=FALSE, include=FALSE}
-a11111<-a[42:615,]#验证环节 循环产生的a1:a12和手算的是否相等.
-identical(a11111,a1)
-length(which(a11111$term=="VAT1"))
+nrow(test[[1]])
 ```
 
-
-a1中lag1小于0.01的.a2中lag2小于0.01的.
-
-**我想要的是a1中的lag1-12且小于0.01的个数×weight[1].**
-
-
-这样就是[1]<-a1的lag1且小于0.01的*weight[1],[2]<-a2 lag1且小于0.01的个数*weight[2]
-
-尝试先后循环
-总共应该有多少个结果啊? a1[lag1:12] 12*12=144个
+**检查test[1:12]是否和a1:a13相等**
+```{r}
+for (i in 1:12) {print(
+  length(which(test[[i]]$term=="Trend"))==
+    length(get(paste0("a",i)))
+)
+  
+}
 
 
-首先生成一个12*12的dataframe, 行是lag1-12, 列是a1:a12 十二个部门.
-双循环,每个部门循环把lag1-lag12 循环一边存储在a_lag_0.01[,i]列里,然后再循环剩下11个部门.
+```
+
+
+
+
+$$
+\frac{\text{部门}1\text{显著个数}}{\text{部门}1\text{的数量}}*weight\left[ 1 \right] 
+$$
 
 ### a_lag.0.01
-```{r}
 
+```{r}
+# 首先生成一个12*12的dataframe, 行是lag1-12, 列是a1:a12 十二个部门.
 a_lag.0.01<-data.frame( row.names =  paste0("lag",1:12),
                    matrix(nrow=12, ncol=12, ) ) 
 
 colnames(a_lag.0.01)<-c(paste0("a",1:12))
+# 双循环,每个部门循环把lag1-lag12 循环一边存储在a_lag_0.01[,i]列里,代表在第一个部门 lag<0.01的
+# 然后再循环剩下11个部门.
+# **a1中的lag1-12且小于0.01的个数/ 部门1 class的个数乘 weight[1].**
 i<-1#i=a,j=lag
 while (i <=12) {
   for (j in 1:12) {
- a_lag.0.01 [j,i]  <-
-  length( which((get(paste0("a",i)))$term==paste0("lag",j)&(get(paste0("a",i)))$p.value<0.01)
-  )*weight[[i]]
+ a_lag.0.01 [j,i]  <-  length( which(test[[i]]$term==paste0("lag",j)&test[[i]]$p.value<0.01)
+  ) /length(get(paste0("a",i))) *weight[[i]]
   }
   i<-i+1
 }
 ```
 
 a8全都是0. 证实了一下确实. 有在0.05显著的,但是没有在0.01显著的.
-```{r echo=FALSE}
-stargazer(regression[77:79],
+```{r a8test, eval=FALSE, include=FALSE}
+for (j in 1:12) {print(
+  length(which(test[[8]]$term==paste0("lag",j)&test[[8]]$p.value<0.01)))
+}
+
+  
+stargazer(regression[78:79],
           star.cutoffs = c(0.05, 0.01),
           
           report = "vc*",
@@ -442,8 +506,9 @@ i<-1#i=a,j=lag
 while (i <=12) {
   for (j in 1:12) {
  a_lag.0.05 [j,i]  <-
-  length( which((get(paste0("a",i)))$term==paste0("lag",j)&(get(paste0("a",i)))$p.value<0.05)
-  )*weight[[i]]
+  length( which(
+   test[[i]]$term==paste0("lag",j)&test[[i]]$p.value<0.05)
+  )/length(get(paste0("a",i))) *weight[[i]]
   }
   i<-i+1
 }
@@ -460,8 +525,8 @@ i<-1#i=a,j=lag
 while (i <=12) {
   for (j in 1:12) {
  a_cpi.0.01 [j,i]  <-
-  length( which((get(paste0("a",i)))$term==paste0("CPI_lag",j)&(get(paste0("a",i)))$p.value<0.01)
-  )*weight[[i]]
+  length( which(test[[i]]$term==paste0("CPI_lag",j)&test[[i]]$p.value<0.01)
+  )/length(get(paste0("a",i))) *weight[[i]]
   }
   i<-i+1
 }
@@ -477,8 +542,8 @@ i<-1#i=a,j=lag
 while (i <=12) {
   for (j in 1:12) {
  a_cpi.0.05 [j,i]  <-
-  length( which((get(paste0("a",i)))$term==paste0("CPI_lag",j)&(get(paste0("a",i)))$p.value<0.05)
-  )*weight[[i]]
+  length( which(test[[i]]$term==paste0("CPI_lag",j)&test[[i]]$p.value<0.05)
+  )/length(get(paste0("a",i))) *weight[[i]]
   }
   i<-i+1
 }
@@ -486,10 +551,10 @@ while (i <=12) {
 
 
 
-$$
-\frac{\text{部门}1\text{显著个数}*weight\left[ 1 \right] +.....+}{121}
-$$
-把a_cpi.0.05这四个表, 每行加起来/121 就是结果.
+
+
+每行代表:lag 0.01 12个部门里, lag1 小于0.01的/个数*weight的总和
+把a_cpi.0.05这四个表, 每行加起来 就是结果.
 一行一个结果,每个表有12行,共4个表,**4×12=48**个结果.
 首先生成存放结果的 24行×2列的dataframe
 
@@ -502,22 +567,30 @@ colnames(table1weight)<-c("p<0.01","p<0.05","p<0.01(Weight)","p<0.05(Weight)")
 rownames(table1weight)<-c(paste0("CPI_lag",1:12),paste0("lag",1:12))
 ```
 写入结果
-一个没有cpi的a dataframe,删除前41行
+sig.class 转换成只有4列的长数据类型, 方便使用
 ```{r}
-nocpi<-a[-c(1:41),]
+
+tidy_mods <- lapply(sig.class, tidy)
+
+for (i in 1:length(tidy_mods)) 
+  tidy_mods[[i]]$mod <- names(tidy_mods[i])
+sig.class.4cols <- do.call(rbind.data.frame, tidy_mods)
+length(which(sig.class.4cols$term=="Trend"))
+
 ```
+
 
 ```{r}
 for (i in 1:12) {#前两列
-  table1weight[i,1]<-percent((length( which(nocpi$term==paste0("CPI_lag",i)&(nocpi$p.value<0.01))))/121)
-   table1weight[i+12,1]<-percent((length( which(nocpi$term==paste0("lag",i)&(nocpi$p.value<0.01))))/121)
-   table1weight[i,2]<-percent((length( which(nocpi$term==paste0("CPI_lag",i)&(nocpi$p.value<0.05))))/121)
-      table1weight[i+12,2]<-percent((length( which(nocpi$term==paste0("lag",i)&(nocpi$p.value<0.05))))/121)
+  table1weight[i,1]<-percent((length( which(sig.class.4cols$term==paste0("CPI_lag",i)&(sig.class.4cols$p.value<0.01))))/85)
+   table1weight[i+12,1]<-percent((length( which(sig.class.4cols$term==paste0("lag",i)&(sig.class.4cols$p.value<0.01))))/85)
+   table1weight[i,2]<-percent((length( which(sig.class.4cols$term==paste0("CPI_lag",i)&(sig.class.4cols$p.value<0.05))))/85)
+      table1weight[i+12,2]<-percent((length( which(sig.class.4cols$term==paste0("lag",i)&(sig.class.4cols$p.value<0.05))))/85)
       #后两列
-    table1weight[i,3]<-percent(sum(a_cpi.0.01[paste0("CPI_lag",i),])      /121)
-    table1weight[i+12,3]<-percent(sum(a_lag.0.01[paste0("lag",i),])/121)
-    table1weight[i,4]<-percent(sum(a_cpi.0.05[paste0("CPI_lag",i),])/121)
-    table1weight[i+12,4]<-percent(sum(a_lag.0.05[paste0("lag",i),])/121)
+    table1weight[i,3]<-percent(sum(a_cpi.0.01[paste0("CPI_lag",i),]))
+    table1weight[i+12,3]<-percent(sum(a_lag.0.01[paste0("lag",i),]))
+    table1weight[i,4]<-percent(sum(a_cpi.0.05[paste0("CPI_lag",i),]))
+    table1weight[i+12,4]<-percent(sum(a_lag.0.05[paste0("lag",i),]))
     
 }
 
@@ -662,16 +735,16 @@ slr.total <- list()
 keep.dummies <- c("time_Aug","time_Apr",
                   "time_Dec",  "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
                   "VAT1","VAT2","VAT3","Recession","Trend")
-for (i in 2:122) {
-  slr.total[[i]] <- model.select(regression[[i]], keep = keep.dummies, sig = 0.05, verbose = F)
+for (i in 1:length(sig.class)) {
+  slr.total[[i]] <- model.select(sig.class[[i]], keep = keep.dummies, sig = 0.05, verbose = F)
 }
 
 ```
+**slr.total 60 是空集, 84 left**
 
-**这个地方会卡一下**
-## 在没换名字之前slr.total=122个,1和86是空集. 替换完名字就变成121了(1仍然空集.)
+
 ```{r}
-#把1和86扔了
+#去除空集
 slr.total[sapply(slr.total, is.null)] <- NULL
 
 #替换名称
@@ -690,19 +763,41 @@ for (i in 1:length(slr.total)) {
  tidy_stepwsie <- lapply(slr.total, tidy)
   stepwsie_a<- do.call(rbind.data.frame, tidy_stepwsie)
 ```
-因为已经删减过cpi and 86, 所以stepwsie_a只剩下120个项目了.
+因为已经删减过cpi and 60, 所以stepwsie_a只剩下120个项目了.
 ```{r}
 length(which(stepwsie_a$term=="VAT1"))
 ```
-**因为1和86是空集,所以每个部门开始的位置也变了. 86之前的变量-1,86之后的-2.**
+## 各部门开始结束位置df
 ```{r}
-dend<-c(2,16,22,28,41,54,62,77,80,102,103,108,122)#这只是每个部门开始的位置
-dend_stepwise<-c(dend[1:9]-1,dend[10:13]-2)
+class.poi<-data.frame(matrix(nrow = 13,ncol = 2),row.names = 1:13)
+names(class.poi)<-c("start","end")
+poi<-c(1,11,4,4,9,9,5,11,2,15,1,3,10)
+class.poi[,1]<-c(cumsum(poi))#每个部门开始的位置
+class.poi[,2]<-c((class.poi[,1]-1)[-1],"na")#结束的位置
+class.poi<-head(class.poi,-1)#删除最后一行
+write.csv(class.poi,"F:/R workspace/Modelling-UK-inflation-quarterly-/class-poisition.csv")
 
+
+
+
+```
+**60属于第9部门**
+**根据 intercept 开始的位置, 和trend结束位置 划分df**
+```{r}
+start<-class.poi[,1]
+start[1]
+end<-as.numeric(class.poi[,2])
+end<-replace(end,end==85,84)#没有85 slr.total最后只剩84个了
 for (i in 1:12) {
   assign(paste0("stepwsie_a",i),
-         stepwsie_a[(which(stepwsie_a$term=="(Intercept)")[dend_stepwise[i]]):(which(stepwsie_a$term=="Trend")[dend_stepwise[i+1]-1]),])
+         stepwsie_a[
+           (which(stepwsie_a$term=="(Intercept)")[start[i]])
+           :
+             (which(stepwsie_a$term=="Trend")[end[i]])
+           ,]
+         )
 }
+length(which(stepwsie_a12$term=="Trend"))
 ```
 
 ## 创建	Table 2 Stepwise Summary Table 存储结果
@@ -725,7 +820,7 @@ while (i <=12) {
   for (j in 1:12) {
  stepwise_lag_0.01_yearly [j,i]  <-
   length( which((get(paste0("stepwsie_a",i)))$term==paste0("lag",j)&(get(paste0("stepwsie_a",i)))$p.value<0.01)
-  )*weight[[i]]
+  )/length(which(get(paste0("stepwsie_a",i))$term=="Trend")) *weight[[i]]
   }
   i<-i+1
 }
@@ -742,7 +837,7 @@ while (i <=12) {
   for (j in 1:12) {
  stepwise_lag_0.05_yearly [j,i]  <-
   length( which((get(paste0("stepwsie_a",i)))$term==paste0("lag",j)&(get(paste0("stepwsie_a",i)))$p.value<0.05)
-  )*weight[[i]]
+  )/length(which(get(paste0("stepwsie_a",i))$term=="Trend"))*weight[[i]]
   }
   i<-i+1
 }
@@ -758,7 +853,7 @@ while (i <=12) {
   for (j in 1:12) {
  stepwise_cpi_0.01_yearly [j,i]  <-
   length( which((get(paste0("stepwsie_a",i)))$term==paste0("CPI_lag",j)&(get(paste0("stepwsie_a",i)))$p.value<0.01)
-  )*weight[[i]]
+  )/length(which(get(paste0("stepwsie_a",i))$term=="Trend"))*weight[[i]]
   }
   i<-i+1
 }
@@ -774,7 +869,7 @@ while (i <=12) {
   for (j in 1:12) {
  stepwise_cpi_0.05_yearly [j,i]  <-
   length( which((get(paste0("stepwsie_a",i)))$term==paste0("CPI_lag",j)&(get(paste0("stepwsie_a",i)))$p.value<0.05)
-  )*weight[[i]]
+  )/length(which(get(paste0("stepwsie_a",i))$term=="Trend"))*weight[[i]]
   }
   i<-i+1
 }
@@ -782,15 +877,15 @@ while (i <=12) {
 # 写入table2
 ```{r}
 for (i in 1:12) {#前两列
-  stepwise_table_yearly[i,1]<-percent((length( which(stepwsie_a$term==paste0("CPI_lag",i)&(stepwsie_a$p.value<0.01))))/121)
-   stepwise_table_yearly[i+12,1]<-percent((length( which(stepwsie_a$term==paste0("lag",i)&(stepwsie_a$p.value<0.01))))/121)
-   stepwise_table_yearly[i,2]<-percent((length( which(stepwsie_a$term==paste0("CPI_lag",i)&(stepwsie_a$p.value<0.05))))/121)
-      stepwise_table_yearly[i+12,2]<-percent((length( which(stepwsie_a$term==paste0("lag",i)&(stepwsie_a$p.value<0.05))))/121)
+  stepwise_table_yearly[i,1]<-percent((length( which(stepwsie_a$term==paste0("CPI_lag",i)&(stepwsie_a$p.value<0.01))))/85)
+   stepwise_table_yearly[i+12,1]<-percent((length( which(stepwsie_a$term==paste0("lag",i)&(stepwsie_a$p.value<0.01))))/85)
+   stepwise_table_yearly[i,2]<-percent((length( which(stepwsie_a$term==paste0("CPI_lag",i)&(stepwsie_a$p.value<0.05))))/85)
+      stepwise_table_yearly[i+12,2]<-percent((length( which(stepwsie_a$term==paste0("lag",i)&(stepwsie_a$p.value<0.05))))/85)
       #后两列
-    stepwise_table_yearly[i,3]<-percent(sum(stepwise_cpi_0.01_yearly[paste0("CPI_lag",i),])      /121)
-    stepwise_table_yearly[i+12,3]<-percent(sum(stepwise_lag_0.01_yearly[paste0("lag",i),])/121)
-    stepwise_table_yearly[i,4]<-percent(sum(stepwise_cpi_0.05_yearly[paste0("CPI_lag",i),])/121)
-    stepwise_table_yearly[i+12,4]<-percent(sum(stepwise_lag_0.05_yearly[paste0("lag",i),])/121)
+    stepwise_table_yearly[i,3]<-percent(sum(stepwise_cpi_0.01_yearly[paste0("CPI_lag",i),])      /85)
+    stepwise_table_yearly[i+12,3]<-percent(sum(stepwise_lag_0.01_yearly[paste0("lag",i),])/85)
+    stepwise_table_yearly[i,4]<-percent(sum(stepwise_cpi_0.05_yearly[paste0("CPI_lag",i),])/85)
+    stepwise_table_yearly[i+12,4]<-percent(sum(stepwise_lag_0.05_yearly[paste0("lag",i),])/85)
     
 }
 ```
