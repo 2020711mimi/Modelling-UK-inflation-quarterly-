@@ -875,6 +875,7 @@ while (i <=12) {
 }
 ```
 # 写入table2
+**与之前版本最大区别是后两列不用/85或者/121.**
 ```{r}
 for (i in 1:12) {#前两列
   stepwise_table_yearly[i,1]<-percent((length( which(stepwsie_a$term==paste0("CPI_lag",i)&(stepwsie_a$p.value<0.01))))/85)
@@ -882,10 +883,10 @@ for (i in 1:12) {#前两列
    stepwise_table_yearly[i,2]<-percent((length( which(stepwsie_a$term==paste0("CPI_lag",i)&(stepwsie_a$p.value<0.05))))/85)
       stepwise_table_yearly[i+12,2]<-percent((length( which(stepwsie_a$term==paste0("lag",i)&(stepwsie_a$p.value<0.05))))/85)
       #后两列
-    stepwise_table_yearly[i,3]<-percent(sum(stepwise_cpi_0.01_yearly[paste0("CPI_lag",i),])      /85)
-    stepwise_table_yearly[i+12,3]<-percent(sum(stepwise_lag_0.01_yearly[paste0("lag",i),])/85)
-    stepwise_table_yearly[i,4]<-percent(sum(stepwise_cpi_0.05_yearly[paste0("CPI_lag",i),])/85)
-    stepwise_table_yearly[i+12,4]<-percent(sum(stepwise_lag_0.05_yearly[paste0("lag",i),])/85)
+    stepwise_table_yearly[i,3]<-percent(sum(stepwise_cpi_0.01_yearly[paste0("CPI_lag",i),])      )
+    stepwise_table_yearly[i+12,3]<-percent(sum(stepwise_lag_0.01_yearly[paste0("lag",i),]))
+    stepwise_table_yearly[i,4]<-percent(sum(stepwise_cpi_0.05_yearly[paste0("CPI_lag",i),]))
+    stepwise_table_yearly[i+12,4]<-percent(sum(stepwise_lag_0.05_yearly[paste0("lag",i),]))
     
 }
 ```
@@ -906,18 +907,22 @@ save_as_docx("1.5	Table 2 Stepwise Summary Table" = ft1, path = "F:/R workspace/
 
 ```
 
-**验证是否和word的表相等**
+**很开心, stargazer coeff 排序的方法在此!**
 ```{r}
+length(slr.total[[2]]$coefficients)
+vars.order<-c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12","CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7",
+                                             "CPI_lag8","CPI_lag9",
+                                             "CPI_lag10","CPI_lag11","CPI_lag12")
 stargazer(slr.total[2:7],
           star.char = c("*"),
           star.cutoffs = c(0.01),
           notes = c(" * p<0.01; "),
           omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
                    "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
-          
+          order=paste0("^", vars.order , "$"),
           dep.var.labels.include = FALSE,
           notes.append = FALSE,
-          # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+
           report = "vc*",
           align = TRUE,
           header = FALSE,
@@ -950,7 +955,10 @@ stargazer(CPI_, slr.cpi,
                    "time_Mar","time_May","time_Nov","time_Oct","time_Sep", "VAT1","VAT2",
                    "VAT3","Recession","Trend",'Constant'), 
           dep.var.labels.include = FALSE, 
-          notes.append = FALSE, # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20), 
+          notes.append = FALSE, 
+          order = c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12","CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7",
+                                             "CPI_lag8","CPI_lag9",
+                                             "CPI_lag10","CPI_lag11","CPI_lag12"),
           report = "vc*", align = TRUE, header = FALSE, df = FALSE, digits = 2, single.row = TRUE,
           model.numbers = FALSE, column.labels = c("CPI","CPI(Stepwise)"), 
           summary = FALSE, 
@@ -964,12 +972,13 @@ stargazer( slr.cpi,
           notes = c(" * p<0.05; ** p<0.01; "),
 
           dep.var.labels.include = FALSE, 
-          notes.append = FALSE, # order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20), 
+          notes.append = FALSE,  order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20), 
           report = "vc*", align = TRUE, header = FALSE, df = FALSE, digits = 2, single.row = TRUE,
           model.numbers = FALSE, column.labels = c("CPI","CPI(Stepwise)"), 
           summary = FALSE, 
           flip = FALSE, se = NULL, type = "text" )
 ```
+s.test
 
 
 
