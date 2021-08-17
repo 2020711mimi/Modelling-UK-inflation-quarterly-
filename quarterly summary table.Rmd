@@ -27,6 +27,7 @@ library(officer)
 library(flextable)
 library(magrittr)
 library(dplyr)
+library(largeList)
 ```
 # Table 3  Summary table before stepwise (Quarterly data)
 
@@ -309,6 +310,318 @@ ft1<-flextable(table3Quarterlydata %>% rownames_to_column("column name"))
 
 
 save_as_docx("Summary table before stepwise (Quarterly data)" = ft1, path = "F:/R workspace/Modelling-UK-inflation-quarterly-/table3.docx")
+
+
+
+
+```
+
+***
+
+# quarterly stepwise
+
+## stepwise function
+```{r include=FALSE}
+# function ----------------------------------------------------------------
+
+
+# Automated model selection
+# Author      : Joris Meys
+# version     : 0.2
+# date        : 12/01/09
+
+#CHANGE LOG
+# 0.2   : check for empty scopevar vector
+
+# #CHANGE LOG -------------------------------------------------------------
+
+
+
+# Function has.interaction checks whether x is part of a term in terms
+# terms is a vector with names of terms from a model
+has.interaction <- function(x,terms){
+  out <- sapply(terms,function(i){
+    sum(1-(strsplit(x,":")[[1]] %in% strsplit(i,":")[[1]]))==0
+  })
+  return(sum(out)>0)
+}
+
+# Function Model.select
+# model is the lm object of the full model
+# keep is a list of model terms to keep in the model at all times
+# sig gives the significance for removal of a variable. Can be 0.1 too (see SPSS)
+# verbose=T gives the F-tests, dropped var and resulting model after 
+model.select <- function(model,keep,sig=0.05,verbose=F){
+  counter=1
+  # check input
+  if(!is(model,"lm")) stop(paste(deparse(substitute(model)),"is not an lm object\n"))
+  # calculate scope for drop1 function
+  terms <- attr(model$terms,"term.labels")
+  if(missing(keep)){ # set scopevars to all terms
+    scopevars <- terms
+  } else{            # select the scopevars if keep is used
+    index <- match(keep,terms)
+    # check if all is specified correctly
+    if(sum(is.na(index))>0){
+      novar <- keep[is.na(index)]
+      warning(paste(
+        c(novar,"cannot be found in the model",
+          "\nThese terms are ignored in the model selection."),
+        collapse=" "))
+      index <- as.vector(na.omit(index))
+    }
+    scopevars <- terms[-index]
+  }
+  
+  # Backward model selection : 
+  
+  while(T){
+    # extract the test statistics from drop.
+    test <- drop1(model, scope=scopevars,test="F")
+    
+    if(verbose){
+      cat("-------------STEP ",counter,"-------------\n",
+          "The drop statistics : \n")
+      print(test)
+    }
+    
+    pval <- test[,dim(test)[2]]
+    
+    names(pval) <- rownames(test)
+    pval <- sort(pval,decreasing=T)
+    
+    if(sum(is.na(pval))>0) stop(paste("Model",
+                                      deparse(substitute(model)),"is invalid. Check if all coefficients are estimated."))
+    
+    # check if all significant
+    if(pval[1]<sig) break # stops the loop if all remaining vars are sign.
+    
+    # select var to drop
+    i=1
+    while(T){
+      dropvar <- names(pval)[i]
+      check.terms <- terms[-match(dropvar,terms)]
+      x <- has.interaction(dropvar,check.terms)
+      if(x){i=i+1;next} else {break}              
+    } # end while(T) drop var
+    
+    if(pval[i]<sig) break # stops the loop if var to remove is significant
+    
+    if(verbose){
+      cat("\n--------\nTerm dropped in step",counter,":",dropvar,"\n--------\n\n")              
+    }
+    
+    #update terms, scopevars and model
+    scopevars <- scopevars[-match(dropvar,scopevars)]
+    terms <- terms[-match(dropvar,terms)]
+    
+    formul <- as.formula(paste(".~.-",dropvar))
+    model <- update(model,formul)
+    
+    if(length(scopevars)==0) {
+      warning("All variables are thrown out of the model.\n",
+              "No model could be specified.")
+      return()
+    }
+    counter=counter+1
+  } # end while(T) main loop
+  return(model)
+}
+
+```
+
+```{r }
+slr.total <- list()
+keep.dummies <- c("quarter1","quarter3","quarter4",
+                  "VAT1","VAT2","VAT3","Recession","Trend")
+for (i in 1:length(sig.class)) {
+  slr.total[[i]] <- model.select(sig.class[[i]], keep = keep.dummies, sig = 0.05, verbose = F)
+}
+
+
+```
+
+## 寻找消失的部门的位置
+
+slr.total所有变量都不显著的部门
+
+```{r}
+names(slr.total) <- 1:length(slr.total)
+class_with_no_significant <- slr.total[which(sapply(slr.total, is.null))]
+length(class_with_no_significant)
+```
+
+```{r}
+#去除不显著的
+slr.total[sapply(slr.total, is.null)] <- NULL
+#替换名称
+search_for_these <- c("lag1[, x]","lag2[, x]","lag3[, x]","lag4[, x]","lag5[, x]","lag6[, x]","lag7[, x]","lag8[, x]","lag9[, x]","lag10[, x]","lag11[, x]","lag12[, x]")
+ replace_with_these <- c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12")
+ found<-list()
+for (i in 1:length(slr.total)) {
+  found[[i]] <- match(names(slr.total[[i]]$coefficients), search_for_these, nomatch = 0)
+  names(slr.total[[i]]$coefficients)[names(slr.total[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
+```
+
+```{r}
+#化成长数据类型
+ tidy_stepwsie <- lapply(slr.total, tidy)
+  stepwsie_a<- do.call(rbind.data.frame, tidy_stepwsie)
+  length(which(stepwsie_a$term=="VAT1"))
+
+```
+
+## 各部门开始结束位置df
+```{r}
+miss.class<-c(1,0,0,2,0,1,3,1,2,0,0,2)
+sum(miss.class)
+class_length_stepwise_quarterly<-data.frame(matrix(nrow = 12,ncol = 1))
+class_length_stepwise_quarterly[,1]<-c(class_length[,1]-miss.class)
+```
+
+```{r}
+class.poi<-data.frame(matrix(nrow = 13,ncol = 2),row.names = 1:13)
+names(class.poi)<-c("start","end")
+poi<-c(1,class_length_stepwise_quarterly[,1])
+class.poi[,1]<-c(cumsum(poi))#每个部门开始的位置
+class.poi[,2]<-c((class.poi[,1]-1)[-1],"na")#结束的位置
+class.poi<-head(class.poi,-1)#删除最后一行
+write.csv(class.poi,"F:/R workspace/Modelling-UK-inflation-quarterly-/class-poisition_stepwise_quarterly.csv")
+
+
+
+
+```
+
+**根据 intercept 开始的位置, 和trend结束位置 划分df**
+```{r}
+start<-class.poi[,1]
+
+end<-as.numeric(class.poi[,2])
+for (i in 1:12) {
+  assign(paste0("stepwsie_a",i),
+         stepwsie_a[
+           (which(stepwsie_a$term=="(Intercept)")[start[i]])
+           :
+             (which(stepwsie_a$term=="Trend")[end[i]])
+           ,]
+         )
+}
+length(which(stepwsie_a12$term=="Trend"))
+```
+```{r}
+class_length_73<-data.frame(matrix(nrow = 12,ncol = 1))
+for(i in 1:12){
+  class_length_73[i,1]<-length(which(get(paste0("stepwsie_a",i))$term=="Trend"))
+}
+```
+
+## 创建	Table 4 Stepwise Summary Table 存储结果 是8*4.
+```{r}
+stepwise_table_quarterly<-data.frame( matrix(nrow=8, ncol=4, )   )
+colnames(stepwise_table_quarterly)<-c("p<0.01","p<0.05","p<0.01(Weight)","p<0.05(Weight)")
+rownames(stepwise_table_quarterly)<-c(paste0("CPI_lag",1:4),paste0("lag",1:4))
+```
+
+### stepwise_lag_0.01_quarterly
+```{r}
+
+stepwise_lag_0.01_quarterly<-data.frame( row.names =  paste0("lag",1:4),
+                   matrix(nrow=4, ncol=12, ) ) 
+
+colnames(stepwise_lag_0.01_quarterly)<-c(paste0("a",1:12))
+i<-1#i=a,j=lag
+while (i <=12) {
+  for (j in 1:4) {
+ stepwise_lag_0.01_quarterly [j,i]  <-
+  length( which((get(paste0("stepwsie_a",i)))$term==paste0("lag",j)&(get(paste0("stepwsie_a",i)))$p.value<0.01)
+  )/length(which(get(paste0("stepwsie_a",i))$term=="Trend"))*weight[[i]]
+  }
+  i<-i+1
+}
+
+```
+### stepwise_lag_0.05_quarterly
+```{r}
+
+stepwise_lag_0.05_quarterly<-data.frame( row.names =  paste0("lag",1:4),
+                   matrix(nrow=4, ncol=12, ) ) 
+
+colnames(stepwise_lag_0.05_quarterly)<-c(paste0("a",1:12))
+i<-1#i=a,j=lag
+while (i <=12) {
+  for (j in 1:4) {
+ stepwise_lag_0.05_quarterly [j,i]  <-
+  length( which((get(paste0("stepwsie_a",i)))$term==paste0("lag",j)&(get(paste0("stepwsie_a",i)))$p.value<0.05)
+  )/length(which(get(paste0("stepwsie_a",i))$term=="Trend"))*weight[[i]]
+  }
+  i<-i+1
+}
+```
+
+### stepwise_cpi_0.01_quarterly
+```{r}
+
+stepwise_cpi_0.01_quarterly<-data.frame( row.names =  paste0("CPI_lag",1:4),
+                   matrix(nrow=4, ncol=12, ) ) 
+
+colnames(stepwise_cpi_0.01_quarterly)<-c(paste0("a",1:12))
+i<-1#i=a,j=lag
+while (i <=12) {
+  for (j in 1:4) {
+ stepwise_cpi_0.01_quarterly [j,i]  <-
+  length( which((get(paste0("stepwsie_a",i)))$term==paste0("CPI_lag",j)&(get(paste0("stepwsie_a",i)))$p.value<0.01)
+  )/length(which(get(paste0("stepwsie_a",i))$term=="Trend"))*weight[[i]]
+  }
+  i<-i+1
+}
+```
+
+### stepwise_cpi_0.05_quarterly
+```{r}
+
+stepwise_cpi_0.05_quarterly<-data.frame( row.names =  paste0("CPI_lag",1:4),
+                   matrix(nrow=4, ncol=12, ) ) 
+
+colnames(stepwise_cpi_0.05_quarterly)<-c(paste0("a",1:12))
+i<-1#i=a,j=lag
+while (i <=12) {
+  for (j in 1:4) {
+ stepwise_cpi_0.05_quarterly [j,i]  <-
+  length( which((get(paste0("stepwsie_a",i)))$term==paste0("CPI_lag",j)&(get(paste0("stepwsie_a",i)))$p.value<0.05)
+  )/length(which(get(paste0("stepwsie_a",i))$term=="Trend"))*weight[[i]]
+  }
+  i<-i+1
+}
+```
+
+# 写入table4
+```{r}
+for (i in 1:4) {#前两列
+  stepwise_table_quarterly[i,1]<-percent((length( which(stepwsie_a$term==paste0("CPI_lag",i)&(stepwsie_a$p.value<0.01))))/85)
+   stepwise_table_quarterly[i+4,1]<-percent((length( which(stepwsie_a$term==paste0("lag",i)&(stepwsie_a$p.value<0.01))))/85)
+   stepwise_table_quarterly[i,2]<-percent((length( which(stepwsie_a$term==paste0("CPI_lag",i)&(stepwsie_a$p.value<0.05))))/85)
+      stepwise_table_quarterly[i+4,2]<-percent((length( which(stepwsie_a$term==paste0("lag",i)&(stepwsie_a$p.value<0.05))))/85)
+      #后两列
+    stepwise_table_quarterly[i,3]<-percent(sum(stepwise_cpi_0.01_quarterly[paste0("CPI_lag",i),])      )
+    stepwise_table_quarterly[i+4,3]<-percent(sum(stepwise_lag_0.01_quarterly[paste0("lag",i),]))
+    stepwise_table_quarterly[i,4]<-percent(sum(stepwise_cpi_0.05_quarterly[paste0("CPI_lag",i),]))
+    stepwise_table_quarterly[i+4,4]<-percent(sum(stepwise_lag_0.05_quarterly[paste0("lag",i),]))
+    
+}
+```
+## flextable 写入word
+```{r}
+
+
+
+ft1<-flextable(stepwise_table_quarterly %>% rownames_to_column("column name"))
+
+
+
+
+save_as_docx("	Table 4 Stepwise Summary Table (Quarterly data)" = ft1, path = "F:/R workspace/Modelling-UK-inflation-quarterly-/table4.docx")
 
 
 
