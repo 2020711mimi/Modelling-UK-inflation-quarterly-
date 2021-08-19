@@ -1,0 +1,340 @@
+---
+title: "Yearly Stepwise Output"
+author: "Yiyi"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 3
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+# 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+ rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+## Packages
+```{r Library, include=FALSE}
+library(readxl)
+library(data.table)
+library(lubridate)#extract cpi time to newdata(furniture48)
+library(dplyr) 
+library(tidyverse) 
+library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
+library(dplyr)
+```
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+Sys.setlocale("LC_TIME","English")
+
+cpi <- read_excel("cpi data/cpi+division+group.xlsx")
+
+
+setDF(cpi)
+
+#
+cols.num <- c(colnames(cpi))
+cpi[cols.num] <- sapply(cpi[cols.num],as.numeric)
+
+
+cpi <- as.data.table(cpi)
+colnames(cpi) = gsub("&", "and", colnames(cpi))
+
+COPY<-copy(cpi)
+tracemem(COPY)==tracemem(cpi)
+
+
+Data_A = as.data.table (cpi)
+#
+
+
+
+#
+Varnames <- copy(names(Data_A))
+Data_A[, (names(Data_A)) := lapply(.SD, as.numeric)][,
+                                                     rn := .I]
+melted <- melt(Data_A, id.vars="rn")[,
+                                     (paste0("lag_", 0:12)) := shift(value, 0:12, type="lag"),
+                                     by=variable][, 
+                                                  value:=NULL][]
+res <- dcast.data.table(melt(melted, id.vars=c("rn", "variable"), variable.name="lag"),
+                        rn ~ variable + lag, sum)
+
+#view results
+res[, ncol(res), with=FALSE]
+# lagged variable generation ----------------------------------------------
+
+
+cpi <- cpi[, unlist(lapply(.SD, shift, n = 0:12), recursive = FALSE)]#lags generation
+
+
+# Monthly Dummies ---------------------------------------------------------
+
+
+cpi$time <- seq.Date(from = as.Date("1988/01/01",format = "%Y/%m/%d"), by = "month", length.out = 387)
+cpi$time <- format(cpi$time, format = "%b")
+Sys.setlocale("LC_TIME","English")
+cpi <- fastDummies::dummy_cols(cpi, select_columns = "time", remove_most_frequent_dummy = TRUE,
+)
+cpi$time1 <- seq.Date(from = as.Date("1988/01/01",format = "%Y/%m/%d"), by = "month", length.out = 387)
+#
+
+
+
+# Extract time from 1993-2019 ---------------------------------------------
+
+
+
+newdata <- with(cpi, cpi[(time1) >= "1993-01-01" & (time1) <= "2019-12-01", ])#start from 93.1
+Trend <- seq_along(newdata$time1)
+#sapply(newdata, class)
+
+
+
+# deal with copy ----------------------------------------------------------
+
+
+COPY$time1 <- seq.Date(from = as.Date("1988/01/01",format = "%Y/%m/%d"), by = "month", length.out = 387)
+COPY <- with(COPY, COPY[(time1) >= "1993-01-01" & (time1) <= "2019-12-01", ])
+COPY = subset(COPY, select = -c(time1) )
+#lag
+```
+
+## Lag and VAT
+```{r}
+old13<-c(2:13)
+for (i in 1:12) {
+
+  assign(paste0("lag",i),select(newdata,ends_with(paste0(old13[i]))))
+
+}
+lag1 <- lag1 %>% select(-contains("12"))
+lag2 <- lag2 %>% select(-contains("13"))
+VAT1 <- as.numeric(newdata$`time1` == "2008-12-01")
+VAT2 <- as.numeric(newdata$`time1` == "2010-01-01")
+VAT3 <- as.numeric(newdata$`time1` == "2011-01-01")
+Recession <- as.numeric(newdata$`time1` >= "2008-04-01" & newdata$`time1`<= "2009-06-01")
+```
+## Monthly dummies variable position
+
+```{r  MONTYHLY DUMMIES }
+monthname<-c("time_Apr","time_Aug", "time_Dec",  "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep")
+
+for (i in 1:length(monthname)) {
+  print(
+ which(colnames(newdata)==monthname[i])
+)
+}
+```
+
+## Create time_Apr etc.
+the correct version. 首先把月度虚拟变量存储到cpilag 里. 然后用同一迭代变量 送到各自的time_下.
+**注意, 双迭代变量还未完全掌握, i 和j 一起用 必出错**
+```{r   }
+monthdummies<-newdata[,2251:2261]
+
+  for (i in 1:11) {
+  assign(colnames(monthdummies)[i],as.numeric(unlist(monthdummies[[i]])))
+  }
+
+
+```
+## CPI LDV variables position
+
+```{r simply lag and cpi}
+
+lag.list <- mget(paste0("lag", 1:12))
+
+
+for (i in 1:12) {
+  assign(paste0("lag",i),as.data.frame(lag.list[[i]]))
+}
+
+COPY <- as.data.frame(COPY)
+
+
+
+# CPI-LAGS ----------------------------------------------------------------
+cpi.list<-c(paste0("CPI ALL ITEMS",2:13))
+
+for (i in 1:length(cpi.list)) {
+  print(which(colnames(newdata)==cpi.list[i]))
+  
+}   
+cpilag<-newdata[,2:13]
+for (i in 1:12) {
+
+    
+ 
+  assign(paste0("CPI_lag",i),as.numeric(unlist(cpilag[,..i])))
+  
+}
+
+
+```
+
+## Rgression
+
+```{r model}
+# Regression Equation -----------------------------------------------------
+
+
+regression <- lapply(1:122, function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+lag4[,x]+lag5[,x]+lag6[,x]+lag7[,x]+
+                                             lag8[,x]+lag9[,x]+lag10[,x]+lag11[,x]+lag12[,x]+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+CPI_lag5+CPI_lag6+CPI_lag7+
+                                             CPI_lag8+CPI_lag9+
+                                             CPI_lag10+CPI_lag11+CPI_lag12+ time_Aug + 
+                                             time_Dec+ time_Apr+ time_Jan+time_Jul+time_Jun +time_Mar+
+                                             time_May+time_Nov+time_Oct+time_Sep+VAT1+VAT2+VAT3+Recession+Trend)
+)
+for (i in 1:122) {
+  names(regression[[i]]$coefficients)<-c('Constant','lag1','lag2',"lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12",
+                                         "CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7","CPI_lag8","CPI_lag9",
+                                         "CPI_lag10","CPI_lag11","CPI_lag12","time_Aug" , 
+                                         "time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Mar",
+                                         "time_May","time_Nov","time_Oct","time_Sep","VAT1","VAT2","VAT3","Recession","Trend")
+}
+
+```
+
+## stepwise function
+```{r}
+# function ----------------------------------------------------------------
+
+
+# Automated model selection
+# Author      : Joris Meys
+# version     : 0.2
+# date        : 12/01/09
+
+#CHANGE LOG
+# 0.2   : check for empty scopevar vector
+
+# #CHANGE LOG -------------------------------------------------------------
+
+
+
+# Function has.interaction checks whether x is part of a term in terms
+# terms is a vector with names of terms from a model
+has.interaction <- function(x,terms){
+  out <- sapply(terms,function(i){
+    sum(1-(strsplit(x,":")[[1]] %in% strsplit(i,":")[[1]]))==0
+  })
+  return(sum(out)>0)
+}
+
+# Function Model.select
+# model is the lm object of the full model
+# keep is a list of model terms to keep in the model at all times
+# sig gives the significance for removal of a variable. Can be 0.1 too (see SPSS)
+# verbose=T gives the F-tests, dropped var and resulting model after 
+model.select <- function(model,keep,sig=0.05,verbose=F){
+  counter=1
+  # check input
+  if(!is(model,"lm")) stop(paste(deparse(substitute(model)),"is not an lm object\n"))
+  # calculate scope for drop1 function
+  terms <- attr(model$terms,"term.labels")
+  if(missing(keep)){ # set scopevars to all terms
+    scopevars <- terms
+  } else{            # select the scopevars if keep is used
+    index <- match(keep,terms)
+    # check if all is specified correctly
+    if(sum(is.na(index))>0){
+      novar <- keep[is.na(index)]
+      warning(paste(
+        c(novar,"cannot be found in the model",
+          "\nThese terms are ignored in the model selection."),
+        collapse=" "))
+      index <- as.vector(na.omit(index))
+    }
+    scopevars <- terms[-index]
+  }
+  
+  # Backward model selection : 
+  
+  while(T){
+    # extract the test statistics from drop.
+    test <- drop1(model, scope=scopevars,test="F")
+    
+    if(verbose){
+      cat("-------------STEP ",counter,"-------------\n",
+          "The drop statistics : \n")
+      print(test)
+    }
+    
+    pval <- test[,dim(test)[2]]
+    
+    names(pval) <- rownames(test)
+    pval <- sort(pval,decreasing=T)
+    
+    if(sum(is.na(pval))>0) stop(paste("Model",
+                                      deparse(substitute(model)),"is invalid. Check if all coefficients are estimated."))
+    
+    # check if all significant
+    if(pval[1]<sig) break # stops the loop if all remaining vars are sign.
+    
+    # select var to drop
+    i=1
+    while(T){
+      dropvar <- names(pval)[i]
+      check.terms <- terms[-match(dropvar,terms)]
+      x <- has.interaction(dropvar,check.terms)
+      if(x){i=i+1;next} else {break}              
+    } # end while(T) drop var
+    
+    if(pval[i]<sig) break # stops the loop if var to remove is significant
+    
+    if(verbose){
+      cat("\n--------\nTerm dropped in step",counter,":",dropvar,"\n--------\n\n")              
+    }
+    
+    #update terms, scopevars and model
+    scopevars <- scopevars[-match(dropvar,scopevars)]
+    terms <- terms[-match(dropvar,terms)]
+    
+    formul <- as.formula(paste(".~.-",dropvar))
+    model <- update(model,formul)
+    
+    if(length(scopevars)==0) {
+      warning("All variables are thrown out of the model.\n",
+              "No model could be specified.")
+      return()
+    }
+    counter=counter+1
+  } # end while(T) main loop
+  return(model)
+}
+
+```
+
+```{r}
+slr.total <- list()
+keep.dummies <- c("time_Aug","time_Apr",
+                  "time_Dec",  "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                  "VAT1","VAT2","VAT3","Recession","Trend")
+for (i in 2:length(regression)) {
+  slr.total[[i]] <- 
+    model.select(regression[[i]], keep = keep.dummies, sig = 0.05, verbose = F)
+}
+
+```
+11 divisions output
+```{r}
+div.poi<-c( 2, 16, 22, 28 ,41,  54,  62, 77, 80,  102, 103, 108)
+
+```
+

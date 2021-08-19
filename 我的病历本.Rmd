@@ -777,6 +777,9 @@ class.poi[,2]<-c((class.poi[,1]-1)[-1],"na")#结束的位置
 class.poi<-head(class.poi,-1)#删除最后一行
 write.csv(class.poi,"F:/R workspace/Modelling-UK-inflation-quarterly-/class-poisition.csv")
 
+
+
+
 ```
 **60属于第9部门**
 **根据 intercept 开始的位置, 和trend结束位置 划分df**
@@ -985,7 +988,7 @@ s.test
 
 # Table 3  Summary table before stepwise (Quarterly data)
 
-**修正summary table 在代码体现最大的变化应该是在run完ression的时候, 再把出去division and groupd的class 汇总在一起 生成新的sig.class, 在对季度数据应用的时候应当也是如此**
+**修正summary table 在代码体现最大的变化应该是在run完regression的时候, 再把出去division and groupd的class 汇总在一起 生成新的sig.class, 在对季度数据应用的时候应当也是如此**
 
 ```{r}
 rm(list = ls())
