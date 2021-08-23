@@ -192,7 +192,19 @@ for (i in 1:12) {
 
 ```{r model}
 # Regression Equation -----------------------------------------------------
+reg.model <- lapply(1:173, function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+lag4[,x]+
+                                            lag5[,x]+lag6[,x]+lag7[,x]+lag8[,x]+lag9[,x]+
+                                            lag10[,x]+lag11[,x]+lag12[,x]+ time_Aug + 
+                                            time_Dec+ time_Apr+ time_Jan+time_Jul+time_Jun +
+                                            time_Mar+time_May+time_Nov+time_Oct+time_Sep+VAT1+VAT2+VAT3+Recession+Trend)
+)
 
+for (i in 1:173) {
+  names(reg.model[[i]]$coefficients)<-c('Constant','lag1','lag2',"lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12",
+                                        "time_Aug" , 
+                                        "time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Mar",
+                                        "time_May","time_Nov","time_Oct","time_Sep","VAT1","VAT2","VAT3","Recession","Trend")
+}
 
 regression <- lapply(1:122, function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+lag4[,x]+lag5[,x]+lag6[,x]+lag7[,x]+
                                              lag8[,x]+lag9[,x]+lag10[,x]+lag11[,x]+lag12[,x]+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+CPI_lag5+CPI_lag6+CPI_lag7+
@@ -331,10 +343,210 @@ for (i in 2:length(regression)) {
     model.select(regression[[i]], keep = keep.dummies, sig = 0.05, verbose = F)
 }
 
+CPI_ <- reg.model[[1]]
+slr.cpi <- model.select(CPI_,keep = keep.dummies,sig = 0.05,verbose = F)
 ```
-11 divisions output
+
 ```{r}
-div.poi<-c( 2, 16, 22, 28 ,41,  54,  62, 77, 80,  102, 103, 108)
+search_for_these <- c("lag1[, x]","lag2[, x]","lag3[, x]","lag4[, x]","lag5[, x]","lag6[, x]","lag7[, x]","lag8[, x]","lag9[, x]","lag10[, x]","lag11[, x]","lag12[, x]")
+ replace_with_these <- c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12")
+```
+
+## 会卡1下
+```{r}
+found<-list()
+for (i in 1:length(slr.total )) {
+  found[[i]] <- match(names(slr.total[[i]]$coefficients), search_for_these, nomatch = 0)
+  names(slr.total[[i]]$coefficients)[names(slr.total[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
+```
+
+```{r}
+found<-list()
+for (i in 1:length(slr.cpi )) {
+  found[[i]] <- match(names(slr.cpi$coefficients), search_for_these, nomatch = 0)
+  names(slr.cpi$coefficients)[names(slr.cpi$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
+```
+
+
+## 11 divisions output
+```{r}
+div.poi<-c( 1,15,21,27,40,53,61,76,79,100,101,106)
+vars.order<-c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12","CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7",
+                                             "CPI_lag8","CPI_lag9",
+                                             "CPI_lag10","CPI_lag11","CPI_lag12")
+```
+
+
+```{r}
+div.122.poi<-c(2, 16, 22, 28 ,41,  54,  62, 77, 80,  102, 103, 108)
+
+div.name<-c("CPI","01FB", "02AT", "03CF", "04HW", "05FH", "06HL", "07TR", "08CM", "09RC", "10ED" ,"11RH", "12MS")
+
+
+
+stargazer(slr.cpi,slr.total[div.poi],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(div.name),
+          summary = FALSE,
+          out = "F:/R workspace/Modelling-UK-inflation-quarterly-/divisions.html",
+          
+          se = NULL,type = "text"
+)
+```
+## Groups
+```{r}
+groups.name <- read_excel("groups name.xlsx")
+colnames(groups.name) = gsub("&", "and", colnames(groups.name))
+groups.name<-colnames(groups.name)
+without.1.86<-subset(COPY,select = -c(1,86))
+groups.poi.test<-vector()
+for (i in 1:length(groups.name)) {
+  groups.poi.test[i]<-which(colnames(without.1.86)==groups.name[i])
+  
+}
+
+groups.poi<-c(2,12,16,20,22,26,28,29,32,35,41,44,45,48,49,50,54,57,60,62,66,71,77,78,80,85,87,92,95,99,102,105,107,110,113,114,118,120)
+length(groups.poi)
+all(groups.poi.test==groups.poi)
+```
+
+```{r}
+stargazer(slr.total[groups.poi.test[1:9]],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(groups.name[1:9]),
+          summary = FALSE,
+          out = "F:/R workspace/Modelling-UK-inflation-quarterly-/groups1.html",
+          flip = FALSE,
+          se = NULL,type = "html"
+)
 
 ```
+
+
+
+
+**2**
+---
+````{r}
+stargazer(slr.total[groups.poi.test[10:18]],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(groups.name[10:18]),
+          summary = FALSE,
+          out = "F:/R workspace/Modelling-UK-inflation-quarterly-/groups2.html",
+          flip = FALSE,
+          se = NULL,type = "html"
+)
+```
+
+````{r}
+stargazer(slr.total[groups.poi.test[19:27]],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(groups.name[19:27]),
+          summary = FALSE,
+          out = "F:/R workspace/Modelling-UK-inflation-quarterly-/groups3.html",
+          flip = FALSE,
+          se = NULL,type = "html"
+)
+```
+
+
+````{r}
+stargazer(slr.total[groups.poi.test[28:38]],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(groups.name[28:38]),
+          summary = FALSE,
+          out = "F:/R workspace/Modelling-UK-inflation-quarterly-/groups4.html",
+          flip = FALSE,
+          se = NULL,type = "html"
+)
+```
+
+
+```{r}
+
+stargazer( slr.total[groups.poi.test[23]],
+          star.char = c("*"), 
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.05; ** p<0.01; "),
+
+          dep.var.labels.include = FALSE, 
+          notes.append = FALSE,  order = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20), 
+          report = "vc*", align = TRUE, header = FALSE, df = FALSE, digits = 2, single.row = TRUE,
+          model.numbers = FALSE,  
+          summary = FALSE, 
+          flip = FALSE, se = NULL, type = "text" )
+```
+
 

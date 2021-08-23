@@ -940,7 +940,7 @@ stargazer(slr.total[2:7],
 ```{r}
 CPI_ <- reg.model[[1]]
 slr.cpi <- model.select(CPI_,keep = keep.dummies,sig = 0.05,verbose = F)
-names(slr.cpi$coefficients)[2:3]<-c("lag1","lag2")
+
 
 #替换名称
 
