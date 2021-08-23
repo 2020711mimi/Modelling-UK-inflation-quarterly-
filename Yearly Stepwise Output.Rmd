@@ -354,6 +354,7 @@ search_for_these <- c("lag1[, x]","lag2[, x]","lag3[, x]","lag4[, x]","lag5[, x]
 
 ## 会卡1下
 ```{r}
+slr.total[sapply(slr.total, is.null)] <- NULL
 found<-list()
 for (i in 1:length(slr.total )) {
   found[[i]] <- match(names(slr.total[[i]]$coefficients), search_for_these, nomatch = 0)

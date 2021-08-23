@@ -319,13 +319,16 @@ division.name<-colnames(COPY[,div.122.poi])
 
 without.17na<-subset(COPY,select = -c((class_with_no_significant)))
 
+na.name<-colnames(COPY)[class_with_no_significant]
+
+idx=which(division.name %in% na.name)
+division.name=division.name[-idx]
 div.poi.test<-vector()
 for (i in 1:length(division.name)) {
   div.poi.test[i]<-which(colnames(without.17na)==division.name[i])
   
 }
-#手动把第12部门加上,因为11没有被中断了.
-div.poi.test<-append(div.poi.test,which(colnames(without.17na)==division.name[12]))
+
 length(div.poi.test)
 
 ```
@@ -387,7 +390,100 @@ sapply(shabi,length)
 
 ```
 
+### stargazer
 ```{r}
+stargazer(slr.total[groups.poi.test[1:8]],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+           omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
 
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(groups.name[1:8]),
+          summary = FALSE,
+          out = "F:/R workspace/Modelling-UK-inflation-quarterly-/Quarterly-groups1.html",
+          
+          se = NULL,type = "html"
+)
+#---
+
+stargazer(slr.total[groups.poi.test[9:16]],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+           omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(groups.name[9:16]),
+          summary = FALSE,
+          out = "F:/R workspace/Modelling-UK-inflation-quarterly-/Quarterly-groups2.html",
+          
+          se = NULL,type = "html"
+)
+
+stargazer(slr.total[groups.poi.test[17:24]],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+           omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(groups.name[17:24]),
+          summary = FALSE,
+          out = "F:/R workspace/Modelling-UK-inflation-quarterly-/Quarterly-groups3.html",
+          
+          se = NULL,type = "html"
+)
+
+stargazer(slr.total[groups.poi.test[25:34]],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+           omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(groups.name[25:34]),
+          summary = FALSE,
+          out = "F:/R workspace/Modelling-UK-inflation-quarterly-/Quarterly-groups4.html",
+          
+          se = NULL,type = "html"
+)
 ```
+
 
