@@ -1,0 +1,289 @@
+---
+title: "SUR"
+author: "Yiyi"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 3
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+# 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+ rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+## Packages
+```{r Library, include=FALSE}
+library(readxl)
+library(data.table)
+library(lubridate)#extract cpi time to newdata(furniture48)
+library(dplyr) 
+library(tidyverse) 
+library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
+library(dplyr)
+library(texreg)
+library(panelr)
+library(plm)
+library(ggplot2)
+library(systemfit)
+library(jtools)
+library(kableExtra)
+library(huxtable)
+library(lme4)
+library(gtools)
+library(mfx)
+library(modelsummary)
+library(memisc)
+library(foreign)
+```
+
+```{r}
+Sys.setlocale("LC_TIME","English")
+
+cpi <- read_excel("cpi data/cpi+division.xlsx")
+
+  
+setDF(cpi)
+pd<-cpi
+#增加时间序列
+
+pd$year <- seq.Date(from = as.Date("1988/01/01",format = "%Y/%m/%d"), by = "month", length.out = 387)
+
+E <- melt(setDT(pd), id.vars = c("year"), variable.name = "class_name",value.name = "inflation")
+```
+
+
+
+
+## lag and CPI
+```{r}
+#长列表, 合并名字和日期
+E <- pdata.frame(E, index=c("class_name","year"), drop.index=FALSE)
+#生成lag1:12根据inflation
+E[,paste0("lag",1:12)]<-lag(E$inflation,1:12)
+
+#前387行是cpi的数据,复制下来.
+test<-E[1:387,paste0("lag",1:12)]
+#把前387行cpi数据复制13遍,填充每一个部门. 并且存储在a1:a12里. 这就是cpi lag1-12
+for(i in 1:12){
+assign( paste0("CPI",i),rep(test[,paste0("lag",i)],times=nrow(E)/nrow(cpi)) )
+}
+#把存储在vectore里的cpilag写入df的列里.
+for(i in 1:12){
+  E[,paste0("CPI_lag", i)]<-get(paste0("CPI",i))
+}
+#cpi 和lag 只有前387 或者说只有cpi的部分是相同的. 从那之后 cpi lag就是不断重复前387行.
+E["EDUCATION-1988-02-01","CPI lag1"]==E["EDUCATION-1988-02-01","lag1"]
+E["CPI ALL ITEMS-1988-02-01","CPI lag1"]==E["CPI ALL ITEMS-1988-02-01","lag1"]
+
+
+```
+## dummy var
+```{r}
+E$VAT1 <- as.numeric(E$year == "2008-12-01")
+E$VAT2 <- as.numeric(E$year == "2010-01-01")
+E$VAT3 <- as.numeric(E$year == "2011-01-01")
+E$Recession <- as.numeric(as.character(E$year)  >= "2008-04-01" & as.character(E$year)  <= "2009-06-01")
+E$Trend <- seq_along(E$year)
+#monthly dummy
+E$time<-seq.Date(from = as.Date("1988/01/01",format = "%Y/%m/%d"), by = "month", length.out = 387)
+#把年转化成月
+E$time<-format(E$time, format = "%b")
+E <- fastDummies::dummy_cols(E,  select_columns = "time", 
+)
+
+```
+### remove feb and time
+```{r}
+#selecte time
+E$year<-as.character(E$year)
+E <- with(E, E[(year) >= "1993-01-01" & (year) <= "2019-12-01", ])
+E<-E[,-c(which(colnames(E)=="time"),which(colnames(E)=="time_Feb"))]
+```
+
+```{r}
+pd<-plm.data(E,c("class_name","year"))
+
+```
+
+## SUR
+```{r}
+#删除含有cpi的行
+div<-pd[!grepl("CPI ALL ITEMS", pd$class_name),]
+
+SUR<-systemfit(inflation~lag1+lag2+lag3+lag4+lag5+lag6+lag7+lag8+lag9+ lag10+lag11+lag12+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+CPI_lag5+CPI_lag6+CPI_lag7+
+                                             CPI_lag8+CPI_lag9+
+                                             CPI_lag10+CPI_lag11+CPI_lag12+ time_Aug + 
+                                             time_Dec+ time_Apr+ time_Jan+time_Jul+time_Jun +time_Mar+
+                                             time_May+time_Nov+time_Oct+time_Sep+VAT1+VAT2+VAT3+Recession+Trend,method="SUR",data=div)
+```
+
+
+```{r}
+summary.sur<-tidy(SUR)
+```
+
+
+
+
+## LM 只是一起回归 为了获得变量名字。
+```{r}
+ols1<-lm(inflation~lag1+lag2+lag3+lag4+lag5+lag6+lag7+lag8+lag9+ lag10+lag11+lag12+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+CPI_lag5+CPI_lag6+CPI_lag7+
+                                             CPI_lag8+CPI_lag9+
+                                             CPI_lag10+CPI_lag11+CPI_lag12+ time_Aug + 
+                                             time_Dec+ time_Apr+ time_Jan+time_Jul+time_Jun +time_Mar+
+                                             time_May+time_Nov+time_Oct+time_Sep+VAT1+VAT2+VAT3+Recession+Trend,data = div)
+
+fit3<-tidy(ols1)
+```
+## SYSTEMFIT OLS 12各部门得ols
+```{r}
+ols2<-systemfit(inflation~lag1+lag2+lag3+lag4+lag5+lag6+lag7+lag8+lag9+ lag10+lag11+lag12+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+CPI_lag5+CPI_lag6+CPI_lag7+
+                                             CPI_lag8+CPI_lag9+
+                                             CPI_lag10+CPI_lag11+CPI_lag12+ time_Aug + 
+                                             time_Dec+ time_Apr+ time_Jan+time_Jul+time_Jun +time_Mar+
+                                             time_May+time_Nov+time_Oct+time_Sep+VAT1+VAT2+VAT3+Recession+Trend,method="OLS",data=div)
+```
+## LMLIST OLS stargazer 不识别这个
+```{r}
+fits <- lmList(inflation~lag1+lag2+lag3+lag4+lag5+lag6+lag7+lag8+lag9+ lag10+lag11+lag12+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+CPI_lag5+CPI_lag6+CPI_lag7+
+                                             CPI_lag8+CPI_lag9+
+                                             CPI_lag10+CPI_lag11+CPI_lag12+ time_Aug + 
+                                             time_Dec+ time_Apr+ time_Jan+time_Jul+time_Jun +time_Mar+
+                                             time_May+time_Nov+time_Oct+time_Sep+VAT1+VAT2+VAT3+Recession+Trend | class_name, data=div)
+```
+## NLME LMIST WIN!!!!!!
+```{r}
+fit.NLME <- nlme::lmList(inflation~lag1+lag2+lag3+lag4+lag5+lag6+lag7+lag8+lag9+ lag10+lag11+lag12+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+CPI_lag5+CPI_lag6+CPI_lag7+
+                                             CPI_lag8+CPI_lag9+
+                                             CPI_lag10+CPI_lag11+CPI_lag12+ time_Aug + 
+                                             time_Dec+ time_Apr+ time_Jan+time_Jul+time_Jun +time_Mar+
+                                             time_May+time_Nov+time_Oct+time_Sep+VAT1+VAT2+VAT3+Recession+Trend | class_name, data=div)
+
+
+```
+
+```{r}
+div.name<-c("01FB", "02AT", "03CF", "04HW", "05FH", "06HL", "07TR", "08CM", "09RC", "10ED" ,"11RH", "12MS")
+```
+
+
+## OLS STARGAZER
+```{r}
+stargazer(fit.NLME[1:12],report = "vc*",type = "text",font.size="tiny",          model.names = FALSE, header=FALSE,
+          model.numbers = FALSE,out = "F:/R workspace/Modelling-UK-inflation-quarterly-/olstest.html",column.labels = div.name)
+```
+
+## OLS STARGAZER OMIT DUMMY
+
+```{r}
+stargazer(fit.NLME[1:12],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+     
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, digits.extra = 0,
+          single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(div.name),
+          summary = FALSE,
+          out = "F:/R workspace/Modelling-UK-inflation-quarterly-/sur_ols.html",
+          initial.zero = FALSE, 
+          omit.stat=c("LL","ser","f","adj.rsq","rsq"), 
+          se = NULL,type = "text"
+)
+```
+
+## sur html
+summary.sur 顺序不是01-12排序的, 是按字母排序的. 所以写入sur.df的列名字 也应该按照字母排序
+```{r}
+
+sur.df<-data.frame(matrix(nrow=41,ncol=12))
+cname<-E[!duplicated(E$class_name), ]
+#colnames(sur.df)<-paste("OLS",cname$class_name[-c(1)],seperate="")
+colnames(sur.df)<-c("02AT","03CF","08CM","10ED" ,"01FB", "05FH",  "06HL", "04HW", "12MS","09RC",    "11RH","07TR" )
+rownames(sur.df)<-fit3$term
+
+
+poi <- which(grepl('.*Intercept*', summary.sur$term))
+
+div.start<-which((summary.sur$term)=="(Intercept)")
+sur.df[,1]<-summary.sur$estimate[1:41]
+for (i in 1:12) {
+  sur.df[,i]<-summary.sur$estimate[as.numeric(poi[[i]]):as.numeric(poi[[i]]+40)]
+  
+}
+all(summary.sur$estimate[42:82]==sur.df[,2])
+
+write_html(sur.df, file = "SURtab.html")
+```
+
+## sur omit dummy
+```{r}
+sur.omit<-sur.df[-c(1,26:41),]
+sur.omit<-round(sur.omit,digits = 2)
+#colnames(sur.omit)<-div.name
+write_html(format(sur.omit, digits=2), file = "SUR_omit.html")
+```
+
+
+
+
+```{r}
+df2 <- data.frame(lapply(sur.omit,
+                         function(x) gsub("^0\\.", "\\.", gsub("^-0\\.", "-\\.", as.character(x)))),
+                  stringsAsFactors = FALSE)
+write_html(format(df2, digits=2), file = "SUR_omit_leading_zero.html")
+```
+
+
+```{r}
+star_summarysur<-mutate(summary.sur,signif = stars.pval(p.value))
+star_summarysur<-star_summarysur[,-c(2:7)]
+```
+
+```{r}
+
+star.weizhi<-grep("\\*",star_summarysur$signif)
+star_summarysur$term[star.weizhi]
+```
+
+
+```{r}
+summary(SUR)
+str(summary(SUR))
+CORRELATION<-cor(residuals(SUR), SUR$SUR$p)
+CORRELATION<-data.frame(CORRELATION)
+rownames(CORRELATION)<-c("02AT","03CF","08CM","10ED" ,"01FB", "05FH",  "06HL", "04HW", "12MS","09RC",    "11RH","07TR" )
+colnames(CORRELATION)<-rownames(CORRELATION)
+write_html(CORRELATION, file = "SUR_CORRELATION.html")
+
+
+```
+
+
+

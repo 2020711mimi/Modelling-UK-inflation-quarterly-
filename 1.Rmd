@@ -1,0 +1,55 @@
+---
+title: "Untitled"
+author: "Yiyi"
+date: "2021/8/30"
+output: 
+  pdf_document: 
+    keep_tex: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r echo=FALSE, results='asis'}
+library("rmarkdown")
+library("tinytex")
+library("stargazer")
+library("sandwich")
+
+m1 = lm(Fertility~ Agriculture, data = swiss)
+m2 = lm(Fertility~ Agriculture + Examination, data = swiss)
+m3 = lm(Fertility~ Agriculture + Examination + Education, data = swiss)
+m4 = lm(Fertility~ Agriculture + Examination + Education + Catholic, data = swiss)
+m5 = lm(Fertility~ Agriculture + Examination + Education + Catholic + Infant.Mortality, data = swiss)
+
+model.lst = list(m1, m2, m3, m4, m5)
+
+stargazer(m1,
+          m2,
+          m3,
+          m4,
+          m5,
+          title="How standardized fertility measure is affected by socio-economic indicators?",
+          type = "latex",
+          float = TRUE,
+          report = "vcs*",
+          se=lapply(model.lst, function(x) sqrt(diag(vcovHC(x, type = "HC1")))),
+          no.space = TRUE,
+          header=FALSE,
+          single.row = FALSE,
+          font.size = "small",
+          intercept.bottom = F,
+          column.labels = c("Iter1", "Iter-2", "Iter-3", "Iter-4", "Iter-5"),
+          column.separate = c(1, 1, 1, 1, 1),
+          digits = 2,
+          t.auto = F,
+          p.auto = F,
+          notes.align = "l",
+          notes = c("datasets::swiss", "lm() function with Robust SE"),
+          notes.append = TRUE,
+          omit.stat=c("f")
+          )
+
+```

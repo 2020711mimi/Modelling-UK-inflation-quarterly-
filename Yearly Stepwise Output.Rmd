@@ -36,6 +36,9 @@ library(officer)
 library(flextable)
 library(magrittr)
 library(dplyr)
+library(jtools)
+library(kableExtra)
+library(huxtable)
 ```
 
 
@@ -384,8 +387,10 @@ vars.order<-c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","la
 div.122.poi<-c(2, 16, 22, 28 ,41,  54,  62, 77, 80,  102, 103, 108)
 
 div.name<-c("CPI","01FB", "02AT", "03CF", "04HW", "05FH", "06HL", "07TR", "08CM", "09RC", "10ED" ,"11RH", "12MS")
+```
 
 
+```{r}
 
 stargazer(slr.cpi,slr.total[div.poi],
           star.char = c("*"),
@@ -409,6 +414,7 @@ stargazer(slr.cpi,slr.total[div.poi],
           
           se = NULL,type = "text"
 )
+
 ```
 ## Groups
 ```{r}

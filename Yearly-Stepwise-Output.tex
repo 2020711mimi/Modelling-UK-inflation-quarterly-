@@ -1,0 +1,893 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Yearly Stepwise Output},
+  pdfauthor={Yiyi},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{graphicx}
+\usepackage{siunitx}
+\usepackage{hhline}
+\usepackage{calc}
+\usepackage{tabularx}
+\usepackage{adjustbox}
+\usepackage{hyperref}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{Yearly Stepwise Output}
+\author{Yiyi}
+\date{2021-08-30}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+\hypertarget{section}{%
+\section{}\label{section}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+ \FunctionTok{rm}\NormalTok{(}\AttributeTok{list =} \FunctionTok{ls}\NormalTok{())}
+\FunctionTok{Sys.setlocale}\NormalTok{(}\StringTok{"LC\_TIME"}\NormalTok{, }\StringTok{"English"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "English_United States.1252"
+\end{verbatim}
+
+\hypertarget{packages}{%
+\subsection{Packages}\label{packages}}
+
+\hypertarget{lag-and-vat}{%
+\subsection{Lag and VAT}\label{lag-and-vat}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{old13}\OtherTok{\textless{}{-}}\FunctionTok{c}\NormalTok{(}\DecValTok{2}\SpecialCharTok{:}\DecValTok{13}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\DecValTok{12}\NormalTok{) \{}
+
+  \FunctionTok{assign}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(}\StringTok{"lag"}\NormalTok{,i),}\FunctionTok{select}\NormalTok{(newdata,}\FunctionTok{ends\_with}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(old13[i]))))}
+
+\NormalTok{\}}
+\NormalTok{lag1 }\OtherTok{\textless{}{-}}\NormalTok{ lag1 }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{contains}\NormalTok{(}\StringTok{"12"}\NormalTok{))}
+\NormalTok{lag2 }\OtherTok{\textless{}{-}}\NormalTok{ lag2 }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{contains}\NormalTok{(}\StringTok{"13"}\NormalTok{))}
+\NormalTok{VAT1 }\OtherTok{\textless{}{-}} \FunctionTok{as.numeric}\NormalTok{(newdata}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{time1}\StringTok{\textasciigrave{}} \SpecialCharTok{==} \StringTok{"2008{-}12{-}01"}\NormalTok{)}
+\NormalTok{VAT2 }\OtherTok{\textless{}{-}} \FunctionTok{as.numeric}\NormalTok{(newdata}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{time1}\StringTok{\textasciigrave{}} \SpecialCharTok{==} \StringTok{"2010{-}01{-}01"}\NormalTok{)}
+\NormalTok{VAT3 }\OtherTok{\textless{}{-}} \FunctionTok{as.numeric}\NormalTok{(newdata}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{time1}\StringTok{\textasciigrave{}} \SpecialCharTok{==} \StringTok{"2011{-}01{-}01"}\NormalTok{)}
+\NormalTok{Recession }\OtherTok{\textless{}{-}} \FunctionTok{as.numeric}\NormalTok{(newdata}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{time1}\StringTok{\textasciigrave{}} \SpecialCharTok{\textgreater{}=} \StringTok{"2008{-}04{-}01"} \SpecialCharTok{\&}\NormalTok{ newdata}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{time1}\StringTok{\textasciigrave{}}\SpecialCharTok{\textless{}=} \StringTok{"2009{-}06{-}01"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{monthly-dummies-variable-position}{%
+\subsection{Monthly dummies variable
+position}\label{monthly-dummies-variable-position}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{monthname}\OtherTok{\textless{}{-}}\FunctionTok{c}\NormalTok{(}\StringTok{"time\_Apr"}\NormalTok{,}\StringTok{"time\_Aug"}\NormalTok{, }\StringTok{"time\_Dec"}\NormalTok{,  }\StringTok{"time\_Jan"}\NormalTok{,}\StringTok{"time\_Jul"}\NormalTok{,}\StringTok{"time\_Jun"}\NormalTok{ ,}\StringTok{"time\_Mar"}\NormalTok{,}\StringTok{"time\_May"}\NormalTok{,}\StringTok{"time\_Nov"}\NormalTok{,}\StringTok{"time\_Oct"}\NormalTok{,}\StringTok{"time\_Sep"}\NormalTok{)}
+
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(monthname)) \{}
+  \FunctionTok{print}\NormalTok{(}
+ \FunctionTok{which}\NormalTok{(}\FunctionTok{colnames}\NormalTok{(newdata)}\SpecialCharTok{==}\NormalTok{monthname[i])}
+\NormalTok{)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 2251
+## [1] 2252
+## [1] 2253
+## [1] 2254
+## [1] 2255
+## [1] 2256
+## [1] 2257
+## [1] 2258
+## [1] 2259
+## [1] 2260
+## [1] 2261
+\end{verbatim}
+
+\hypertarget{create-time_apr-etc.}{%
+\subsection{Create time\_Apr etc.}\label{create-time_apr-etc.}}
+
+the correct version. 首先把月度虚拟变量存储到cpilag 里.
+然后用同一迭代变量 送到各自的time\_下. \textbf{注意,
+双迭代变量还未完全掌握, i 和j 一起用 必出错}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{monthdummies}\OtherTok{\textless{}{-}}\NormalTok{newdata[,}\DecValTok{2251}\SpecialCharTok{:}\DecValTok{2261}\NormalTok{]}
+
+  \ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\DecValTok{11}\NormalTok{) \{}
+  \FunctionTok{assign}\NormalTok{(}\FunctionTok{colnames}\NormalTok{(monthdummies)[i],}\FunctionTok{as.numeric}\NormalTok{(}\FunctionTok{unlist}\NormalTok{(monthdummies[[i]])))}
+\NormalTok{  \}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{cpi-ldv-variables-position}{%
+\subsection{CPI LDV variables
+position}\label{cpi-ldv-variables-position}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lag.list }\OtherTok{\textless{}{-}} \FunctionTok{mget}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(}\StringTok{"lag"}\NormalTok{, }\DecValTok{1}\SpecialCharTok{:}\DecValTok{12}\NormalTok{))}
+
+
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\DecValTok{12}\NormalTok{) \{}
+  \FunctionTok{assign}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(}\StringTok{"lag"}\NormalTok{,i),}\FunctionTok{as.data.frame}\NormalTok{(lag.list[[i]]))}
+\NormalTok{\}}
+
+\NormalTok{COPY }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(COPY)}
+
+
+
+\CommentTok{\# CPI{-}LAGS {-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}}
+\NormalTok{cpi.list}\OtherTok{\textless{}{-}}\FunctionTok{c}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(}\StringTok{"CPI ALL ITEMS"}\NormalTok{,}\DecValTok{2}\SpecialCharTok{:}\DecValTok{13}\NormalTok{))}
+
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(cpi.list)) \{}
+  \FunctionTok{print}\NormalTok{(}\FunctionTok{which}\NormalTok{(}\FunctionTok{colnames}\NormalTok{(newdata)}\SpecialCharTok{==}\NormalTok{cpi.list[i]))}
+  
+\NormalTok{\}   }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 2
+## [1] 3
+## [1] 4
+## [1] 5
+## [1] 6
+## [1] 7
+## [1] 8
+## [1] 9
+## [1] 10
+## [1] 11
+## [1] 12
+## [1] 13
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cpilag}\OtherTok{\textless{}{-}}\NormalTok{newdata[,}\DecValTok{2}\SpecialCharTok{:}\DecValTok{13}\NormalTok{]}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\DecValTok{12}\NormalTok{) \{}
+
+    
+ 
+  \FunctionTok{assign}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(}\StringTok{"CPI\_lag"}\NormalTok{,i),}\FunctionTok{as.numeric}\NormalTok{(}\FunctionTok{unlist}\NormalTok{(cpilag[,..i])))}
+  
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{rgression}{%
+\subsection{Rgression}\label{rgression}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Regression Equation {-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}}
+\NormalTok{reg.model }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{173}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(x) }\FunctionTok{lm}\NormalTok{(COPY[,x] }\SpecialCharTok{\textasciitilde{}}\NormalTok{ lag1[,x]}\SpecialCharTok{+}\NormalTok{lag2[,x]}\SpecialCharTok{+}\NormalTok{lag3[,x]}\SpecialCharTok{+}\NormalTok{lag4[,x]}\SpecialCharTok{+}
+\NormalTok{                                            lag5[,x]}\SpecialCharTok{+}\NormalTok{lag6[,x]}\SpecialCharTok{+}\NormalTok{lag7[,x]}\SpecialCharTok{+}\NormalTok{lag8[,x]}\SpecialCharTok{+}\NormalTok{lag9[,x]}\SpecialCharTok{+}
+\NormalTok{                                            lag10[,x]}\SpecialCharTok{+}\NormalTok{lag11[,x]}\SpecialCharTok{+}\NormalTok{lag12[,x]}\SpecialCharTok{+}\NormalTok{ time\_Aug }\SpecialCharTok{+} 
+\NormalTok{                                            time\_Dec}\SpecialCharTok{+}\NormalTok{ time\_Apr}\SpecialCharTok{+}\NormalTok{ time\_Jan}\SpecialCharTok{+}\NormalTok{time\_Jul}\SpecialCharTok{+}\NormalTok{time\_Jun }\SpecialCharTok{+}
+\NormalTok{                                            time\_Mar}\SpecialCharTok{+}\NormalTok{time\_May}\SpecialCharTok{+}\NormalTok{time\_Nov}\SpecialCharTok{+}\NormalTok{time\_Oct}\SpecialCharTok{+}\NormalTok{time\_Sep}\SpecialCharTok{+}\NormalTok{VAT1}\SpecialCharTok{+}\NormalTok{VAT2}\SpecialCharTok{+}\NormalTok{VAT3}\SpecialCharTok{+}\NormalTok{Recession}\SpecialCharTok{+}\NormalTok{Trend)}
+\NormalTok{)}
+
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\DecValTok{173}\NormalTok{) \{}
+  \FunctionTok{names}\NormalTok{(reg.model[[i]]}\SpecialCharTok{$}\NormalTok{coefficients)}\OtherTok{\textless{}{-}}\FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}Constant\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}lag1\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}lag2\textquotesingle{}}\NormalTok{,}\StringTok{"lag3"}\NormalTok{,}\StringTok{"lag4"}\NormalTok{,}\StringTok{"lag5"}\NormalTok{,}\StringTok{"lag6"}\NormalTok{,}\StringTok{"lag7"}\NormalTok{,}\StringTok{"lag8"}\NormalTok{,}\StringTok{"lag9"}\NormalTok{,}\StringTok{"lag10"}\NormalTok{,}\StringTok{"lag11"}\NormalTok{,}\StringTok{"lag12"}\NormalTok{,}
+                                        \StringTok{"time\_Aug"}\NormalTok{ , }
+                                        \StringTok{"time\_Dec"}\NormalTok{, }\StringTok{"time\_Feb"}\NormalTok{, }\StringTok{"time\_Jan"}\NormalTok{,}\StringTok{"time\_Jul"}\NormalTok{,}\StringTok{"time\_Jun"}\NormalTok{ ,}\StringTok{"time\_Mar"}\NormalTok{,}
+                                        \StringTok{"time\_May"}\NormalTok{,}\StringTok{"time\_Nov"}\NormalTok{,}\StringTok{"time\_Oct"}\NormalTok{,}\StringTok{"time\_Sep"}\NormalTok{,}\StringTok{"VAT1"}\NormalTok{,}\StringTok{"VAT2"}\NormalTok{,}\StringTok{"VAT3"}\NormalTok{,}\StringTok{"Recession"}\NormalTok{,}\StringTok{"Trend"}\NormalTok{)}
+\NormalTok{\}}
+
+\NormalTok{regression }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{122}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(x) }\FunctionTok{lm}\NormalTok{(COPY[,x] }\SpecialCharTok{\textasciitilde{}}\NormalTok{ lag1[,x]}\SpecialCharTok{+}\NormalTok{lag2[,x]}\SpecialCharTok{+}\NormalTok{lag3[,x]}\SpecialCharTok{+}\NormalTok{lag4[,x]}\SpecialCharTok{+}\NormalTok{lag5[,x]}\SpecialCharTok{+}\NormalTok{lag6[,x]}\SpecialCharTok{+}\NormalTok{lag7[,x]}\SpecialCharTok{+}
+\NormalTok{                                             lag8[,x]}\SpecialCharTok{+}\NormalTok{lag9[,x]}\SpecialCharTok{+}\NormalTok{lag10[,x]}\SpecialCharTok{+}\NormalTok{lag11[,x]}\SpecialCharTok{+}\NormalTok{lag12[,x]}\SpecialCharTok{+}\NormalTok{CPI\_lag1}\SpecialCharTok{+}\NormalTok{CPI\_lag2}\SpecialCharTok{+}\NormalTok{CPI\_lag3}\SpecialCharTok{+}\NormalTok{CPI\_lag4}\SpecialCharTok{+}\NormalTok{CPI\_lag5}\SpecialCharTok{+}\NormalTok{CPI\_lag6}\SpecialCharTok{+}\NormalTok{CPI\_lag7}\SpecialCharTok{+}
+\NormalTok{                                             CPI\_lag8}\SpecialCharTok{+}\NormalTok{CPI\_lag9}\SpecialCharTok{+}
+\NormalTok{                                             CPI\_lag10}\SpecialCharTok{+}\NormalTok{CPI\_lag11}\SpecialCharTok{+}\NormalTok{CPI\_lag12}\SpecialCharTok{+}\NormalTok{ time\_Aug }\SpecialCharTok{+} 
+\NormalTok{                                             time\_Dec}\SpecialCharTok{+}\NormalTok{ time\_Apr}\SpecialCharTok{+}\NormalTok{ time\_Jan}\SpecialCharTok{+}\NormalTok{time\_Jul}\SpecialCharTok{+}\NormalTok{time\_Jun }\SpecialCharTok{+}\NormalTok{time\_Mar}\SpecialCharTok{+}
+\NormalTok{                                             time\_May}\SpecialCharTok{+}\NormalTok{time\_Nov}\SpecialCharTok{+}\NormalTok{time\_Oct}\SpecialCharTok{+}\NormalTok{time\_Sep}\SpecialCharTok{+}\NormalTok{VAT1}\SpecialCharTok{+}\NormalTok{VAT2}\SpecialCharTok{+}\NormalTok{VAT3}\SpecialCharTok{+}\NormalTok{Recession}\SpecialCharTok{+}\NormalTok{Trend)}
+\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\DecValTok{122}\NormalTok{) \{}
+  \FunctionTok{names}\NormalTok{(regression[[i]]}\SpecialCharTok{$}\NormalTok{coefficients)}\OtherTok{\textless{}{-}}\FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}Constant\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}lag1\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}lag2\textquotesingle{}}\NormalTok{,}\StringTok{"lag3"}\NormalTok{,}\StringTok{"lag4"}\NormalTok{,}\StringTok{"lag5"}\NormalTok{,}\StringTok{"lag6"}\NormalTok{,}\StringTok{"lag7"}\NormalTok{,}\StringTok{"lag8"}\NormalTok{,}\StringTok{"lag9"}\NormalTok{,}\StringTok{"lag10"}\NormalTok{,}\StringTok{"lag11"}\NormalTok{,}\StringTok{"lag12"}\NormalTok{,}
+                                         \StringTok{"CPI\_lag1"}\NormalTok{,}\StringTok{"CPI\_lag2"}\NormalTok{,}\StringTok{"CPI\_lag3"}\NormalTok{,}\StringTok{"CPI\_lag4"}\NormalTok{,}\StringTok{"CPI\_lag5"}\NormalTok{,}\StringTok{"CPI\_lag6"}\NormalTok{,}\StringTok{"CPI\_lag7"}\NormalTok{,}\StringTok{"CPI\_lag8"}\NormalTok{,}\StringTok{"CPI\_lag9"}\NormalTok{,}
+                                         \StringTok{"CPI\_lag10"}\NormalTok{,}\StringTok{"CPI\_lag11"}\NormalTok{,}\StringTok{"CPI\_lag12"}\NormalTok{,}\StringTok{"time\_Aug"}\NormalTok{ , }
+                                         \StringTok{"time\_Dec"}\NormalTok{, }\StringTok{"time\_Feb"}\NormalTok{, }\StringTok{"time\_Jan"}\NormalTok{,}\StringTok{"time\_Jul"}\NormalTok{,}\StringTok{"time\_Jun"}\NormalTok{ ,}\StringTok{"time\_Mar"}\NormalTok{,}
+                                         \StringTok{"time\_May"}\NormalTok{,}\StringTok{"time\_Nov"}\NormalTok{,}\StringTok{"time\_Oct"}\NormalTok{,}\StringTok{"time\_Sep"}\NormalTok{,}\StringTok{"VAT1"}\NormalTok{,}\StringTok{"VAT2"}\NormalTok{,}\StringTok{"VAT3"}\NormalTok{,}\StringTok{"Recession"}\NormalTok{,}\StringTok{"Trend"}\NormalTok{)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{stepwise-function}{%
+\subsection{stepwise function}\label{stepwise-function}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# function {-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}}
+
+
+\CommentTok{\# Automated model selection}
+\CommentTok{\# Author      : Joris Meys}
+\CommentTok{\# version     : 0.2}
+\CommentTok{\# date        : 12/01/09}
+
+\CommentTok{\#CHANGE LOG}
+\CommentTok{\# 0.2   : check for empty scopevar vector}
+
+\CommentTok{\# \#CHANGE LOG {-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}}
+
+
+
+\CommentTok{\# Function has.interaction checks whether x is part of a term in terms}
+\CommentTok{\# terms is a vector with names of terms from a model}
+\NormalTok{has.interaction }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(x,terms)\{}
+\NormalTok{  out }\OtherTok{\textless{}{-}} \FunctionTok{sapply}\NormalTok{(terms,}\ControlFlowTok{function}\NormalTok{(i)\{}
+    \FunctionTok{sum}\NormalTok{(}\DecValTok{1}\SpecialCharTok{{-}}\NormalTok{(}\FunctionTok{strsplit}\NormalTok{(x,}\StringTok{":"}\NormalTok{)[[}\DecValTok{1}\NormalTok{]] }\SpecialCharTok{\%in\%} \FunctionTok{strsplit}\NormalTok{(i,}\StringTok{":"}\NormalTok{)[[}\DecValTok{1}\NormalTok{]]))}\SpecialCharTok{==}\DecValTok{0}
+\NormalTok{  \})}
+  \FunctionTok{return}\NormalTok{(}\FunctionTok{sum}\NormalTok{(out)}\SpecialCharTok{\textgreater{}}\DecValTok{0}\NormalTok{)}
+\NormalTok{\}}
+
+\CommentTok{\# Function Model.select}
+\CommentTok{\# model is the lm object of the full model}
+\CommentTok{\# keep is a list of model terms to keep in the model at all times}
+\CommentTok{\# sig gives the significance for removal of a variable. Can be 0.1 too (see SPSS)}
+\CommentTok{\# verbose=T gives the F{-}tests, dropped var and resulting model after }
+\NormalTok{model.select }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(model,keep,}\AttributeTok{sig=}\FloatTok{0.05}\NormalTok{,}\AttributeTok{verbose=}\NormalTok{F)\{}
+\NormalTok{  counter}\OtherTok{=}\DecValTok{1}
+  \CommentTok{\# check input}
+  \ControlFlowTok{if}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is}\NormalTok{(model,}\StringTok{"lm"}\NormalTok{)) }\FunctionTok{stop}\NormalTok{(}\FunctionTok{paste}\NormalTok{(}\FunctionTok{deparse}\NormalTok{(}\FunctionTok{substitute}\NormalTok{(model)),}\StringTok{"is not an lm object}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{))}
+  \CommentTok{\# calculate scope for drop1 function}
+\NormalTok{  terms }\OtherTok{\textless{}{-}} \FunctionTok{attr}\NormalTok{(model}\SpecialCharTok{$}\NormalTok{terms,}\StringTok{"term.labels"}\NormalTok{)}
+  \ControlFlowTok{if}\NormalTok{(}\FunctionTok{missing}\NormalTok{(keep))\{ }\CommentTok{\# set scopevars to all terms}
+\NormalTok{    scopevars }\OtherTok{\textless{}{-}}\NormalTok{ terms}
+\NormalTok{  \} }\ControlFlowTok{else}\NormalTok{\{            }\CommentTok{\# select the scopevars if keep is used}
+\NormalTok{    index }\OtherTok{\textless{}{-}} \FunctionTok{match}\NormalTok{(keep,terms)}
+    \CommentTok{\# check if all is specified correctly}
+    \ControlFlowTok{if}\NormalTok{(}\FunctionTok{sum}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(index))}\SpecialCharTok{\textgreater{}}\DecValTok{0}\NormalTok{)\{}
+\NormalTok{      novar }\OtherTok{\textless{}{-}}\NormalTok{ keep[}\FunctionTok{is.na}\NormalTok{(index)]}
+      \FunctionTok{warning}\NormalTok{(}\FunctionTok{paste}\NormalTok{(}
+        \FunctionTok{c}\NormalTok{(novar,}\StringTok{"cannot be found in the model"}\NormalTok{,}
+          \StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{These terms are ignored in the model selection."}\NormalTok{),}
+        \AttributeTok{collapse=}\StringTok{" "}\NormalTok{))}
+\NormalTok{      index }\OtherTok{\textless{}{-}} \FunctionTok{as.vector}\NormalTok{(}\FunctionTok{na.omit}\NormalTok{(index))}
+\NormalTok{    \}}
+\NormalTok{    scopevars }\OtherTok{\textless{}{-}}\NormalTok{ terms[}\SpecialCharTok{{-}}\NormalTok{index]}
+\NormalTok{  \}}
+  
+  \CommentTok{\# Backward model selection : }
+  
+  \ControlFlowTok{while}\NormalTok{(T)\{}
+    \CommentTok{\# extract the test statistics from drop.}
+\NormalTok{    test }\OtherTok{\textless{}{-}} \FunctionTok{drop1}\NormalTok{(model, }\AttributeTok{scope=}\NormalTok{scopevars,}\AttributeTok{test=}\StringTok{"F"}\NormalTok{)}
+    
+    \ControlFlowTok{if}\NormalTok{(verbose)\{}
+      \FunctionTok{cat}\NormalTok{(}\StringTok{"{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}STEP "}\NormalTok{,counter,}\StringTok{"{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{,}
+          \StringTok{"The drop statistics : }\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+      \FunctionTok{print}\NormalTok{(test)}
+\NormalTok{    \}}
+    
+\NormalTok{    pval }\OtherTok{\textless{}{-}}\NormalTok{ test[,}\FunctionTok{dim}\NormalTok{(test)[}\DecValTok{2}\NormalTok{]]}
+    
+    \FunctionTok{names}\NormalTok{(pval) }\OtherTok{\textless{}{-}} \FunctionTok{rownames}\NormalTok{(test)}
+\NormalTok{    pval }\OtherTok{\textless{}{-}} \FunctionTok{sort}\NormalTok{(pval,}\AttributeTok{decreasing=}\NormalTok{T)}
+    
+    \ControlFlowTok{if}\NormalTok{(}\FunctionTok{sum}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(pval))}\SpecialCharTok{\textgreater{}}\DecValTok{0}\NormalTok{) }\FunctionTok{stop}\NormalTok{(}\FunctionTok{paste}\NormalTok{(}\StringTok{"Model"}\NormalTok{,}
+                                      \FunctionTok{deparse}\NormalTok{(}\FunctionTok{substitute}\NormalTok{(model)),}\StringTok{"is invalid. Check if all coefficients are estimated."}\NormalTok{))}
+    
+    \CommentTok{\# check if all significant}
+    \ControlFlowTok{if}\NormalTok{(pval[}\DecValTok{1}\NormalTok{]}\SpecialCharTok{\textless{}}\NormalTok{sig) }\ControlFlowTok{break} \CommentTok{\# stops the loop if all remaining vars are sign.}
+    
+    \CommentTok{\# select var to drop}
+\NormalTok{    i}\OtherTok{=}\DecValTok{1}
+    \ControlFlowTok{while}\NormalTok{(T)\{}
+\NormalTok{      dropvar }\OtherTok{\textless{}{-}} \FunctionTok{names}\NormalTok{(pval)[i]}
+\NormalTok{      check.terms }\OtherTok{\textless{}{-}}\NormalTok{ terms[}\SpecialCharTok{{-}}\FunctionTok{match}\NormalTok{(dropvar,terms)]}
+\NormalTok{      x }\OtherTok{\textless{}{-}} \FunctionTok{has.interaction}\NormalTok{(dropvar,check.terms)}
+      \ControlFlowTok{if}\NormalTok{(x)\{i}\OtherTok{=}\NormalTok{i}\SpecialCharTok{+}\DecValTok{1}\NormalTok{;}\ControlFlowTok{next}\NormalTok{\} }\ControlFlowTok{else}\NormalTok{ \{}\ControlFlowTok{break}\NormalTok{\}              }
+\NormalTok{    \} }\CommentTok{\# end while(T) drop var}
+    
+    \ControlFlowTok{if}\NormalTok{(pval[i]}\SpecialCharTok{\textless{}}\NormalTok{sig) }\ControlFlowTok{break} \CommentTok{\# stops the loop if var to remove is significant}
+    
+    \ControlFlowTok{if}\NormalTok{(verbose)\{}
+      \FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{{-}{-}{-}{-}{-}{-}{-}{-}}\SpecialCharTok{\textbackslash{}n}\StringTok{Term dropped in step"}\NormalTok{,counter,}\StringTok{":"}\NormalTok{,dropvar,}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{{-}{-}{-}{-}{-}{-}{-}{-}}\SpecialCharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)              }
+\NormalTok{    \}}
+    
+    \CommentTok{\#update terms, scopevars and model}
+\NormalTok{    scopevars }\OtherTok{\textless{}{-}}\NormalTok{ scopevars[}\SpecialCharTok{{-}}\FunctionTok{match}\NormalTok{(dropvar,scopevars)]}
+\NormalTok{    terms }\OtherTok{\textless{}{-}}\NormalTok{ terms[}\SpecialCharTok{{-}}\FunctionTok{match}\NormalTok{(dropvar,terms)]}
+    
+\NormalTok{    formul }\OtherTok{\textless{}{-}} \FunctionTok{as.formula}\NormalTok{(}\FunctionTok{paste}\NormalTok{(}\StringTok{".\textasciitilde{}.{-}"}\NormalTok{,dropvar))}
+\NormalTok{    model }\OtherTok{\textless{}{-}} \FunctionTok{update}\NormalTok{(model,formul)}
+    
+    \ControlFlowTok{if}\NormalTok{(}\FunctionTok{length}\NormalTok{(scopevars)}\SpecialCharTok{==}\DecValTok{0}\NormalTok{) \{}
+      \FunctionTok{warning}\NormalTok{(}\StringTok{"All variables are thrown out of the model.}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{,}
+              \StringTok{"No model could be specified."}\NormalTok{)}
+      \FunctionTok{return}\NormalTok{()}
+\NormalTok{    \}}
+\NormalTok{    counter}\OtherTok{=}\NormalTok{counter}\SpecialCharTok{+}\DecValTok{1}
+\NormalTok{  \} }\CommentTok{\# end while(T) main loop}
+  \FunctionTok{return}\NormalTok{(model)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{slr.total }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{()}
+\NormalTok{keep.dummies }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"time\_Aug"}\NormalTok{,}\StringTok{"time\_Apr"}\NormalTok{,}
+                  \StringTok{"time\_Dec"}\NormalTok{,  }\StringTok{"time\_Jan"}\NormalTok{,}\StringTok{"time\_Jul"}\NormalTok{,}\StringTok{"time\_Jun"}\NormalTok{ ,}\StringTok{"time\_Mar"}\NormalTok{,}\StringTok{"time\_May"}\NormalTok{,}\StringTok{"time\_Nov"}\NormalTok{,}\StringTok{"time\_Oct"}\NormalTok{,}\StringTok{"time\_Sep"}\NormalTok{,}
+                  \StringTok{"VAT1"}\NormalTok{,}\StringTok{"VAT2"}\NormalTok{,}\StringTok{"VAT3"}\NormalTok{,}\StringTok{"Recession"}\NormalTok{,}\StringTok{"Trend"}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{2}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(regression)) \{}
+\NormalTok{  slr.total[[i]] }\OtherTok{\textless{}{-}} 
+    \FunctionTok{model.select}\NormalTok{(regression[[i]], }\AttributeTok{keep =}\NormalTok{ keep.dummies, }\AttributeTok{sig =} \FloatTok{0.05}\NormalTok{, }\AttributeTok{verbose =}\NormalTok{ F)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in model.select(regression[[i]], keep = keep.dummies, sig = 0.05, : All variables are thrown out of the model.
+## No model could be specified.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{CPI\_ }\OtherTok{\textless{}{-}}\NormalTok{ reg.model[[}\DecValTok{1}\NormalTok{]]}
+\NormalTok{slr.cpi }\OtherTok{\textless{}{-}} \FunctionTok{model.select}\NormalTok{(CPI\_,}\AttributeTok{keep =}\NormalTok{ keep.dummies,}\AttributeTok{sig =} \FloatTok{0.05}\NormalTok{,}\AttributeTok{verbose =}\NormalTok{ F)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{search\_for\_these }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"lag1[, x]"}\NormalTok{,}\StringTok{"lag2[, x]"}\NormalTok{,}\StringTok{"lag3[, x]"}\NormalTok{,}\StringTok{"lag4[, x]"}\NormalTok{,}\StringTok{"lag5[, x]"}\NormalTok{,}\StringTok{"lag6[, x]"}\NormalTok{,}\StringTok{"lag7[, x]"}\NormalTok{,}\StringTok{"lag8[, x]"}\NormalTok{,}\StringTok{"lag9[, x]"}\NormalTok{,}\StringTok{"lag10[, x]"}\NormalTok{,}\StringTok{"lag11[, x]"}\NormalTok{,}\StringTok{"lag12[, x]"}\NormalTok{)}
+\NormalTok{ replace\_with\_these }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"lag1"}\NormalTok{,}\StringTok{"lag2"}\NormalTok{,}\StringTok{"lag3"}\NormalTok{,}\StringTok{"lag4"}\NormalTok{,}\StringTok{"lag5"}\NormalTok{,}\StringTok{"lag6"}\NormalTok{,}\StringTok{"lag7"}\NormalTok{,}\StringTok{"lag8"}\NormalTok{,}\StringTok{"lag9"}\NormalTok{,}\StringTok{"lag10"}\NormalTok{,}\StringTok{"lag11"}\NormalTok{,}\StringTok{"lag12"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{ux4f1aux53611ux4e0b}{%
+\subsection{会卡1下}\label{ux4f1aux53611ux4e0b}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{slr.total[}\FunctionTok{sapply}\NormalTok{(slr.total, is.null)] }\OtherTok{\textless{}{-}} \ConstantTok{NULL}
+\NormalTok{found}\OtherTok{\textless{}{-}}\FunctionTok{list}\NormalTok{()}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(slr.total )) \{}
+\NormalTok{  found[[i]] }\OtherTok{\textless{}{-}} \FunctionTok{match}\NormalTok{(}\FunctionTok{names}\NormalTok{(slr.total[[i]]}\SpecialCharTok{$}\NormalTok{coefficients), search\_for\_these, }\AttributeTok{nomatch =} \DecValTok{0}\NormalTok{)}
+  \FunctionTok{names}\NormalTok{(slr.total[[i]]}\SpecialCharTok{$}\NormalTok{coefficients)[}\FunctionTok{names}\NormalTok{(slr.total[[i]]}\SpecialCharTok{$}\NormalTok{coefficients) }\SpecialCharTok{\%in\%}\NormalTok{ search\_for\_these] }\OtherTok{\textless{}{-}}\NormalTok{ replace\_with\_these[found[[i]]]}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{found}\OtherTok{\textless{}{-}}\FunctionTok{list}\NormalTok{()}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(slr.cpi )) \{}
+\NormalTok{  found[[i]] }\OtherTok{\textless{}{-}} \FunctionTok{match}\NormalTok{(}\FunctionTok{names}\NormalTok{(slr.cpi}\SpecialCharTok{$}\NormalTok{coefficients), search\_for\_these, }\AttributeTok{nomatch =} \DecValTok{0}\NormalTok{)}
+  \FunctionTok{names}\NormalTok{(slr.cpi}\SpecialCharTok{$}\NormalTok{coefficients)[}\FunctionTok{names}\NormalTok{(slr.cpi}\SpecialCharTok{$}\NormalTok{coefficients) }\SpecialCharTok{\%in\%}\NormalTok{ search\_for\_these] }\OtherTok{\textless{}{-}}\NormalTok{ replace\_with\_these[found[[i]]]}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{divisions-output}{%
+\subsection{11 divisions output}\label{divisions-output}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{div.poi}\OtherTok{\textless{}{-}}\FunctionTok{c}\NormalTok{( }\DecValTok{1}\NormalTok{,}\DecValTok{15}\NormalTok{,}\DecValTok{21}\NormalTok{,}\DecValTok{27}\NormalTok{,}\DecValTok{40}\NormalTok{,}\DecValTok{53}\NormalTok{,}\DecValTok{61}\NormalTok{,}\DecValTok{76}\NormalTok{,}\DecValTok{79}\NormalTok{,}\DecValTok{100}\NormalTok{,}\DecValTok{101}\NormalTok{,}\DecValTok{106}\NormalTok{)}
+\NormalTok{vars.order}\OtherTok{\textless{}{-}}\FunctionTok{c}\NormalTok{(}\StringTok{"lag1"}\NormalTok{,}\StringTok{"lag2"}\NormalTok{,}\StringTok{"lag3"}\NormalTok{,}\StringTok{"lag4"}\NormalTok{,}\StringTok{"lag5"}\NormalTok{,}\StringTok{"lag6"}\NormalTok{,}\StringTok{"lag7"}\NormalTok{,}\StringTok{"lag8"}\NormalTok{,}\StringTok{"lag9"}\NormalTok{,}\StringTok{"lag10"}\NormalTok{,}\StringTok{"lag11"}\NormalTok{,}\StringTok{"lag12"}\NormalTok{,}\StringTok{"CPI\_lag1"}\NormalTok{,}\StringTok{"CPI\_lag2"}\NormalTok{,}\StringTok{"CPI\_lag3"}\NormalTok{,}\StringTok{"CPI\_lag4"}\NormalTok{,}\StringTok{"CPI\_lag5"}\NormalTok{,}\StringTok{"CPI\_lag6"}\NormalTok{,}\StringTok{"CPI\_lag7"}\NormalTok{,}
+                                             \StringTok{"CPI\_lag8"}\NormalTok{,}\StringTok{"CPI\_lag9"}\NormalTok{,}
+                                             \StringTok{"CPI\_lag10"}\NormalTok{,}\StringTok{"CPI\_lag11"}\NormalTok{,}\StringTok{"CPI\_lag12"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{div.}\FloatTok{122.}\NormalTok{poi}\OtherTok{\textless{}{-}}\FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{16}\NormalTok{, }\DecValTok{22}\NormalTok{, }\DecValTok{28}\NormalTok{ ,}\DecValTok{41}\NormalTok{,  }\DecValTok{54}\NormalTok{,  }\DecValTok{62}\NormalTok{, }\DecValTok{77}\NormalTok{, }\DecValTok{80}\NormalTok{,  }\DecValTok{102}\NormalTok{, }\DecValTok{103}\NormalTok{, }\DecValTok{108}\NormalTok{)}
+
+\NormalTok{div.name}\OtherTok{\textless{}{-}}\FunctionTok{c}\NormalTok{(}\StringTok{"CPI"}\NormalTok{,}\StringTok{"01FB"}\NormalTok{, }\StringTok{"02AT"}\NormalTok{, }\StringTok{"03CF"}\NormalTok{, }\StringTok{"04HW"}\NormalTok{, }\StringTok{"05FH"}\NormalTok{, }\StringTok{"06HL"}\NormalTok{, }\StringTok{"07TR"}\NormalTok{, }\StringTok{"08CM"}\NormalTok{, }\StringTok{"09RC"}\NormalTok{, }\StringTok{"10ED"}\NormalTok{ ,}\StringTok{"11RH"}\NormalTok{, }\StringTok{"12MS"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{stargazer}\NormalTok{(slr.cpi,slr.total[div.poi],}
+          \AttributeTok{star.char =} \FunctionTok{c}\NormalTok{(}\StringTok{"*"}\NormalTok{),}
+          \AttributeTok{star.cutoffs =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.01}\NormalTok{),}
+          \AttributeTok{notes =} \FunctionTok{c}\NormalTok{(}\StringTok{" * p\textless{}0.01; "}\NormalTok{),}
+          \AttributeTok{omit =} \FunctionTok{c}\NormalTok{(}\StringTok{"time\_Aug"}\NormalTok{,}\StringTok{"time\_Dec"}\NormalTok{, }\StringTok{"time\_Apr"}\NormalTok{, }\StringTok{"time\_Jan"}\NormalTok{,}\StringTok{"time\_Jul"}\NormalTok{,}\StringTok{"time\_Jun"}\NormalTok{ ,}\StringTok{"time\_Mar"}\NormalTok{,}\StringTok{"time\_May"}\NormalTok{,}\StringTok{"time\_Nov"}\NormalTok{,}\StringTok{"time\_Oct"}\NormalTok{,}\StringTok{"time\_Sep"}\NormalTok{,}
+                   \StringTok{"VAT1"}\NormalTok{,}\StringTok{"VAT2"}\NormalTok{,}\StringTok{"VAT3"}\NormalTok{,}\StringTok{"Recession"}\NormalTok{,}\StringTok{"Trend"}\NormalTok{,}\StringTok{\textquotesingle{}Constant\textquotesingle{}}\NormalTok{),}
+          \AttributeTok{order=}\FunctionTok{paste0}\NormalTok{(}\StringTok{"\^{}"}\NormalTok{, vars.order , }\StringTok{"$"}\NormalTok{),}
+          \AttributeTok{dep.var.labels.include =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{notes.append =} \ConstantTok{FALSE}\NormalTok{,}
+
+          \AttributeTok{report =} \StringTok{"vc*"}\NormalTok{,}
+          \AttributeTok{align =} \ConstantTok{TRUE}\NormalTok{,}
+          \AttributeTok{header =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{df =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{digits =} \DecValTok{2}\NormalTok{, }\AttributeTok{single.row =} \ConstantTok{TRUE}\NormalTok{,}
+          \AttributeTok{model.numbers =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{column.labels =} \FunctionTok{c}\NormalTok{(div.name),}
+          \AttributeTok{summary =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{out =} \StringTok{"F:/R workspace/Modelling{-}UK{-}inflation{-}quarterly{-}/divisions.html"}\NormalTok{,}
+          
+          \AttributeTok{se =} \ConstantTok{NULL}\NormalTok{,}\AttributeTok{type =} \StringTok{"latex"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[!htbp] \centering 
+  \caption{} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}}lD{.}{.}{-2} D{.}{.}{-2} D{.}{.}{-2} D{.}{.}{-2} D{.}{.}{-2} D{.}{.}{-2} D{.}{.}{-2} D{.}{.}{-2} D{.}{.}{-2} D{.}{.}{-2} D{.}{.}{-2} D{.}{.}{-2} D{.}{.}{-2} } 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{13}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-14} 
+ & \multicolumn{1}{c}{CPI} & \multicolumn{1}{c}{01FB} & \multicolumn{1}{c}{02AT} & \multicolumn{1}{c}{03CF} & \multicolumn{1}{c}{04HW} & \multicolumn{1}{c}{05FH} & \multicolumn{1}{c}{06HL} & \multicolumn{1}{c}{07TR} & \multicolumn{1}{c}{08CM} & \multicolumn{1}{c}{09RC} & \multicolumn{1}{c}{10ED} & \multicolumn{1}{c}{11RH} & \multicolumn{1}{c}{12MS} \\ 
+\hline \\[-1.8ex] 
+ lag1 & 0.11 & 0.15^{*} & -0.15^{*} & -0.19^{*} & 0.22^{*} & -0.26^{*} & -0.38^{*} &  &  & -0.18^{*} &  &  &  \\ 
+  lag2 &  &  &  & -0.13^{*} &  & -0.22^{*} & -0.39^{*} &  &  &  &  &  &  \\ 
+  lag3 &  &  &  & -0.13 &  &  & 0.13 &  &  &  &  &  & 0.13 \\ 
+  lag4 &  &  &  & -0.13^{*} &  &  & -0.24^{*} &  &  & 0.13 &  &  &  \\ 
+  lag5 &  &  &  &  &  &  & -0.19^{*} &  &  & 0.14 &  &  &  \\ 
+  lag6 &  &  &  & 0.28^{*} &  & 0.21^{*} & -0.22^{*} &  &  & 0.18^{*} &  &  &  \\ 
+  lag10 &  &  &  &  &  & -0.15^{*} &  &  &  &  &  &  &  \\ 
+  lag11 &  &  &  &  &  & -0.11 & -0.15^{*} &  &  &  &  &  &  \\ 
+  lag12 & 0.27^{*} & 0.13 & 0.27^{*} & 0.33^{*} & 0.14 & 0.35^{*} &  & 0.24^{*} &  & 0.22^{*} & 0.47^{*} & 0.19^{*} & 0.13 \\ 
+  CPI\_lag1 &  &  &  &  &  &  &  & 0.50 &  &  &  &  &  \\ 
+  CPI\_lag3 &  &  & 0.33 & 0.67^{*} & 0.38 &  &  & -0.57^{*} & 0.50^{*} &  & 0.64 &  &  \\ 
+  CPI\_lag4 &  & 0.34 &  &  &  &  &  &  &  &  &  &  &  \\ 
+  CPI\_lag6 &  &  & 0.62^{*} &  &  &  &  &  &  & -0.17 &  &  &  \\ 
+  CPI\_lag7 &  &  & -0.48^{*} &  &  & 0.58^{*} &  &  &  &  &  &  &  \\ 
+ \hline \\[-1.8ex] 
+Observations & \multicolumn{1}{c}{324} & \multicolumn{1}{c}{324} & \multicolumn{1}{c}{324} & \multicolumn{1}{c}{324} & \multicolumn{1}{c}{324} & \multicolumn{1}{c}{324} & \multicolumn{1}{c}{324} & \multicolumn{1}{c}{324} & \multicolumn{1}{c}{324} & \multicolumn{1}{c}{324} & \multicolumn{1}{c}{324} & \multicolumn{1}{c}{324} & \multicolumn{1}{c}{324} \\ 
+R$^{2}$ & \multicolumn{1}{c}{0.73} & \multicolumn{1}{c}{0.27} & \multicolumn{1}{c}{0.62} & \multicolumn{1}{c}{0.93} & \multicolumn{1}{c}{0.31} & \multicolumn{1}{c}{0.92} & \multicolumn{1}{c}{0.43} & \multicolumn{1}{c}{0.55} & \multicolumn{1}{c}{0.17} & \multicolumn{1}{c}{0.36} & \multicolumn{1}{c}{0.59} & \multicolumn{1}{c}{0.44} & \multicolumn{1}{c}{0.17} \\ 
+Adjusted R$^{2}$ & \multicolumn{1}{c}{0.72} & \multicolumn{1}{c}{0.22} & \multicolumn{1}{c}{0.60} & \multicolumn{1}{c}{0.93} & \multicolumn{1}{c}{0.26} & \multicolumn{1}{c}{0.92} & \multicolumn{1}{c}{0.39} & \multicolumn{1}{c}{0.52} & \multicolumn{1}{c}{0.12} & \multicolumn{1}{c}{0.31} & \multicolumn{1}{c}{0.57} & \multicolumn{1}{c}{0.41} & \multicolumn{1}{c}{0.12} \\ 
+Residual Std. Error & \multicolumn{1}{c}{0.19} & \multicolumn{1}{c}{0.57} & \multicolumn{1}{c}{0.57} & \multicolumn{1}{c}{0.68} & \multicolumn{1}{c}{0.57} & \multicolumn{1}{c}{0.44} & \multicolumn{1}{c}{0.69} & \multicolumn{1}{c}{0.74} & \multicolumn{1}{c}{0.65} & \multicolumn{1}{c}{0.29} & \multicolumn{1}{c}{1.15} & \multicolumn{1}{c}{0.17} & \multicolumn{1}{c}{0.30} \\ 
+F Statistic & \multicolumn{1}{c}{46.46$^{*}$} & \multicolumn{1}{c}{5.85$^{*}$} & \multicolumn{1}{c}{23.83$^{*}$} & \multicolumn{1}{c}{181.85$^{*}$} & \multicolumn{1}{c}{7.11$^{*}$} & \multicolumn{1}{c}{154.10$^{*}$} & \multicolumn{1}{c}{9.99$^{*}$} & \multicolumn{1}{c}{19.44$^{*}$} & \multicolumn{1}{c}{3.70$^{*}$} & \multicolumn{1}{c}{7.62$^{*}$} & \multicolumn{1}{c}{24.66$^{*}$} & \multicolumn{1}{c}{14.10$^{*}$} & \multicolumn{1}{c}{3.54$^{*}$} \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{13}{r}{ * p<0.01; } \\ 
+\end{tabular} 
+\end{table}
+
+\hypertarget{groups}{%
+\subsection{Groups}\label{groups}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{groups.name }\OtherTok{\textless{}{-}} \FunctionTok{read\_excel}\NormalTok{(}\StringTok{"groups name.xlsx"}\NormalTok{)}
+\FunctionTok{colnames}\NormalTok{(groups.name) }\OtherTok{=} \FunctionTok{gsub}\NormalTok{(}\StringTok{"\&"}\NormalTok{, }\StringTok{"and"}\NormalTok{, }\FunctionTok{colnames}\NormalTok{(groups.name))}
+\NormalTok{groups.name}\OtherTok{\textless{}{-}}\FunctionTok{colnames}\NormalTok{(groups.name)}
+\NormalTok{without.}\FloatTok{1.86}\OtherTok{\textless{}{-}}\FunctionTok{subset}\NormalTok{(COPY,}\AttributeTok{select =} \SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{86}\NormalTok{))}
+\NormalTok{groups.poi.test}\OtherTok{\textless{}{-}}\FunctionTok{vector}\NormalTok{()}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(groups.name)) \{}
+\NormalTok{  groups.poi.test[i]}\OtherTok{\textless{}{-}}\FunctionTok{which}\NormalTok{(}\FunctionTok{colnames}\NormalTok{(without.}\FloatTok{1.86}\NormalTok{)}\SpecialCharTok{==}\NormalTok{groups.name[i])}
+  
+\NormalTok{\}}
+
+\NormalTok{groups.poi}\OtherTok{\textless{}{-}}\FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{12}\NormalTok{,}\DecValTok{16}\NormalTok{,}\DecValTok{20}\NormalTok{,}\DecValTok{22}\NormalTok{,}\DecValTok{26}\NormalTok{,}\DecValTok{28}\NormalTok{,}\DecValTok{29}\NormalTok{,}\DecValTok{32}\NormalTok{,}\DecValTok{35}\NormalTok{,}\DecValTok{41}\NormalTok{,}\DecValTok{44}\NormalTok{,}\DecValTok{45}\NormalTok{,}\DecValTok{48}\NormalTok{,}\DecValTok{49}\NormalTok{,}\DecValTok{50}\NormalTok{,}\DecValTok{54}\NormalTok{,}\DecValTok{57}\NormalTok{,}\DecValTok{60}\NormalTok{,}\DecValTok{62}\NormalTok{,}\DecValTok{66}\NormalTok{,}\DecValTok{71}\NormalTok{,}\DecValTok{77}\NormalTok{,}\DecValTok{78}\NormalTok{,}\DecValTok{80}\NormalTok{,}\DecValTok{85}\NormalTok{,}\DecValTok{87}\NormalTok{,}\DecValTok{92}\NormalTok{,}\DecValTok{95}\NormalTok{,}\DecValTok{99}\NormalTok{,}\DecValTok{102}\NormalTok{,}\DecValTok{105}\NormalTok{,}\DecValTok{107}\NormalTok{,}\DecValTok{110}\NormalTok{,}\DecValTok{113}\NormalTok{,}\DecValTok{114}\NormalTok{,}\DecValTok{118}\NormalTok{,}\DecValTok{120}\NormalTok{)}
+\FunctionTok{length}\NormalTok{(groups.poi)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 38
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{all}\NormalTok{(groups.poi.test}\SpecialCharTok{==}\NormalTok{groups.poi)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] TRUE
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{stargazer}\NormalTok{(slr.total[groups.poi.test[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{9}\NormalTok{]],}
+          \AttributeTok{star.char =} \FunctionTok{c}\NormalTok{(}\StringTok{"*"}\NormalTok{),}
+          \AttributeTok{star.cutoffs =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.01}\NormalTok{),}
+          \AttributeTok{notes =} \FunctionTok{c}\NormalTok{(}\StringTok{" * p\textless{}0.01; "}\NormalTok{),}
+          \AttributeTok{omit =} \FunctionTok{c}\NormalTok{(}\StringTok{"time\_Aug"}\NormalTok{,}\StringTok{"time\_Dec"}\NormalTok{, }\StringTok{"time\_Apr"}\NormalTok{, }\StringTok{"time\_Jan"}\NormalTok{,}\StringTok{"time\_Jul"}\NormalTok{,}\StringTok{"time\_Jun"}\NormalTok{ ,}\StringTok{"time\_Mar"}\NormalTok{,}\StringTok{"time\_May"}\NormalTok{,}\StringTok{"time\_Nov"}\NormalTok{,}\StringTok{"time\_Oct"}\NormalTok{,}\StringTok{"time\_Sep"}\NormalTok{,}
+                   \StringTok{"VAT1"}\NormalTok{,}\StringTok{"VAT2"}\NormalTok{,}\StringTok{"VAT3"}\NormalTok{,}\StringTok{"Recession"}\NormalTok{,}\StringTok{"Trend"}\NormalTok{,}\StringTok{\textquotesingle{}Constant\textquotesingle{}}\NormalTok{),}
+          \AttributeTok{order=}\FunctionTok{paste0}\NormalTok{(}\StringTok{"\^{}"}\NormalTok{, vars.order , }\StringTok{"$"}\NormalTok{),}
+          \AttributeTok{dep.var.labels.include =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{notes.append =} \ConstantTok{FALSE}\NormalTok{,}
+
+          \AttributeTok{report =} \StringTok{"vc*"}\NormalTok{,}
+          \AttributeTok{align =} \ConstantTok{TRUE}\NormalTok{,}
+          \AttributeTok{header =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{df =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{digits =} \DecValTok{2}\NormalTok{, }\AttributeTok{single.row =} \ConstantTok{TRUE}\NormalTok{,}
+          \AttributeTok{model.numbers =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{column.labels =} \FunctionTok{c}\NormalTok{(groups.name[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{9}\NormalTok{]),}
+          \AttributeTok{summary =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{out =} \StringTok{"F:/R workspace/Modelling{-}UK{-}inflation{-}quarterly{-}/groups1.html"}\NormalTok{,}
+          \AttributeTok{flip =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{se =} \ConstantTok{NULL}\NormalTok{,}\AttributeTok{type =} \StringTok{"html"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## <table style="text-align:center"><tr><td colspan="10" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="9"><em>Dependent variable:</em></td></tr>
+## <tr><td></td><td colspan="9" style="border-bottom: 1px solid black"></td></tr>
+## <tr><td style="text-align:left"></td><td>FOOD</td><td>NON-ALCOHOLIC BEVERAGES</td><td>ALCOHOLIC BEVERAGES</td><td>TOBACCO</td><td>CLOTHING</td><td>FOOTWEAR INCLUDING REPAIRS</td><td>ACTUAL RENTALS FOR HOUSING</td><td>REGULAR MAINTENANCE AND REPAIR OF THE DWELLING</td><td>WATER SUPPLY AND MISC. SERVICES FOR THE DWELLING</td></tr>
+## <tr><td colspan="10" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">lag1</td><td>0.15<sup>*</sup></td><td>-0.30<sup>*</sup></td><td>-0.44<sup>*</sup></td><td></td><td>-0.22<sup>*</sup></td><td>-0.12</td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag2</td><td></td><td>-0.16<sup>*</sup></td><td>-0.27<sup>*</sup></td><td></td><td>-0.11</td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag3</td><td></td><td></td><td>-0.16<sup>*</sup></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag4</td><td></td><td></td><td></td><td></td><td>-0.09</td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag5</td><td></td><td>0.11</td><td></td><td></td><td>0.11</td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag6</td><td></td><td></td><td></td><td></td><td>0.34<sup>*</sup></td><td>0.17<sup>*</sup></td><td></td><td>0.19<sup>*</sup></td><td></td></tr>
+## <tr><td style="text-align:left">lag7</td><td></td><td>0.15<sup>*</sup></td><td></td><td></td><td>0.13</td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag9</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>0.14<sup>*</sup></td><td></td></tr>
+## <tr><td style="text-align:left">lag11</td><td></td><td></td><td></td><td></td><td></td><td>0.17<sup>*</sup></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag12</td><td>0.13</td><td>0.19<sup>*</sup></td><td>0.24<sup>*</sup></td><td>0.27<sup>*</sup></td><td>0.29<sup>*</sup></td><td>0.27<sup>*</sup></td><td>0.73<sup>*</sup></td><td></td><td>0.27<sup>*</sup></td></tr>
+## <tr><td style="text-align:left">CPI_lag1</td><td></td><td>0.48</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag3</td><td></td><td></td><td>0.80<sup>*</sup></td><td></td><td>0.60<sup>*</sup></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag4</td><td></td><td></td><td></td><td>0.58<sup>*</sup></td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag5</td><td></td><td></td><td></td><td></td><td></td><td></td><td>0.13</td><td>0.21</td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag6</td><td></td><td></td><td>1.17<sup>*</sup></td><td></td><td></td><td></td><td></td><td>-0.22</td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag7</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>0.22</td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag9</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-0.17<sup>*</sup></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag12</td><td></td><td></td><td></td><td></td><td></td><td></td><td>0.14</td><td></td><td></td></tr>
+## <tr><td colspan="10" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Observations</td><td>324</td><td>324</td><td>324</td><td>324</td><td>324</td><td>324</td><td>324</td><td>324</td><td>324</td></tr>
+## <tr><td style="text-align:left">R<sup>2</sup></td><td>0.25</td><td>0.33</td><td>0.72</td><td>0.40</td><td>0.93</td><td>0.84</td><td>0.86</td><td>0.24</td><td>0.57</td></tr>
+## <tr><td style="text-align:left">Adjusted R<sup>2</sup></td><td>0.21</td><td>0.29</td><td>0.70</td><td>0.36</td><td>0.93</td><td>0.83</td><td>0.86</td><td>0.18</td><td>0.54</td></tr>
+## <tr><td style="text-align:left">Residual Std. Error</td><td>0.62</td><td>0.76</td><td>0.82</td><td>0.73</td><td>0.74</td><td>0.74</td><td>0.22</td><td>0.38</td><td>1.04</td></tr>
+## <tr><td style="text-align:left">F Statistic</td><td>5.74<sup>*</sup></td><td>6.88<sup>*</sup></td><td>35.49<sup>*</sup></td><td>11.14<sup>*</sup></td><td>168.42<sup>*</sup></td><td>78.54<sup>*</sup></td><td>96.40<sup>*</sup></td><td>4.47<sup>*</sup></td><td>23.57<sup>*</sup></td></tr>
+## <tr><td colspan="10" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="9" style="text-align:right">* p<0.01;</td></tr>
+## </table>
+\end{verbatim}
+
+\hypertarget{section-1}{%
+\subsection{\texorpdfstring{\textbf{2}}{2}}\label{section-1}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{stargazer}\NormalTok{(slr.total[groups.poi.test[}\DecValTok{10}\SpecialCharTok{:}\DecValTok{18}\NormalTok{]],}
+          \AttributeTok{star.char =} \FunctionTok{c}\NormalTok{(}\StringTok{"*"}\NormalTok{),}
+          \AttributeTok{star.cutoffs =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.01}\NormalTok{),}
+          \AttributeTok{notes =} \FunctionTok{c}\NormalTok{(}\StringTok{" * p\textless{}0.01; "}\NormalTok{),}
+          \AttributeTok{omit =} \FunctionTok{c}\NormalTok{(}\StringTok{"time\_Aug"}\NormalTok{,}\StringTok{"time\_Dec"}\NormalTok{, }\StringTok{"time\_Apr"}\NormalTok{, }\StringTok{"time\_Jan"}\NormalTok{,}\StringTok{"time\_Jul"}\NormalTok{,}\StringTok{"time\_Jun"}\NormalTok{ ,}\StringTok{"time\_Mar"}\NormalTok{,}\StringTok{"time\_May"}\NormalTok{,}\StringTok{"time\_Nov"}\NormalTok{,}\StringTok{"time\_Oct"}\NormalTok{,}\StringTok{"time\_Sep"}\NormalTok{,}
+                   \StringTok{"VAT1"}\NormalTok{,}\StringTok{"VAT2"}\NormalTok{,}\StringTok{"VAT3"}\NormalTok{,}\StringTok{"Recession"}\NormalTok{,}\StringTok{"Trend"}\NormalTok{,}\StringTok{\textquotesingle{}Constant\textquotesingle{}}\NormalTok{),}
+          \AttributeTok{order=}\FunctionTok{paste0}\NormalTok{(}\StringTok{"\^{}"}\NormalTok{, vars.order , }\StringTok{"$"}\NormalTok{),}
+          \AttributeTok{dep.var.labels.include =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{notes.append =} \ConstantTok{FALSE}\NormalTok{,}
+
+          \AttributeTok{report =} \StringTok{"vc*"}\NormalTok{,}
+          \AttributeTok{align =} \ConstantTok{TRUE}\NormalTok{,}
+          \AttributeTok{header =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{df =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{digits =} \DecValTok{2}\NormalTok{, }\AttributeTok{single.row =} \ConstantTok{TRUE}\NormalTok{,}
+          \AttributeTok{model.numbers =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{column.labels =} \FunctionTok{c}\NormalTok{(groups.name[}\DecValTok{10}\SpecialCharTok{:}\DecValTok{18}\NormalTok{]),}
+          \AttributeTok{summary =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{out =} \StringTok{"F:/R workspace/Modelling{-}UK{-}inflation{-}quarterly{-}/groups2.html"}\NormalTok{,}
+          \AttributeTok{flip =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{se =} \ConstantTok{NULL}\NormalTok{,}\AttributeTok{type =} \StringTok{"html"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## <table style="text-align:center"><tr><td colspan="10" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="9"><em>Dependent variable:</em></td></tr>
+## <tr><td></td><td colspan="9" style="border-bottom: 1px solid black"></td></tr>
+## <tr><td style="text-align:left"></td><td>ELECTRICITY, GAS AND OTHER FUELS</td><td>FURNITURE, FURNISHINGS and CARPETS</td><td>HOUSEHOLD TEXTILES</td><td>HOUSEHOLD APPLIANCES, FITTING AND REPAIRS</td><td>GLASSWARE, TABLEWARE and HOUSEHOLD UTENSILS</td><td>TOOLS AND EQUIPMENT FOR HOUSE AND GARDEN</td><td>GOODS AND SERVICES FOR ROUTINE MAINTENANCE</td><td>MEDICAL PRODUCTS, APPLIANCES AND EQUIPMENT</td><td>OUT-PATIENT SERVICES</td></tr>
+## <tr><td colspan="10" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">lag1</td><td>0.26<sup>*</sup></td><td>-0.50<sup>*</sup></td><td>-0.35<sup>*</sup></td><td>-0.20<sup>*</sup></td><td>-0.31<sup>*</sup></td><td></td><td>-0.22<sup>*</sup></td><td>-0.43<sup>*</sup></td><td></td></tr>
+## <tr><td style="text-align:left">lag2</td><td></td><td>-0.37<sup>*</sup></td><td>-0.16<sup>*</sup></td><td></td><td>-0.11</td><td></td><td></td><td>-0.35<sup>*</sup></td><td></td></tr>
+## <tr><td style="text-align:left">lag3</td><td></td><td>-0.14<sup>*</sup></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag4</td><td></td><td>-0.10</td><td></td><td></td><td>-0.10</td><td></td><td>-0.17<sup>*</sup></td><td>-0.16<sup>*</sup></td><td></td></tr>
+## <tr><td style="text-align:left">lag5</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>-0.13</td><td></td></tr>
+## <tr><td style="text-align:left">lag6</td><td></td><td>0.14<sup>*</sup></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag7</td><td></td><td>0.12<sup>*</sup></td><td></td><td>0.15<sup>*</sup></td><td></td><td>0.10</td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag8</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-0.11</td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag10</td><td></td><td>-0.19<sup>*</sup></td><td></td><td></td><td>0.11</td><td></td><td></td><td>0.12</td><td>-0.20<sup>*</sup></td></tr>
+## <tr><td style="text-align:left">lag11</td><td></td><td>-0.22<sup>*</sup></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag12</td><td></td><td>0.26<sup>*</sup></td><td>0.18<sup>*</sup></td><td>0.24<sup>*</sup></td><td>0.14<sup>*</sup></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag1</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>-0.47</td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag2</td><td>0.88</td><td></td><td>-0.45</td><td></td><td></td><td>0.62<sup>*</sup></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag3</td><td></td><td></td><td></td><td></td><td>0.49</td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag4</td><td></td><td></td><td></td><td></td><td></td><td>0.52<sup>*</sup></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag5</td><td></td><td></td><td></td><td></td><td></td><td>0.39</td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag6</td><td></td><td>0.58</td><td>0.66<sup>*</sup></td><td></td><td></td><td></td><td>-0.33</td><td></td><td>-0.33</td></tr>
+## <tr><td style="text-align:left">CPI_lag7</td><td></td><td>0.68</td><td></td><td></td><td></td><td></td><td>0.84<sup>*</sup></td><td>0.43</td><td>0.37<sup>*</sup></td></tr>
+## <tr><td style="text-align:left">CPI_lag8</td><td></td><td></td><td></td><td></td><td></td><td>0.63<sup>*</sup></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag9</td><td></td><td>-0.52</td><td>0.49</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag11</td><td></td><td></td><td></td><td></td><td>0.62<sup>*</sup></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag12</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>0.48</td><td></td></tr>
+## <tr><td colspan="10" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Observations</td><td>324</td><td>324</td><td>324</td><td>324</td><td>324</td><td>324</td><td>324</td><td>324</td><td>230</td></tr>
+## <tr><td style="text-align:left">R<sup>2</sup></td><td>0.13</td><td>0.91</td><td>0.88</td><td>0.40</td><td>0.68</td><td>0.25</td><td>0.26</td><td>0.39</td><td>0.29</td></tr>
+## <tr><td style="text-align:left">Adjusted R<sup>2</sup></td><td>0.08</td><td>0.90</td><td>0.87</td><td>0.36</td><td>0.65</td><td>0.20</td><td>0.21</td><td>0.34</td><td>0.22</td></tr>
+## <tr><td style="text-align:left">Residual Std. Error</td><td>1.59</td><td>0.90</td><td>0.80</td><td>0.99</td><td>0.85</td><td>0.65</td><td>0.56</td><td>0.76</td><td>0.40</td></tr>
+## <tr><td style="text-align:left">F Statistic</td><td>2.63<sup>*</sup></td><td>106.00<sup>*</sup></td><td>103.43<sup>*</sup></td><td>10.65<sup>*</sup></td><td>27.66<sup>*</sup></td><td>4.76<sup>*</sup></td><td>5.00<sup>*</sup></td><td>7.91<sup>*</sup></td><td>4.44<sup>*</sup></td></tr>
+## <tr><td colspan="10" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="9" style="text-align:right">* p<0.01;</td></tr>
+## </table>
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{stargazer}\NormalTok{(slr.total[groups.poi.test[}\DecValTok{19}\SpecialCharTok{:}\DecValTok{27}\NormalTok{]],}
+          \AttributeTok{star.char =} \FunctionTok{c}\NormalTok{(}\StringTok{"*"}\NormalTok{),}
+          \AttributeTok{star.cutoffs =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.01}\NormalTok{),}
+          \AttributeTok{notes =} \FunctionTok{c}\NormalTok{(}\StringTok{" * p\textless{}0.01; "}\NormalTok{),}
+          \AttributeTok{omit =} \FunctionTok{c}\NormalTok{(}\StringTok{"time\_Aug"}\NormalTok{,}\StringTok{"time\_Dec"}\NormalTok{, }\StringTok{"time\_Apr"}\NormalTok{, }\StringTok{"time\_Jan"}\NormalTok{,}\StringTok{"time\_Jul"}\NormalTok{,}\StringTok{"time\_Jun"}\NormalTok{ ,}\StringTok{"time\_Mar"}\NormalTok{,}\StringTok{"time\_May"}\NormalTok{,}\StringTok{"time\_Nov"}\NormalTok{,}\StringTok{"time\_Oct"}\NormalTok{,}\StringTok{"time\_Sep"}\NormalTok{,}
+                   \StringTok{"VAT1"}\NormalTok{,}\StringTok{"VAT2"}\NormalTok{,}\StringTok{"VAT3"}\NormalTok{,}\StringTok{"Recession"}\NormalTok{,}\StringTok{"Trend"}\NormalTok{,}\StringTok{\textquotesingle{}Constant\textquotesingle{}}\NormalTok{),}
+          \AttributeTok{order=}\FunctionTok{paste0}\NormalTok{(}\StringTok{"\^{}"}\NormalTok{, vars.order , }\StringTok{"$"}\NormalTok{),}
+          \AttributeTok{dep.var.labels.include =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{notes.append =} \ConstantTok{FALSE}\NormalTok{,}
+
+          \AttributeTok{report =} \StringTok{"vc*"}\NormalTok{,}
+          \AttributeTok{align =} \ConstantTok{TRUE}\NormalTok{,}
+          \AttributeTok{header =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{df =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{digits =} \DecValTok{2}\NormalTok{, }\AttributeTok{single.row =} \ConstantTok{TRUE}\NormalTok{,}
+          \AttributeTok{model.numbers =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{column.labels =} \FunctionTok{c}\NormalTok{(groups.name[}\DecValTok{19}\SpecialCharTok{:}\DecValTok{27}\NormalTok{]),}
+          \AttributeTok{summary =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{out =} \StringTok{"F:/R workspace/Modelling{-}UK{-}inflation{-}quarterly{-}/groups3.html"}\NormalTok{,}
+          \AttributeTok{flip =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{se =} \ConstantTok{NULL}\NormalTok{,}\AttributeTok{type =} \StringTok{"html"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## <table style="text-align:center"><tr><td colspan="10" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="9"><em>Dependent variable:</em></td></tr>
+## <tr><td></td><td colspan="9" style="border-bottom: 1px solid black"></td></tr>
+## <tr><td style="text-align:left"></td><td>HOSPITAL SERVICES</td><td>PURCHASE OF VEHICLES</td><td>OPERATION OF PERSONAL TRANSPORT EQUIPMENT</td><td>TRANSPORT SERVICES</td><td>POSTAL SERVICES</td><td>TELEPHONE AND TELEFAX EQUIPMENT AND SERVICES</td><td>AUDIO-VISUAL EQUIPMENT AND RELATED PRODUCTS</td><td>OTHER MAJOR DURABLES FOR RECREATION AND CULTURE</td><td>OTHER RECREATIONAL ITEMS, GARDENS and PETS</td></tr>
+## <tr><td colspan="10" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">lag1</td><td></td><td>0.39<sup>*</sup></td><td>0.31<sup>*</sup></td><td>-0.49<sup>*</sup></td><td>-0.12</td><td></td><td></td><td></td><td>-0.42<sup>*</sup></td></tr>
+## <tr><td style="text-align:left">lag2</td><td></td><td></td><td></td><td>-0.34<sup>*</sup></td><td></td><td></td><td></td><td></td><td>-0.15</td></tr>
+## <tr><td style="text-align:left">lag3</td><td>-0.25<sup>*</sup></td><td></td><td></td><td>-0.40<sup>*</sup></td><td></td><td></td><td>0.17<sup>*</sup></td><td></td><td>-0.15<sup>*</sup></td></tr>
+## <tr><td style="text-align:left">lag4</td><td></td><td></td><td></td><td>-0.27<sup>*</sup></td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag5</td><td></td><td>-0.11</td><td></td><td>-0.24<sup>*</sup></td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag6</td><td>-0.21<sup>*</sup></td><td></td><td></td><td>-0.31<sup>*</sup></td><td></td><td></td><td>0.16<sup>*</sup></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag7</td><td></td><td></td><td></td><td>-0.30<sup>*</sup></td><td></td><td></td><td></td><td></td><td>-0.15<sup>*</sup></td></tr>
+## <tr><td style="text-align:left">lag8</td><td></td><td></td><td></td><td>-0.18<sup>*</sup></td><td></td><td></td><td>0.19<sup>*</sup></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag9</td><td></td><td></td><td></td><td>-0.39<sup>*</sup></td><td></td><td>0.12</td><td></td><td>0.14</td><td></td></tr>
+## <tr><td style="text-align:left">lag10</td><td></td><td>0.15<sup>*</sup></td><td></td><td>-0.32<sup>*</sup></td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag11</td><td></td><td></td><td>0.18<sup>*</sup></td><td>-0.20<sup>*</sup></td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag12</td><td>0.47<sup>*</sup></td><td></td><td></td><td>0.26<sup>*</sup></td><td></td><td></td><td>0.17<sup>*</sup></td><td>0.13</td><td>0.26<sup>*</sup></td></tr>
+## <tr><td style="text-align:left">CPI_lag2</td><td></td><td></td><td>-1.00<sup>*</sup></td><td>1.85<sup>*</sup></td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag3</td><td></td><td></td><td></td><td></td><td></td><td>0.48</td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag5</td><td></td><td>0.29</td><td>-0.58</td><td>1.20</td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag7</td><td></td><td>-0.42<sup>*</sup></td><td></td><td>1.12</td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag9</td><td></td><td></td><td></td><td>1.60<sup>*</sup></td><td>1.07</td><td></td><td></td><td></td><td></td></tr>
+## <tr><td colspan="10" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Observations</td><td>216</td><td>324</td><td>324</td><td>324</td><td>324</td><td>324</td><td>324</td><td>228</td><td>324</td></tr>
+## <tr><td style="text-align:left">R<sup>2</sup></td><td>0.67</td><td>0.41</td><td>0.33</td><td>0.80</td><td>0.21</td><td>0.17</td><td>0.35</td><td>0.36</td><td>0.38</td></tr>
+## <tr><td style="text-align:left">Adjusted R<sup>2</sup></td><td>0.64</td><td>0.37</td><td>0.29</td><td>0.78</td><td>0.17</td><td>0.12</td><td>0.31</td><td>0.30</td><td>0.33</td></tr>
+## <tr><td style="text-align:left">Residual Std. Error</td><td>0.47</td><td>0.51</td><td>0.95</td><td>1.89</td><td>1.63</td><td>0.70</td><td>0.86</td><td>0.43</td><td>0.75</td></tr>
+## <tr><td style="text-align:left">F Statistic</td><td>20.81<sup>*</sup></td><td>10.02<sup>*</sup></td><td>7.58<sup>*</sup></td><td>37.07<sup>*</sup></td><td>4.63<sup>*</sup></td><td>3.48<sup>*</sup></td><td>8.31<sup>*</sup></td><td>6.53<sup>*</sup></td><td>8.68<sup>*</sup></td></tr>
+## <tr><td colspan="10" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="9" style="text-align:right">* p<0.01;</td></tr>
+## </table>
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{stargazer}\NormalTok{(slr.total[groups.poi.test[}\DecValTok{28}\SpecialCharTok{:}\DecValTok{38}\NormalTok{]],}
+          \AttributeTok{star.char =} \FunctionTok{c}\NormalTok{(}\StringTok{"*"}\NormalTok{),}
+          \AttributeTok{star.cutoffs =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.01}\NormalTok{),}
+          \AttributeTok{notes =} \FunctionTok{c}\NormalTok{(}\StringTok{" * p\textless{}0.01; "}\NormalTok{),}
+          \AttributeTok{omit =} \FunctionTok{c}\NormalTok{(}\StringTok{"time\_Aug"}\NormalTok{,}\StringTok{"time\_Dec"}\NormalTok{, }\StringTok{"time\_Apr"}\NormalTok{, }\StringTok{"time\_Jan"}\NormalTok{,}\StringTok{"time\_Jul"}\NormalTok{,}\StringTok{"time\_Jun"}\NormalTok{ ,}\StringTok{"time\_Mar"}\NormalTok{,}\StringTok{"time\_May"}\NormalTok{,}\StringTok{"time\_Nov"}\NormalTok{,}\StringTok{"time\_Oct"}\NormalTok{,}\StringTok{"time\_Sep"}\NormalTok{,}
+                   \StringTok{"VAT1"}\NormalTok{,}\StringTok{"VAT2"}\NormalTok{,}\StringTok{"VAT3"}\NormalTok{,}\StringTok{"Recession"}\NormalTok{,}\StringTok{"Trend"}\NormalTok{,}\StringTok{\textquotesingle{}Constant\textquotesingle{}}\NormalTok{),}
+          \AttributeTok{order=}\FunctionTok{paste0}\NormalTok{(}\StringTok{"\^{}"}\NormalTok{, vars.order , }\StringTok{"$"}\NormalTok{),}
+          \AttributeTok{dep.var.labels.include =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{notes.append =} \ConstantTok{FALSE}\NormalTok{,}
+
+          \AttributeTok{report =} \StringTok{"vc*"}\NormalTok{,}
+          \AttributeTok{align =} \ConstantTok{TRUE}\NormalTok{,}
+          \AttributeTok{header =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{df =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{digits =} \DecValTok{2}\NormalTok{, }\AttributeTok{single.row =} \ConstantTok{TRUE}\NormalTok{,}
+          \AttributeTok{model.numbers =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{column.labels =} \FunctionTok{c}\NormalTok{(groups.name[}\DecValTok{28}\SpecialCharTok{:}\DecValTok{38}\NormalTok{]),}
+          \AttributeTok{summary =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{out =} \StringTok{"F:/R workspace/Modelling{-}UK{-}inflation{-}quarterly{-}/groups4.html"}\NormalTok{,}
+          \AttributeTok{flip =} \ConstantTok{FALSE}\NormalTok{,}
+          \AttributeTok{se =} \ConstantTok{NULL}\NormalTok{,}\AttributeTok{type =} \StringTok{"html"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## <table style="text-align:center"><tr><td colspan="12" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="11"><em>Dependent variable:</em></td></tr>
+## <tr><td></td><td colspan="11" style="border-bottom: 1px solid black"></td></tr>
+## <tr><td style="text-align:left"></td><td>RECREATIONAL AND CULTURAL SERVICES</td><td>BOOKS, NEWSPAPERS AND STATIONERY</td><td>PACKAGE HOLIDAY</td><td>CATERING SERVICES</td><td>ACCOMMODATION SERVICES</td><td>PERSONAL CARE</td><td>PERSONAL EFFECTS (NEC)</td><td>SOCIAL PROTECTION</td><td>INSURANCE</td><td>FINANCIAL SERVICES (NEC)</td><td>OTHER SERVICES (NEC)</td></tr>
+## <tr><td colspan="12" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">lag1</td><td>-0.17<sup>*</sup></td><td>-0.21<sup>*</sup></td><td>0.43<sup>*</sup></td><td></td><td>-0.21<sup>*</sup></td><td>-0.21<sup>*</sup></td><td>-0.16<sup>*</sup></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag2</td><td></td><td>-0.12</td><td>0.24<sup>*</sup></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag3</td><td>-0.11</td><td>-0.13</td><td></td><td></td><td></td><td></td><td></td><td></td><td>0.25<sup>*</sup></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag6</td><td></td><td></td><td></td><td></td><td>-0.19<sup>*</sup></td><td></td><td>0.18<sup>*</sup></td><td></td><td>0.15<sup>*</sup></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag8</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>0.12</td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">lag9</td><td></td><td></td><td>0.11</td><td></td><td></td><td></td><td></td><td></td><td></td><td>0.18<sup>*</sup></td><td>0.17<sup>*</sup></td></tr>
+## <tr><td style="text-align:left">lag12</td><td>0.22<sup>*</sup></td><td>0.26<sup>*</sup></td><td>-0.10</td><td>0.20<sup>*</sup></td><td></td><td>0.16<sup>*</sup></td><td>0.18<sup>*</sup></td><td>0.36<sup>*</sup></td><td>0.14<sup>*</sup></td><td>-0.11</td><td>0.21<sup>*</sup></td></tr>
+## <tr><td style="text-align:left">CPI_lag1</td><td>-0.26</td><td></td><td></td><td></td><td></td><td>0.26</td><td>0.55<sup>*</sup></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag2</td><td></td><td></td><td></td><td>0.07</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag3</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>-0.12</td><td></td><td>1.02</td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag4</td><td></td><td></td><td></td><td>0.11<sup>*</sup></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag6</td><td></td><td></td><td></td><td>0.07</td><td>-0.56<sup>*</sup></td><td></td><td>0.44<sup>*</sup></td><td>-0.13</td><td></td><td></td><td>-0.37</td></tr>
+## <tr><td style="text-align:left">CPI_lag7</td><td></td><td>0.47</td><td></td><td></td><td></td><td></td><td></td><td>0.12</td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag9</td><td>0.34<sup>*</sup></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>-0.69</td><td></td><td>-0.28</td></tr>
+## <tr><td style="text-align:left">CPI_lag10</td><td></td><td>-0.43</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag11</td><td></td><td></td><td></td><td>-0.08</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+## <tr><td style="text-align:left">CPI_lag12</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>-0.10</td><td></td><td></td><td></td></tr>
+## <tr><td colspan="12" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Observations</td><td>324</td><td>324</td><td>311</td><td>324</td><td>281</td><td>324</td><td>324</td><td>228</td><td>324</td><td>324</td><td>324</td></tr>
+## <tr><td style="text-align:left">R<sup>2</sup></td><td>0.62</td><td>0.34</td><td>0.47</td><td>0.53</td><td>0.34</td><td>0.23</td><td>0.74</td><td>0.61</td><td>0.25</td><td>0.08</td><td>0.28</td></tr>
+## <tr><td style="text-align:left">Adjusted R<sup>2</sup></td><td>0.60</td><td>0.30</td><td>0.43</td><td>0.50</td><td>0.30</td><td>0.18</td><td>0.72</td><td>0.57</td><td>0.20</td><td>0.02</td><td>0.23</td></tr>
+## <tr><td style="text-align:left">Residual Std. Error</td><td>0.45</td><td>0.70</td><td>0.29</td><td>0.12</td><td>0.69</td><td>0.46</td><td>0.53</td><td>0.15</td><td>1.01</td><td>1.74</td><td>0.51</td></tr>
+## <tr><td style="text-align:left">F Statistic</td><td>23.95<sup>*</sup></td><td>7.19<sup>*</sup></td><td>12.66<sup>*</sup></td><td>16.34<sup>*</sup></td><td>7.21<sup>*</sup></td><td>4.67<sup>*</sup></td><td>41.44<sup>*</sup></td><td>14.41<sup>*</sup></td><td>5.06<sup>*</sup></td><td>1.43</td><td>5.87<sup>*</sup></td></tr>
+## <tr><td colspan="12" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="11" style="text-align:right">* p<0.01;</td></tr>
+## </table>
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{stargazer}\NormalTok{( slr.total[groups.poi.test[}\DecValTok{23}\NormalTok{]],}
+          \AttributeTok{star.char =} \FunctionTok{c}\NormalTok{(}\StringTok{"*"}\NormalTok{), }
+          \AttributeTok{star.cutoffs =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.01}\NormalTok{),}
+          \AttributeTok{notes =} \FunctionTok{c}\NormalTok{(}\StringTok{" * p\textless{}0.05; ** p\textless{}0.01; "}\NormalTok{),}
+
+          \AttributeTok{dep.var.labels.include =} \ConstantTok{FALSE}\NormalTok{, }
+          \AttributeTok{notes.append =} \ConstantTok{FALSE}\NormalTok{,  }\AttributeTok{order =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{4}\NormalTok{,}\DecValTok{5}\NormalTok{,}\DecValTok{6}\NormalTok{,}\DecValTok{7}\NormalTok{,}\DecValTok{8}\NormalTok{,}\DecValTok{9}\NormalTok{,}\DecValTok{10}\NormalTok{,}\DecValTok{11}\NormalTok{,}\DecValTok{12}\NormalTok{,}\DecValTok{13}\NormalTok{,}\DecValTok{14}\NormalTok{,}\DecValTok{15}\NormalTok{,}\DecValTok{16}\NormalTok{,}\DecValTok{17}\NormalTok{,}\DecValTok{18}\NormalTok{,}\DecValTok{19}\NormalTok{,}\DecValTok{20}\NormalTok{), }
+          \AttributeTok{report =} \StringTok{"vc*"}\NormalTok{, }\AttributeTok{align =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{header =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{df =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{digits =} \DecValTok{2}\NormalTok{, }\AttributeTok{single.row =} \ConstantTok{TRUE}\NormalTok{,}
+          \AttributeTok{model.numbers =} \ConstantTok{FALSE}\NormalTok{,  }
+          \AttributeTok{summary =} \ConstantTok{FALSE}\NormalTok{, }
+          \AttributeTok{flip =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{se =} \ConstantTok{NULL}\NormalTok{, }\AttributeTok{type =} \StringTok{"text"}\NormalTok{ )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## ========================================
+##                     Dependent variable: 
+##                     --------------------
+## ----------------------------------------
+## lag1                       -0.12        
+## CPI_lag9                    1.07        
+## time_Aug                    0.28        
+## time_Dec                    0.01        
+## time_Apr                   3.29*        
+## time_Jan                   -0.20        
+## time_Jul                    0.36        
+## time_Jun                    0.12        
+## time_Mar                    0.25        
+## time_May                   1.31*        
+## time_Nov                   -0.04        
+## time_Oct                    0.98        
+## time_Sep                    0.20        
+## VAT1                       -0.65        
+## VAT2                        0.22        
+## VAT3                       -0.16        
+## Recession                   0.45        
+## Trend                      0.001        
+## Constant                   -0.52        
+## ----------------------------------------
+## Observations                324         
+## R2                          0.21        
+## Adjusted R2                 0.17        
+## Residual Std. Error         1.63        
+## F Statistic                4.63*        
+## ========================================
+## Note:               * p<0.05; ** p<0.01;
+\end{verbatim}
+
+\end{document}
