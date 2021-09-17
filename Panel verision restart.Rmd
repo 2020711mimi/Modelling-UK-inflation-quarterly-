@@ -50,6 +50,7 @@ library(mfx)
 library(modelsummary)
 library(memisc)
 library(foreign)
+library(psycho)
 ```
 
 ```{r}
@@ -274,16 +275,33 @@ star_summarysur$term[star.weizhi]
 
 
 ```{r}
-summary(SUR)
-str(summary(SUR))
+
+#summary(SUR)
+#str(summary(SUR))
 CORRELATION<-cor(residuals(SUR), SUR$SUR$p)
 CORRELATION<-data.frame(CORRELATION)
+
 rownames(CORRELATION)<-c("02AT","03CF","08CM","10ED" ,"01FB", "05FH",  "06HL", "04HW", "12MS","09RC",    "11RH","07TR" )
 colnames(CORRELATION)<-rownames(CORRELATION)
-write_html(CORRELATION, file = "SUR_CORRELATION.html")
 
+mycor<-CORRELATION[c("01FB","02AT","03CF","04HW","05FH","06HL","07TR","08CM","09RC","10ED","11RH","12MS"),c("01FB","02AT","03CF","04HW","05FH","06HL","07TR","08CM","09RC","10ED","11RH","12MS")]
 
+mcor<-mycor
+
+upper<-mcor
+upper[upper.tri(mcor)]<-""
+upper<-as.data.frame(upper)
+upper[]  <- lapply(upper, as.numeric) 
+upper %>% mutate(across(is.numeric, ~ round(., 2)))
+library(xtable)
+
+  
+print(xtable(upper), type="html",file = "SUR_CORRELATION.html")
 ```
+
+
+
+
 
 
 

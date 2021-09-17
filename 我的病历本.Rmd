@@ -532,6 +532,13 @@ while (i <=12) {
 }
 ```
 
+### cpi 0.01 第一个部门
+```{r}
+ length( which(test[[1]]$term==paste0("CPI_lag",1)&test[[1]]$p.value<0.01))
+  #/length(get(paste0("a",1))) *weight[[1]]
+### 2个显著,第一个部门11个regresion
+```
+
 ### a_cpi.0.05
 ```{r}
 a_cpi.0.05<-data.frame( row.names =  paste0("CPI_lag",1:12),
@@ -890,7 +897,7 @@ for (i in 1:12) {#前两列
     
 }
 ```
-## flextable 写入word
+ ## flextable 写入word
 ```{r}
 
 
