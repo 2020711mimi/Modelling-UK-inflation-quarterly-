@@ -114,6 +114,7 @@ CPI_lag3 <- (newdata$"CPI ALL ITEMS4")
 CPI_lag4 <- (newdata$"CPI ALL ITEMS5")
 
 ```
+
 ```{r}
 # Copy删除前四行? --------------------------------------------------
 
@@ -516,6 +517,10 @@ for(i in 1:12){
   class_length_73[i,1]<-length(which(get(paste0("stepwsie_a",i))$term=="Trend"))
 }
 ```
+```{r}
+length(which(stepwsie_a$term=="Trend"))
+```
+
 
 ## 创建	Table 4 Stepwise Summary Table 存储结果 是8*4.
 ```{r}
@@ -536,7 +541,7 @@ while (i <=12) {
   for (j in 1:4) {
  stepwise_lag_0.01_quarterly [j,i]  <-
   length( which((get(paste0("stepwsie_a",i)))$term==paste0("lag",j)&(get(paste0("stepwsie_a",i)))$p.value<0.01)
-  )/length(which(get(paste0("stepwsie_a",i))$term=="Trend"))*weight[[i]]
+  )/length(which(get(paste0("a",i))$term=="Trend"))weight[[i]]
   }
   i<-i+1
 }
@@ -554,7 +559,7 @@ while (i <=12) {
   for (j in 1:4) {
  stepwise_lag_0.05_quarterly [j,i]  <-
   length( which((get(paste0("stepwsie_a",i)))$term==paste0("lag",j)&(get(paste0("stepwsie_a",i)))$p.value<0.05)
-  )/length(which(get(paste0("stepwsie_a",i))$term=="Trend"))*weight[[i]]
+  )/length(which(get(paste0("a",i))$term=="Trend"))*weight[[i]]
   }
   i<-i+1
 }
@@ -572,7 +577,7 @@ while (i <=12) {
   for (j in 1:4) {
  stepwise_cpi_0.01_quarterly [j,i]  <-
   length( which((get(paste0("stepwsie_a",i)))$term==paste0("CPI_lag",j)&(get(paste0("stepwsie_a",i)))$p.value<0.01)
-  )/length(which(get(paste0("stepwsie_a",i))$term=="Trend"))*weight[[i]]
+  )/length(which(get(paste0("a",i))$term=="Trend"))*weight[[i]]
   }
   i<-i+1
 }
@@ -590,7 +595,7 @@ while (i <=12) {
   for (j in 1:4) {
  stepwise_cpi_0.05_quarterly [j,i]  <-
   length( which((get(paste0("stepwsie_a",i)))$term==paste0("CPI_lag",j)&(get(paste0("stepwsie_a",i)))$p.value<0.05)
-  )/length(which(get(paste0("stepwsie_a",i))$term=="Trend"))*weight[[i]]
+  )/length(which(get(paste0("a",i))$term=="Trend"))*weight[[i]]
   }
   i<-i+1
 }
