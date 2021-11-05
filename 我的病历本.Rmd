@@ -12,8 +12,13 @@ output:
   pdf_document:
     toc: yes
     toc_depth: '3'
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
+
 # 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -22,7 +27,9 @@ knitr::opts_chunk$set(echo = TRUE)
  rm(list = ls())
 Sys.setlocale("LC_TIME", "English")
 ```
+
 ## Packages
+
 ```{r Library, include=FALSE}
 library(readxl)
 library(data.table)
@@ -114,14 +121,16 @@ COPY = subset(COPY, select = -c(time1) )
 #lag
 ```
 
-lag 是2:13 代表1:12. newdata里的1代表的是原数据.
-首先把2:13 存储起来, 用paste0(2:13,加上"$")用来匹配以2:13数字结尾的列? 
+lag 是2:13 代表1:12. newdata里的1代表的是原数据. 首先把2:13 存储起来,
+用paste0(2:13,加上"\$")用来匹配以2:13数字结尾的列?
 
 ```{r eval=FALSE, echo=TRUE}
 select(x,starts_with("s")) or select(df,end_with("string")) 句法 等同于df%>%select(matches("$"))
 ```
 
-这两种做法都和之前是完全相等. 都只针对**列**操作,对表格内容无关. 在此只保留
+这两种做法都和之前是完全相等. 都只针对**列**操作,对表格内容无关.
+在此只保留
+
 ```{r eval=FALSE, echo=TRUE}
 select(df,end_with("s"))
 ```
@@ -129,6 +138,7 @@ select(df,end_with("s"))
 后续可以查看git 完全匹配字段的两种算法 commit
 
 ## Lag and VAT
+
 ```{r}
 old13<-c(2:13)
 for (i in 1:12) {
@@ -143,6 +153,7 @@ VAT2 <- as.numeric(newdata$`time1` == "2010-01-01")
 VAT3 <- as.numeric(newdata$`time1` == "2011-01-01")
 Recession <- as.numeric(newdata$`time1` >= "2008-04-01" & newdata$`time1`<= "2009-06-01")
 ```
+
 ## Monthly dummies variable position
 
 ```{r  MONTYHLY DUMMIES }
@@ -156,8 +167,11 @@ for (i in 1:length(monthname)) {
 ```
 
 ## Create time_Apr etc.
-the correct version. 首先把月度虚拟变量存储到cpilag 里. 然后用同一迭代变量 送到各自的time_下.
-**注意, 双迭代变量还未完全掌握, i 和j 一起用 必出错**
+
+the correct version. 首先把月度虚拟变量存储到cpilag 里.
+然后用同一迭代变量 送到各自的time_下. **注意, 双迭代变量还未完全掌握, i
+和j 一起用 必出错**
+
 ```{r   }
 monthdummies<-newdata[,2251:2261]
 
@@ -167,6 +181,7 @@ monthdummies<-newdata[,2251:2261]
 
 
 ```
+
 ## CPI LDV variables position
 
 ```{r simply lag and cpi}
@@ -238,8 +253,8 @@ for (i in 1:122) {
 
 ```
 
+##前两列显著百分比
 
-##前两列显著百分比 
 ```{r}
 
 
@@ -249,17 +264,19 @@ percent <- function(x, digits = 2, format = "f", ...) {
 percent(1)
 
 ```
-##	Table 1 Summary table before stepwise 前两列
-<center>
-|![论文第一表](F:/R workspace/Modelling-UK-inflation-quarterly-/table1.jpg)|
-|:--:|
-| <b>论文第一表</b>|
+
+## Table 1 Summary table before stepwise 前两列
 
 <center>
 
+| ![论文第一表](F:/R%20workspace/Modelling-UK-inflation-quarterly-/table1.jpg) |
+|:----------------------------------------------------------------------------:|
+|                              <b>论文第一表</b>                               |
 
+<center>
 
 ## **85部门版本合集生成**
+
 ```{r}
 sig.class<-c(regression[4:12],regression[14:15],#1,
              regression[18:21],#2
@@ -274,6 +291,7 @@ sig.class<-c(regression[4:12],regression[14:15],#1,
              regression[105:107],#11
              regression[110:111],regression[113:115],regression[117:119],regression[121:122])#12
 ```
+
 **各部门个数**
 
 ```{r}
@@ -307,6 +325,7 @@ n12<-length(c(110:111,113:115,117:119,121:122))
 ```
 
 **/121有double counting的嫌疑,就/85把**
+
 ```{r}
 a=list()
 for (i in 1:12) {
@@ -332,8 +351,8 @@ for (i in 1:12) {
 }
 ```
 
-
 ## 后两列(Weight)
+
 例如,01部门属于2-15.
 
 ```{r}
@@ -347,41 +366,22 @@ weight<- list(0.109,	0.042,	0.063,	0.115,	0.067,	0.022,	0.152,	0.023,	0.152,	0.0
 Reduce("+",weight)
 ```
 
+------------------------------------------------------------------------
 
-
-
-
-
-* * *
-01 Food and non-alcoholic beverages
-**2-15**
-02 Alcoholic beverages, tobacco and narcotics
-**16-21**
-03 Clothing and footwear
-**22-27**
-04 Housing, water, electricity, gas and other fuels
-**28:40 **
-05 Furnishings, household equipment and routine household maintenance
-**41:53 **
-06 Health
-**54:61 **
-07 Transport
-**62:76 **
-08 Communication
-**77:79 **
-09 Recreation and culture
-**[80:101**
-10 Education
-**102**
-11 Restaurants and hotels
-**103：107**
-12 Miscellaneous goods and services
+01 Food and non-alcoholic beverages **2-15** 02 Alcoholic beverages,
+tobacco and narcotics **16-21** 03 Clothing and footwear **22-27** 04
+Housing, water, electricity, gas and other fuels **28:40** 05
+Furnishings, household equipment and routine household maintenance
+**41:53** 06 Health **54:61** 07 Transport **62:76** 08 Communication
+**77:79** 09 Recreation and culture **\[80:101** 10 Education **102** 11
+Restaurants and hotels **103：107** 12 Miscellaneous goods and services
 **108：122**
 
-* * *
+------------------------------------------------------------------------
 
-因为每个部门现在是间断的了,不再连续, 所以之前根据constant转化的办法不行了.
-## 手动生成a1:a12.
+因为每个部门现在是间断的了,不再连续,
+所以之前根据constant转化的办法不行了. ## 手动生成a1:a12.
+
 ```{r}
 a1<-c(regression[4:12],regression[14:15])
 a2<-c(regression[18:21])
@@ -397,8 +397,10 @@ a11<-c(regression[105:107])
 a12<-c(regression[110:111],regression[113:115],regression[117:119],regression[121:122])
 ```
 
-用lapply 把regression 这个list 化成长数据框类型.(多行,5列:term,estimate,std,statitc, pvalue)
-**再更新85版本之后, 可以用85版本的sig.class 替代 regression,避免了之后的操作**
+用lapply 把regression 这个list
+化成长数据框类型.(多行,5列:term,estimate,std,statitc, pvalue)
+**再更新85版本之后, 可以用85版本的sig.class 替代
+regression,避免了之后的操作**
 
 ```{r}
 
@@ -409,7 +411,6 @@ for (i in 1:length(tidy_mods))
 
 
 ```
-
 
 ```{r}
 a1<-c(tidy_mods[4:12],tidy_mods[14:15])
@@ -426,8 +427,6 @@ a11<-c(tidy_mods[105:107])
 a12<-c(tidy_mods[110:111],tidy_mods[113:115],tidy_mods[117:119],tidy_mods[121:122])
 ```
 
-
-
 ```{r}
 test<-list()
 for (i in 1:12) {
@@ -436,7 +435,8 @@ test[[i]] <- do.call(rbind.data.frame, get(paste0("a",i)))
 nrow(test[[1]])
 ```
 
-**检查test[1:12]是否和a1:a13相等**
+**检查test\[1:12\]是否和a1:a13相等**
+
 ```{r}
 for (i in 1:12) {print(
   length(which(test[[i]]$term=="Trend"))==
@@ -447,9 +447,6 @@ for (i in 1:12) {print(
 
 
 ```
-
-
-
 
 $$
 \frac{\text{部门}1\text{显著个数}}{\text{部门}1\text{的数量}}*weight\left[ 1 \right] 
@@ -477,6 +474,7 @@ while (i <=12) {
 ```
 
 a8全都是0. 证实了一下确实. 有在0.05显著的,但是没有在0.01显著的.
+
 ```{r a8test, eval=FALSE, include=FALSE}
 for (j in 1:12) {print(
   length(which(test[[8]]$term==paste0("lag",j)&test[[8]]$p.value<0.01)))
@@ -496,7 +494,9 @@ stargazer(regression[78:79],
           summary=FALSE,
           se = NULL, type = "text")
 ```
+
 ### a_lag.0.05
+
 ```{r}
 a_lag.0.05<-data.frame( row.names =  paste0("lag",1:12),
                    matrix(nrow=12, ncol=12, ) ) 
@@ -533,6 +533,7 @@ while (i <=12) {
 ```
 
 ### cpi 0.01 第一个部门
+
 ```{r}
  length( which(test[[1]]$term==paste0("CPI_lag",1)&test[[1]]$p.value<0.01))
   #/length(get(paste0("a",1))) *weight[[1]]
@@ -540,6 +541,7 @@ while (i <=12) {
 ```
 
 ### a_cpi.0.05
+
 ```{r}
 a_cpi.0.05<-data.frame( row.names =  paste0("CPI_lag",1:12),
                    matrix(nrow=12, ncol=12, ) ) 
@@ -556,25 +558,21 @@ while (i <=12) {
 }
 ```
 
-
-
-
-
-每行代表:lag 0.01 12个部门里, lag1 小于0.01的/个数*weight的总和
+每行代表:lag 0.01 12个部门里, lag1 小于0.01的/个数\*weight的总和
 把a_cpi.0.05这四个表, 每行加起来 就是结果.
-一行一个结果,每个表有12行,共4个表,**4×12=48**个结果.
-首先生成存放结果的 24行×2列的dataframe
+一行一个结果,每个表有12行,共4个表,**4×12=48**个结果. 首先生成存放结果的
+24行×2列的dataframe
 
+# 所有table1的结果都写入,这次要生成24\*4的dataframe
 
-
-# 所有table1的结果都写入,这次要生成24*4的dataframe
 ```{r}
 table1weight<-data.frame( matrix(nrow=24, ncol=4, )   )
 colnames(table1weight)<-c("p<0.01","p<0.05","p<0.01(Weight)","p<0.05(Weight)")
 rownames(table1weight)<-c(paste0("CPI_lag",1:12),paste0("lag",1:12))
 ```
-写入结果
-sig.class 转换成只有4列的长数据类型, 方便使用
+
+写入结果 sig.class 转换成只有4列的长数据类型, 方便使用
+
 ```{r}
 
 tidy_mods <- lapply(sig.class, tidy)
@@ -585,7 +583,6 @@ sig.class.4cols <- do.call(rbind.data.frame, tidy_mods)
 length(which(sig.class.4cols$term=="Trend"))
 
 ```
-
 
 ```{r}
 for (i in 1:12) {#前两列
@@ -606,6 +603,7 @@ for (i in 1:12) {#前两列
 ```
 
 flextable 写入word
+
 ```{r}
 
 ft1<-flextable(table1weight %>% rownames_to_column("column name"))
@@ -613,20 +611,19 @@ ft1<-flextable(table1weight %>% rownames_to_column("column name"))
 
 
 
-save_as_docx("Summary table before stepwise" = ft1, path = "F:/R workspace/Modelling-UK-inflation-quarterly-/table1.docx")
+#save_as_docx("Summary table before stepwise" = ft1, path = "F:/R workspace/Modelling-UK-inflation-quarterly-/table1.docx")
 
 
 
 
 ```
 
-
-***************
-
+------------------------------------------------------------------------
 
 # Table 2 Stepwise Summary Table
 
 ## stepwise function
+
 ```{r}
 # function ----------------------------------------------------------------
 
@@ -737,6 +734,7 @@ model.select <- function(model,keep,sig=0.05,verbose=F){
 ```
 
 # **如果简化到0.01, 所有变量都在0.01显著了, 那0.05的列就全是0了.** 所以只有个 stepwsie function, 那就是到0.05.
+
 ```{r}
 slr.total <- list()
 keep.dummies <- c("time_Aug","time_Apr",
@@ -746,9 +744,10 @@ for (i in 1:length(sig.class)) {
   slr.total[[i]] <- model.select(sig.class[[i]], keep = keep.dummies, sig = 0.05, verbose = F)
 }
 
-```
-**slr.total 60 是空集, 84 left**
 
+```
+
+**slr.total 60 是空集, 84 left**
 
 ```{r}
 #去除空集
@@ -764,17 +763,337 @@ for (i in 1:length(slr.total)) {
 }
 ```
 
+#尝试stargazer把85个部门全都输出到html以便查找具体哪个显著
 
 ```{r}
+df.summary<-data.frame()
+x <- do.call(rbind, slr.total)
+for (i in 1:length(slr.total)) {
+  df.summary[<-(summary(slr.total[[i]])$coefficients)#把summary 导出到df
+
+}
+summary.df<-data.frame(summary(slr.total[[1:10]])$coefficients)#把summary 导出到df
+omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant')#想忽略的变量
+
+which(omit %in% rownames(summary.df)==TRUE )
+omit.poi<-which(rownames(summary.df) %in% omit)
+df.lagleft<-summary.df[-omit.poi,]
+
+```
+
+## now
+
+```{r}
+df.dream<-data.frame(matrix(nrow = 85,ncol = 24))
+colnames(df.dream)<-c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12","CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7",
+                                             "CPI_lag8","CPI_lag9",
+                                             "CPI_lag10","CPI_lag11","CPI_lag12")
+for (i in 1:length(slr.total)) {
+  if (summary(slr.total[[1]])$coefficients[,4]<0.05) {df.dream[i,]
+    
+  }
+  
+}
+names(summary(slr.total[[1]])$coefficients[,4])
+
+```
+
+## 转成长类型并添加1：85标号
+
+```{r}
+df.85<-lapply(slr.total, tidy)#把regression list 化为一个data frmae
+df85<- do.call(rbind.data.frame, df.85)
+omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant')#想忽略的变量
+omit.poi<-which(df85$term %in% omit)
+df.lagleft<-df85[-omit.poi,]
+df.name<-c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12","CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7",
+                                             "CPI_lag8","CPI_lag9",
+                                             "CPI_lag10","CPI_lag11","CPI_lag12")
+length(which(df.lagleft$term=="(Intercept)"))#有84个
+which(df.lagleft$p.value<0.05)#所有值都显著
+start.poi<-which(df.lagleft$term=="(Intercept)")
+write.csv(df.lagleft,"85个慢慢数把.csv") 
+
+
+df.lagleft$qwe<-NA#生成na列
+df.lagleft$qwe[start.poi]<-c(1:59,61:85)#na列intercept行插入1:59,61:85
+df.lagleft<-df.lagleft %>% fill(qwe)#填充na
+wide<-spread(df.lagleft, key = term, value =p.value)#我愿称之为奇迹！列是coef 名字， 行是每个值
+asd<-wide[,-c(2,3,5)]#去掉stand erro之类的列
+asd<-asd[,c(1,2,3,7:14,4:6,15,19:26,16:18)]#重新排序，cpi 1：12，lag 1:12
+```
+
+```{r}
+vars.order<-c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12","CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7",
+                                             "CPI_lag8","CPI_lag9",
+                                             "CPI_lag10","CPI_lag11","CPI_lag12")
+name85.df<-read_excel("cpi weight for 85 divisions.xlsx")
+name85<-dplyr::pull(name85.df, 1)
+
+stargazer(slr.total[1:8],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(name85[1:8]),
+          summary = FALSE,
+          out = "85.1.html",
+          flip = FALSE,
+          se = NULL,type = "html"
+)
+
+stargazer(slr.total[9:16],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(name85[9:16]),
+          summary = FALSE,
+          out = "85.2.html",
+          flip = FALSE,
+          se = NULL,type = "html"
+)
+stargazer(slr.total[17:24],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(name85[17:24]),
+          summary = FALSE,
+          out = "85.3.html",
+          flip = FALSE,
+          se = NULL,type = "html"
+)
+stargazer(slr.total[25:32],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(name85[25:32]),
+          summary = FALSE,
+          out = "85.4.html",
+          flip = FALSE,
+          se = NULL,type = "html"
+)
+
+stargazer(slr.total[33:40],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(name85[33:40]),
+          summary = FALSE,
+          out = "85.5.html",
+          flip = FALSE,
+          se = NULL,type = "html"
+)
+stargazer(slr.total[41:48],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(name85[41:48]),
+          summary = FALSE,
+          out = "85.5.html",
+          flip = FALSE,
+          se = NULL,type = "html"
+)
+stargazer(slr.total[49:56],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(name85[49:56]),
+          summary = FALSE,
+          out = "85.6.html",
+          flip = FALSE,
+          se = NULL,type = "html"
+)
+stargazer(slr.total[57:64],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(name85[57:59],name85[61:65]),
+          summary = FALSE,
+          out = "85.7.html",
+          flip = FALSE,
+          se = NULL,type = "html"
+)
+stargazer(slr.total[65:72],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(name85[66:73]),
+          summary = FALSE,
+          out = "85.8.html",
+          flip = FALSE,
+          se = NULL,type = "html"
+)
+stargazer(slr.total[73:80],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(name85[74:81]),
+          summary = FALSE,
+          out = "85.9.html",
+          flip = FALSE,
+          se = NULL,type = "html"
+)
+stargazer(slr.total[81:84],
+          star.char = c("*"),
+          star.cutoffs = c(0.01),
+          notes = c(" * p<0.01; "),
+          omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(name85[82:85]),
+          summary = FALSE,
+          out = "85.10.html",
+          flip = FALSE,
+          se = NULL,type = "html"
+)
+```
+
 #化成长数据类型
+
+```{r}
+
  tidy_stepwsie <- lapply(slr.total, tidy)
   stepwsie_a<- do.call(rbind.data.frame, tidy_stepwsie)
 ```
+
 因为已经删减过cpi and 60, 所以stepwsie_a只剩下120个项目了.
+
 ```{r}
 length(which(stepwsie_a$term=="VAT1"))
 ```
+
 ## 各部门开始结束位置df
+
 ```{r}
 class.poi<-data.frame(matrix(nrow = 13,ncol = 2),row.names = 1:13)
 names(class.poi)<-c("start","end")
@@ -788,8 +1107,9 @@ write.csv(class.poi,"F:/R workspace/Modelling-UK-inflation-quarterly-/class-pois
 
 
 ```
-**60属于第9部门**
-**根据 intercept 开始的位置, 和trend结束位置 划分df**
+
+**60属于第9部门** **根据 intercept 开始的位置, 和trend结束位置 划分df**
+
 ```{r}
 start<-class.poi[,1]
 start[1]
@@ -807,8 +1127,10 @@ for (i in 1:12) {
 length(which(stepwsie_a12$term=="Trend"))
 ```
 
-## 创建	Table 2 Stepwise Summary Table 存储结果
-同样是24*4.
+## 创建 Table 2 Stepwise Summary Table 存储结果
+
+同样是24\*4.
+
 ```{r}
 stepwise_table_yearly<-data.frame( matrix(nrow=24, ncol=4, )   )
 colnames(stepwise_table_yearly)<-c("p<0.01","p<0.05","p<0.01(Weight)","p<0.05(Weight)")
@@ -816,6 +1138,7 @@ rownames(stepwise_table_yearly)<-c(paste0("CPI_lag",1:12),paste0("lag",1:12))
 ```
 
 ### stepwise_lag_0.01_yearly
+
 ```{r}
 
 stepwise_lag_0.01_yearly<-data.frame( row.names =  paste0("lag",1:12),
@@ -832,7 +1155,9 @@ while (i <=12) {
   i<-i+1
 }
 ```
+
 ### stepwise_lag_0.05_yearly
+
 ```{r}
 
 stepwise_lag_0.05_yearly<-data.frame( row.names =  paste0("lag",1:12),
@@ -849,7 +1174,9 @@ while (i <=12) {
   i<-i+1
 }
 ```
+
 ### stepwise_cpi_0.01_yearly
+
 ```{r}
 stepwise_cpi_0.01_yearly<-data.frame( row.names =  paste0("CPI_lag",1:12),
                    matrix(nrow=12, ncol=12, ) ) 
@@ -865,7 +1192,9 @@ while (i <=12) {
   i<-i+1
 }
 ```
+
 ### stepwise_cpi_0.05_yearly
+
 ```{r}
 stepwise_cpi_0.05_yearly<-data.frame( row.names =  paste0("CPI_lag",1:12),
                    matrix(nrow=12, ncol=12, ) ) 
@@ -881,8 +1210,11 @@ while (i <=12) {
   i<-i+1
 }
 ```
+
 # 写入table2
+
 **与之前版本最大区别是后两列不用/85或者/121.**
+
 ```{r}
 for (i in 1:12) {#前两列
   stepwise_table_yearly[i,1]<-percent((length( which(stepwsie_a$term==paste0("CPI_lag",i)&(stepwsie_a$p.value<0.01))))/85)
@@ -897,7 +1229,9 @@ for (i in 1:12) {#前两列
     
 }
 ```
- ## flextable 写入word
+
+## flextable 写入word
+
 ```{r}
 
 
@@ -915,6 +1249,7 @@ save_as_docx("1.5	Table 2 Stepwise Summary Table" = ft1, path = "F:/R workspace/
 ```
 
 **很开心, stargazer coeff 排序的方法在此!**
+
 ```{r}
 length(slr.total[[2]]$coefficients)
 vars.order<-c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12","CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7",
@@ -943,7 +1278,9 @@ stargazer(slr.total[2:7],
           se = NULL,type = "text"
 )
 ```
+
 ## CPI itself
+
 ```{r}
 CPI_ <- reg.model[[1]]
 slr.cpi <- model.select(CPI_,keep = keep.dummies,sig = 0.05,verbose = F)
@@ -972,6 +1309,7 @@ stargazer(CPI_, slr.cpi,
  out = "F:/R workspace/Modelling-UK-inflation-quarterly-/CPI Summary Table.html",          flip = FALSE, se = NULL, type = "html" )
 
 ```
+
 ```{r}
 stargazer( slr.cpi,
           star.char = c("*"), 
@@ -985,17 +1323,16 @@ stargazer( slr.cpi,
           summary = FALSE, 
           flip = FALSE, se = NULL, type = "text" )
 ```
+
 s.test
 
+------------------------------------------------------------------------
 
+# Table 3 Summary table before stepwise (Quarterly data)
 
-***
-
-
-
-# Table 3  Summary table before stepwise (Quarterly data)
-
-**修正summary table 在代码体现最大的变化应该是在run完regression的时候, 再把出去division and groupd的class 汇总在一起 生成新的sig.class, 在对季度数据应用的时候应当也是如此**
+**修正summary table 在代码体现最大的变化应该是在run完regression的时候,
+再把出去division and groupd的class 汇总在一起 生成新的sig.class,
+在对季度数据应用的时候应当也是如此**
 
 ```{r}
 rm(list = ls())
@@ -1078,22 +1415,14 @@ CPI_lag3 <- (newdata$"CPI ALL ITEMS4")
 CPI_lag4 <- (newdata$"CPI ALL ITEMS5")
 
 ```
+
 ```{r}
 # Copy删除前四行? --------------------------------------------------
 
 COPY<-COPY[-1:-4,]
 ```
+
 ## Regression
-```{r}
-regression <- lapply(1:122, function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+lag4[,x]+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+ quarter1+quarter3+quarter4+VAT1+VAT2+VAT3+Recession+Trend)
-)
-for (i in 1:122) {
-  names(regression[[i]]$coefficients)<-c('Constant','lag1','lag2',"lag3","lag4",
-                                         "CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4",
-                                         "quarter1","quarter3","quarter4",
-                                         "VAT1","VAT2","VAT3","Recession","Trend")
-}
-```
 
 ```{r}
 regression <- lapply(1:122, function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+lag4[,x]+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+ quarter1+quarter3+quarter4+VAT1+VAT2+VAT3+Recession+Trend)
@@ -1106,8 +1435,19 @@ for (i in 1:122) {
 }
 ```
 
-可以重复了
-下面是重复yearly 部分
+```{r}
+regression <- lapply(1:122, function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+lag4[,x]+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+ quarter1+quarter3+quarter4+VAT1+VAT2+VAT3+Recession+Trend)
+)
+for (i in 1:122) {
+  names(regression[[i]]$coefficients)<-c('Constant','lag1','lag2',"lag3","lag4",
+                                         "CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4",
+                                         "quarter1","quarter3","quarter4",
+                                         "VAT1","VAT2","VAT3","Recession","Trend")
+}
+```
+
+可以重复了 下面是重复yearly 部分
+
 ```{r}
 
 percent <- function(x, digits = 2, format = "f", ...) {
@@ -1119,7 +1459,10 @@ weight<- list(0.109,	0.042,	0.063,	0.115,	0.067,	0.022,	0.152,	0.023,	0.152,	0.0
 )
 Reduce("+",weight)
 ```
-用lapply 把regression 这个list 化成长数据框类型.(多行,5列:term,estimate,std,statitc, pvalue)
+
+用lapply 把regression 这个list
+化成长数据框类型.(多行,5列:term,estimate,std,statitc, pvalue)
+
 ```{r}
 
 tidy_mods <- lapply(regression, tidy)
@@ -1137,7 +1480,9 @@ for (i in 1:12) {
          a[(which(a$term=="Constant")[dend[i]]):(which(a$term=="Trend")[dend[i+1]-1]),])
 }
 ```
+
 ### a_lag.0.01
+
 ```{r}
 
 a_lag.0.01<-data.frame( row.names =  paste0("lag",1:12),
@@ -1154,7 +1499,9 @@ while (i <=12) {
   i<-i+1
 }
 ```
+
 ### a_lag.0.05
+
 ```{r}
 a_lag.0.05<-data.frame( row.names =  paste0("lag",1:12),
                    matrix(nrow=12, ncol=12, ) ) 
@@ -1170,6 +1517,7 @@ while (i <=12) {
   i<-i+1
 }
 ```
+
 ### a_cpi.0.01
 
 ```{r}
@@ -1187,7 +1535,9 @@ while (i <=12) {
   i<-i+1
 }
 ```
+
 ### a_cpi.0.05
+
 ```{r}
 a_cpi.0.05<-data.frame( row.names =  paste0("CPI_lag",1:12),
                    matrix(nrow=12, ncol=12, ) ) 
@@ -1204,14 +1554,16 @@ while (i <=12) {
 }
 ```
 
-# table3写入,这次要生成8*4的dataframe
+# table3写入,这次要生成8\*4的dataframe
+
 ```{r}
 table3Quarterlydata<-data.frame( matrix(nrow=8, ncol=4, )   )
 colnames(table3Quarterlydata)<-c("p<0.01","p<0.05","p<0.01(Weight)","p<0.05(Weight)")
 rownames(table3Quarterlydata)<-c(paste0("CPI_lag",1:4),paste0("lag",1:4))
 ```
-写入结果
-一个没有cpi的a dataframe,删除前41行
+
+写入结果 一个没有cpi的a dataframe,删除前41行
+
 ```{r}
 nocpi<-a[-c(1:41),]
 ```
@@ -1235,6 +1587,7 @@ for (i in 1:4) {#前两列
 ```
 
 flextable 写入word
+
 ```{r}
 
 ft1<-flextable(table3Quarterlydata %>% rownames_to_column("column name"))
@@ -1249,11 +1602,12 @@ save_as_docx("Summary table before stepwise (Quarterly data)" = ft1, path = "F:/
 
 ```
 
+------------------------------------------------------------------------
 
-***
 # quarterly stepwise
 
 ## stepwise function
+
 ```{r include=FALSE}
 # function ----------------------------------------------------------------
 
@@ -1363,10 +1717,8 @@ model.select <- function(model,keep,sig=0.05,verbose=F){
 
 ```
 
-
-
-
 ### stepwise process
+
 ```{r include=FALSE}
 slr.total <- list()
 keep.dummies <- c("quarter1","quarter3","quarter4",
@@ -1378,6 +1730,7 @@ for (i in 2:122) {
 
 
 ```
+
 ## slr.total所有变量都不显著的部门
 
 ```{r}
@@ -1385,8 +1738,6 @@ names(slr.total) <- 1:length(slr.total)
 class_with_no_significant <- slr.total[which(sapply(slr.total, is.null))]
 length(class_with_no_significant)
 ```
-
-
 
 ```{r}
 #把1和86扔了
@@ -1413,8 +1764,10 @@ length(which(stepwsie_a$term=="VAT1"))
 ```
 
 ## 在没换名字之前slr.total=122个,$`1`$`10`$`35`$`40`$`55`$`57`$`58`$`64`$`69`$`74`$`79`$`86`$`100``103`$`114`$`120`$`121`空集. 替换完名字就变成105了
-103部门没有 只能算104的. 104-14
-** 新的部门开始的位置等于丢失之前的变量-[n]**
+
+103部门没有 只能算104的. 104-14 \*\*
+新的部门开始的位置等于丢失之前的变量-\[n\]\*\*
+
 ```{r}
 
 dend<-c(2,16,22,28,41,54,62,77,80,102,103,108,122)#这只是每个部门开始的位置
@@ -1438,7 +1791,9 @@ for (i in 1:12) {
          stepwsie_a[(which(stepwsie_a$term=="(Intercept)")[dend_stepwise[i]]):(which(stepwsie_a$term=="Trend")[dend_stepwise[i+1]-1]),])
 }
 ```
-## 创建	Table 4 Stepwise Summary Table 存储结果 是8*4.
+
+## 创建 Table 4 Stepwise Summary Table 存储结果 是8\*4.
+
 ```{r}
 stepwise_table_quarterly<-data.frame( matrix(nrow=8, ncol=4, )   )
 colnames(stepwise_table_quarterly)<-c("p<0.01","p<0.05","p<0.01(Weight)","p<0.05(Weight)")
@@ -1446,6 +1801,7 @@ rownames(stepwise_table_quarterly)<-c(paste0("CPI_lag",1:4),paste0("lag",1:4))
 ```
 
 ### stepwise_lag_0.01_quarterly
+
 ```{r}
 
 stepwise_lag_0.01_quarterly<-data.frame( row.names =  paste0("lag",1:4),
@@ -1464,6 +1820,7 @@ while (i <=12) {
 ```
 
 ### stepwise_lag_0.05_quarterly
+
 ```{r}
 
 stepwise_lag_0.05_quarterly<-data.frame( row.names =  paste0("lag",1:4),
@@ -1482,6 +1839,7 @@ while (i <=12) {
 ```
 
 ### stepwise_cpi_0.01_quarterly
+
 ```{r}
 
 stepwise_cpi_0.01_quarterly<-data.frame( row.names =  paste0("CPI_lag",1:4),
@@ -1500,6 +1858,7 @@ while (i <=12) {
 ```
 
 ### stepwise_cpi_0.05_quarterly
+
 ```{r}
 
 stepwise_cpi_0.05_quarterly<-data.frame( row.names =  paste0("CPI_lag",1:4),
@@ -1518,6 +1877,7 @@ while (i <=12) {
 ```
 
 # 写入table4
+
 ```{r}
 for (i in 1:4) {#前两列
   stepwise_table_quarterly[i,1]<-percent((length( which(stepwsie_a$term==paste0("CPI_lag",i)&(stepwsie_a$p.value<0.01))))/121)
@@ -1532,7 +1892,9 @@ for (i in 1:4) {#前两列
     
 }
 ```
+
 ## flextable 写入word
+
 ```{r}
 
 
@@ -1548,7 +1910,6 @@ save_as_docx("	Table 4 Stepwise Summary Table (Quarterly data)" = ft1, path = "F
 
 
 ```
-
 
 ```{r}
 
@@ -1567,4 +1928,3 @@ stargazer(CPI_, slr.cpi,
           summary = FALSE, out = "C:/Users/PC/Desktop/output/4.15 quarterly data/stepwise-cpi.html", flip = FALSE, se = NULL, type = "html" )
 
 ```
-

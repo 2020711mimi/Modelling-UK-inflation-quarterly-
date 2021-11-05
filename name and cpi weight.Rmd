@@ -1,0 +1,93 @@
+---
+title: "name and cpi weight"
+author: "Yiyi"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 3
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+# 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+ rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+## Packages
+```{r Library, include=FALSE}
+library(readxl)
+library(data.table)
+library(lubridate)#extract cpi time to newdata(furniture48)
+library(dplyr) 
+library(tidyverse) 
+library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
+library(dplyr)
+
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+Sys.setlocale("LC_TIME","English")
+```
+
+```{r}
+df <- read_excel("name and cpi weight.xlsx.")#读取数据
+df <- na.omit(df)#删除空白行
+df<-df[ grep("\\..", df$`CPI weight`,invert = TRUE),]#删除含有两个..的部门
+#df<-df[ grep("\\0.1.", df$name,invert = TRUE),]#删除含有两个..的部门
+
+write.csv(df,file = "div with data.csv",row.names = FALSE)
+
+
+```
+
+```{r}
+df1 <- read_excel("myworkbook.xlsx")#读取同时含有cpi weight 和 我用的85部门的名字的数据
+tf<-df1$wehave %in% df1$focus
+
+which(tf==FALSE)
+
+length(which(df1$wehave %in% df1$focus==TRUE))
+```
+在table 25 和 我自己用的85版本用名字匹配太难了 放弃了 
+决定用名字前的数字带好 0.0.0.0.1
+
+poi<-df2[2,] %in% df2[1,]
+length(which(poi==TRUE))
+which(poi==TRUE)
+df2$`aggregate number`[df2[2,] %in% df2[1,]]
+```{r}
+df2 <- read_excel("name on table 25 and 85.xlsx")#读取带aggregate number的85部门版本
+poi<-which(df2$`index date` %in% df2$...3)#第三列在第二列的有同类的 位置
+AggregateNumberandName85 <-df2[poi,1:2]#只保留前两列 85部门的行
+write.csv(AggregateNumberandName85,file = "85部门的数字名和本名.csv")
+```
+
+```{r}
+a.df<-read_excel("修改完的 千万别丢.xlsx")#读取含有aggregate number，division 名字
+a.df[,6]<-str_split_fixed(a.df$name, " ", 2)[,1]#分离数字 和名字， 把名字给到df的第六列
+colnames(a.df)<-c("mynum","myname","rubbish","combname","cpi weight","newNum")
+which(a.df$mynum %in% a.df$newNum==FALSE)#查找85部门那个不在他们的名单上
+
+
+want.poi<-which(a.df$newNum %in% a.df$mynum==TRUE)#85个部门在cpi weight的位置
+length(want.poi)#85个
+t.df<-a.df[want.poi,]#只保留85个部门的在cpi weight里的对应数据
+write.csv(t.df,file = "t.df.csv")#输出
+cpi.weight.for85<-t.df[,4:5]#只保留名字和cpi weight的数据
+write.csv(cpi.weight.for85,file = "cpi weight for 85 divisions.csv",row.names = FALSE)
+```
+

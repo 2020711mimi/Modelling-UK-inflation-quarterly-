@@ -1,0 +1,73 @@
+---
+title: "在table 57和24 之间匹配字符段"
+author: "Yiyi"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 3
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+# 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+ rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+## Packages
+```{r Library, include=FALSE}
+library(readxl)
+library(data.table)
+library(lubridate)#extract cpi time to newdata(furniture48)
+library(dplyr) 
+library(tidyverse) 
+library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
+library(dplyr)
+
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+Sys.setlocale("LC_TIME","English")
+
+df <- read_excel("cpi all weight.xlsx")#读取数据
+df$cola<-gsub("&", "AND", df$cola)#在c列 用and 替换&
+df$cola<-sapply(df$cola,toupper)#a列所有拼写全部大写
+df$cola<-gsub('[[:digit:]]+', '', df$cola)#去除a列所有的数字
+df$cola<-gsub("\\.", '', df$cola)#去除a列所有点的小数点
+df$cola<-gsub("\\/", '', df$cola)#去除a列所有/斜杠
+df$cola<-trimws(df$cola)#去除a列单词前的空格
+
+
+df$colc<-gsub("&", "and", df$colc)#在c列 用and 替换&
+df$colc<-sapply(df$colc,toupper)#a列所有拼写全部大写
+df$colB<-na.omit(df$colB)
+
+#从第一列里删除不含有第二列的名字的行
+
+gongyou<-intersect(df$colc,df$cola)#一三列共有的
+df$inter<-c(gongyou)
+length(gongyou)#共有的长度
+write.csv(df, "myworkbook.csv", 
+  col.names = TRUE, row.names = TRUE, append = FALSE)
+df$winner <- ifelse(df$cola > df$colc, 'A',
+               ifelse(df$cola < df$cola, 'B', 'Tie'))
+df$cola==df$colc
+
+=IF(ISNA(VLOOKUP(df$colc,df$cola,1,FALSE)),FALSE, TRUE)
+
+```
+
+
