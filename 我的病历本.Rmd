@@ -747,7 +747,8 @@ for (i in 1:length(sig.class)) {
 
 ```
 
-**slr.total 60 是空集, 84 left**
+**slr.total 60 REPAIR OF AUDIO-VISUAL & RELATED PRODUCTS
+ 是空集, 84 left**
 
 ```{r}
 #去除空集
@@ -763,44 +764,13 @@ for (i in 1:length(slr.total)) {
 }
 ```
 
-#尝试stargazer把85个部门全都输出到html以便查找具体哪个显著
 
-```{r}
-df.summary<-data.frame()
-x <- do.call(rbind, slr.total)
-for (i in 1:length(slr.total)) {
-  df.summary[<-(summary(slr.total[[i]])$coefficients)#把summary 导出到df
 
-}
-summary.df<-data.frame(summary(slr.total[[1:10]])$coefficients)#把summary 导出到df
-omit = c("time_Aug","time_Dec", "time_Apr", "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
-                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant')#想忽略的变量
 
-which(omit %in% rownames(summary.df)==TRUE )
-omit.poi<-which(rownames(summary.df) %in% omit)
-df.lagleft<-summary.df[-omit.poi,]
 
-```
-
-## now
-
-```{r}
-df.dream<-data.frame(matrix(nrow = 85,ncol = 24))
-colnames(df.dream)<-c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12","CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7",
-                                             "CPI_lag8","CPI_lag9",
-                                             "CPI_lag10","CPI_lag11","CPI_lag12")
-for (i in 1:length(slr.total)) {
-  if (summary(slr.total[[1]])$coefficients[,4]<0.05) {df.dream[i,]
-    
-  }
-  
-}
-names(summary(slr.total[[1]])$coefficients[,4])
-
-```
 
 ## 转成长类型并添加1：85标号
-
+### 0.5
 ```{r}
 df.85<-lapply(slr.total, tidy)#把regression list 化为一个data frmae
 df85<- do.call(rbind.data.frame, df.85)
@@ -812,7 +782,7 @@ df.name<-c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10
                                              "CPI_lag8","CPI_lag9",
                                              "CPI_lag10","CPI_lag11","CPI_lag12")
 length(which(df.lagleft$term=="(Intercept)"))#有84个
-which(df.lagleft$p.value<0.05)#所有值都显著
+df.lagleft$term[which(df.lagleft$p.value>0.05)]#大于0.05的全是intercept这是不是就说明所有都在0。05显著。
 start.poi<-which(df.lagleft$term=="(Intercept)")
 write.csv(df.lagleft,"85个慢慢数把.csv") 
 
@@ -820,10 +790,26 @@ write.csv(df.lagleft,"85个慢慢数把.csv")
 df.lagleft$qwe<-NA#生成na列
 df.lagleft$qwe[start.poi]<-c(1:59,61:85)#na列intercept行插入1:59,61:85
 df.lagleft<-df.lagleft %>% fill(qwe)#填充na
-wide<-spread(df.lagleft, key = term, value =p.value)#我愿称之为奇迹！列是coef 名字， 行是每个值
-asd<-wide[,-c(2,3,5)]#去掉stand erro之类的列
+wide<-spread(df.lagleft, key = term, value =p.value)#我愿称之为奇迹！列是coef 名字， 行是每个值,列下面的行是每个值的p-value
+asd<-wide[,-c(2,3,5)]#去掉stand erro，statistic,intercept列
 asd<-asd[,c(1,2,3,7:14,4:6,15,19:26,16:18)]#重新排序，cpi 1：12，lag 1:12
+ttt<-aggregate(x=asd[,3:26], by=list(name=asd$qwe), min, na.rm = TRUE)#合并行，把一个部门的从多行变为一行。
+length(which(ttt[,2:25]<0.05))#所有值都显著在0.05
+###0.05
+aaa<-ttt#0.05合并的过程太慢了， 另存为一个好折腾
+is.na(aaa)<-sapply(aaa, is.infinite)#把所有inf变成0 
+aaa[is.na(aaa)]<-0
+aaa[-1] <- as.integer(aaa[-1] != 0)#奇迹再次发生，把非0的变成1
+write.csv(aaa,file = "aaa.csv",row.names = FALSE)
+### 0.01
+bbb<-ttt#0.01
+bbb[-1]<-as.integer(bbb[-1]<0.01)#小于0.01的变成1,发现只需要interger函数就够了。自动把inf变成0了。
+write.csv(bbb,file = "bbb.csv")
+
 ```
+
+#尝试stargazer把85个部门全都输出到html以便查找具体哪个显著
+
 
 ```{r}
 vars.order<-c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12","CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7",
