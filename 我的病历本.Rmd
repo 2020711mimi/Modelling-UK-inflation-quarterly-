@@ -47,7 +47,10 @@ library(dplyr)
 
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
 Sys.setlocale("LC_TIME","English")
+```
 
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
 cpi <- read_excel("cpi data/cpi+division+group.xlsx")
 
 

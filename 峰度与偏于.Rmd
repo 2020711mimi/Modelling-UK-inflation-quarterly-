@@ -1,0 +1,121 @@
+---
+title: "风度与偏度"
+author: "Yiyi"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 3
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+ rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+
+## Packages
+
+```{r Library, include=FALSE}
+library(readxl)
+library(data.table)
+library(lubridate)#extract cpi time to newdata(furniture48)
+library(dplyr) 
+library(tidyverse) 
+library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
+library(dplyr)
+library(moments)
+library(Inflation)
+library(ggplot2)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+Sys.setlocale("LC_TIME","English")
+```
+
+# 正太测试
+
+### 1. Positive skewness in R
+
+```{r}
+#Removed all the existing objects
+rm(list = ls())
+ 
+# Defining data vector 
+data <- c(10,11,12,13,20) 
+ 
+print(skewness(data)) 
+ 
+hist(data)
+```
+
+### 2. Negative skewness in R
+
+```{r}
+#Removed all the existing objects
+rm(list = ls())
+
+# Defining data vector 
+data <- c(1,2,30,31,32,33) 
+ 
+print(skewness(data)) 
+ 
+hist(data) 
+```
+
+# 巴西 core inflation package
+
+```{r}
+ipca_sub <- Inflation::ipca_sub
+nuc <- Inflation::INFL.core_tm(subits.var = ipca_sub$ipca_ts, weights = ipca_sub$weights_ts)
+aaa<-data.frame(ipca_sub$ipca)
+bbb<-data.frame(ipca_sub$ipca_ts)
+asdasda<-data.frame(ipca_sub$weights_ts)
+asdasda[] <- lapply(asdasda, function(x) as.numeric(as.character(x)))
+plot(nuc$core)
+
+
+```
+
+
+# ggplot2 作图
+
+```{r}
+ccc<-data.frame(matrix(nrow = length(nuc$core),ncol = 2))
+colnames(ccc)<-c("core","cpi")
+
+ddd<-data.frame(Y=as.matrix(ipca_sub$ipca_index), date=time(ipca_sub$ipca_index))
+
+ccc$core<-nuc$core
+ccc$cpi<-ipca_sub$ipca_index
+
+p<-ggplot(data=ccc, aes(x=time(nuc$core)))+
+ geom_line(aes(y = core,color = "Core Inflation") )+ 
+geom_line(aes(y = cpi, color="CPI Index")) +
+labs(x="Time",y="Inflation")
+
+  
+
+p + theme(legend.title = element_blank()) 
+```
+
+
