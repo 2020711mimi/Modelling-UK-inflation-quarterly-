@@ -1,0 +1,165 @@
+---
+title: "EXCLUDING FOOD AND ENERGY"
+author: "Yiyi"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 3
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+ rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+
+## 
+
+```{r Library, include=FALSE}
+#Packages
+library(readxl)
+library(data.table)
+library(lubridate)#extract cpi time to newdata(furniture48)
+library(dplyr) 
+library(tidyverse) 
+library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
+library(dplyr)
+library(moments)
+library(Inflation)
+library(ggplot2)
+library(zoo)
+library(xts)
+library(hydroTSM)
+library(openair)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+Sys.setlocale("LC_TIME","English")
+```
+
+# Weight
+
+```{r eval=FALSE, include=FALSE}
+#因为之前用85部门名字替换找weight的时候是避免了重复的，如果还从122部门重新开始，重新删除，那么势必还是要重新经过避免重复这一步骤。 所以 85部门就是个基础版本（避免了重复计算）的。所以只要从85部门里开始删除就可以了
+#权重
+#从85的权重开始删除
+#基于以上，要删除的话是从 数字+名字里删除， 但是要对应85的月度inflation数据的时候名字又对不上，所以要找到名字 weight数据里数字+名字 与 名字 相对应的办法。
+```
+
+```{r include=FALSE}
+a.df<-read_excel("修改完的 千万别丢.xlsx")#读取含有aggregate number，division 名字
+a.df[,6:7]<-str_split_fixed(a.df$name, " ", 2)#分离数字 和名字，把名字和数字给到df的第六，7列
+n_n_poi<-which(a.df$V1 %in% a.df$...1==TRUE)#有85个部门名字的在weight里的位置
+nd<-a.df[1:85,2]
+nd[,2:3]<-a.df[n_n_poi,4:5]#把两种名字和weight导入新表
+```
+
+```{r include=FALSE}
+#excel从85版本删除food and energy并保存"85删除为了excluding food and erergy.xlsx"。
+rf<-read_excel("85删除为了excluding food and erergy.xlsx","Sheet2")
+remove_var<-rf[2,]#把从85删除的class名字保存到新df
+shan.chu.wan<-remove_var[,colSums(is.na(remove_var))==0]#删除的class名字
+write.csv(shan.chu.wan,file = "excluding food 删除的class.csv",row.names = FALSE)
+```
+
+```{r include=FALSE}
+#05-19 weight的数据
+w519<-read_excel("weight05-19.xlsx")
+#nd里name列是85部门里正好对应85部门的weight里的名字
+#消除na看看weight到底有多少个
+#有319行，当然也有每个部门的带头人，所以是division+group+class+subclass+item？
+test<-na.omit(w519)#
+
+#-----------------------------------------
+#nd里是我想要的名字，shan.chu完是我要删的。
+#nd实则为两种名字的对照表
+#先从nd删除看看
+#删除的里面只在nd85里找到了17个，但是总删除了删除了23个总共
+length(
+  which(
+  nd$`index date` %in% shan.chu.wan[1,]==TRUE
+  )
+)
+#保存删除的位置
+p17<-which(
+  nd$`index date` %in% shan.chu.wan[1,]==TRUE
+)
+#先寻找17个的85版本的名字，再根据nd里进行转换，把85的名字转化成带数字的名字，
+n_a_m_e<-nd[p17,2]
+#尝试从原数据看看是否是23个，以免出现错误
+refer_table<-read_excel("consumerpriceinflationdetailedreferencetables.xls","Table 57")
+#refer_table第6行是所有的名字
+#结果是23个，对上了，方法没问题
+length(
+  which(
+  refer_table[6,] %in% shan.chu.wan[1,]==TRUE
+  )
+)
+#那就是总共删除17个
+#----------------------------
+#从所有的weight数据里首先删选出85个部门的行
+#在05-19weight数据里能找到这85个
+length(
+  which(
+    w519$...1 %in% nd$name
+  )
+)
+#保存85个的位置
+p85<-  which(
+    w519$...1 %in% nd$name==TRUE
+  )
+#df85 是带数字名字的 85个部门的 每年的weight 数据
+df85<-w519[p85,]
+#再从85里面减去17个带数字的名字
+#是17个 找到了完整的17个
+length(
+  which(
+    df85$...1 %in% n_a_m_e$name
+  )
+)
+#保存17个 带数字名字的 位置再df85里
+n_17_p<-  which(
+    df85$...1 %in% n_a_m_e$name
+  )
+#从df85里移除这些,生成新的，是68行
+df.excluding<-df85[-n_17_p,]
+#weight部分处理结束
+```
+
+# CPI
+
+```{r include=FALSE}
+df<-read_excel("85 cpi idex dat.xlsx",sheet="Sheet1")#读取85部门cpi 数据
+#有些列不是numerical，
+df[] <- lapply(df, function(x) as.numeric(as.character(x)))
+#把所有cpi index 转化为增长率
+df<-as.data.table(df)[, lapply(.SD, function(x)x/shift(x) - 1), .SDcols = 1:ncol(df)]
+#不会在function里×100 只能笨办法了
+df<-df*100
+date = seq(from = as.Date("1988-01-01"), to = as.Date("2019-12-01"),
+           by = "month")#生成日期
+zxc <- data.frame(date, df)#合并日期和原数据到新df
+#只保留2005年之后的
+qwe<-zxc[zxc$date>="2005-01-01",]#这部分数据和read to work.csv 里是完全一样的，也就是和我的病历本 得inflation计算结果是相同的. 证明都没错。
+
+```
