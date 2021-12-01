@@ -185,6 +185,7 @@ df[] <- lapply(df, function(x) as.numeric(as.character(x)))
 #30/11/2021 huw 说不要用月度的85inflation，要用年度的85inflation
 #公式应该是
 #（这个月的cpi数据-去年这个月cpi的数据）/去年这个月的cpi数据
+#test
 df<-as.data.table(df)[, lapply(.SD, function(x)x/shift(x) - 12), .SDcols = 1:ncol(df)]
 #不会在function里×100 只能笨办法了
 df<-df*100
