@@ -3,15 +3,15 @@ title: "EXCLUDING FOOD AND ENERGY"
 author: "Yiyi"
 date: "`r Sys.Date()`"
 output:
-  word_document:
-    toc: yes
-    toc_depth: '3'
   html_document:
     highlight: tango
     number_sections: yes
     theme: united
     toc: yes
     toc_depth: 3
+  word_document:
+    toc: yes
+    toc_depth: '3'
   pdf_document:
     toc: yes
     toc_depth: '3'
@@ -19,8 +19,6 @@ editor_options:
   markdown:
     wrap: 72
 ---
-
-# 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -56,6 +54,7 @@ library(hydroTSM)
 library(openair)
 library(tibble)
 library(miscTools)
+library(priceR)
 
 ```
 
@@ -175,18 +174,23 @@ n_a_m_e
 
 The rest 68 components are listed in the spreadsheet.
 
+Rate of Inflation
+$=\frac{\mathrm{CPI}_{\mathrm{x}+1}-\mathrm{CPI}_{\mathrm{x}}}{\mathrm{CPI}_{\mathrm{x}}}$
+
 ```{r include=FALSE}
 df<-read_excel("85 cpi idex dat.xlsx",sheet="Sheet1")#读取85部门cpi 数据
 #有些列不是numerical，
 df[] <- lapply(df, function(x) as.numeric(as.character(x)))
 #把所有cpi index 转化为增长率
 #月度增长率
+#这个shift（x）-1不是shift的减去1,是cpix/cpix=1的意思
+#
 #df<-as.data.table(df)[, lapply(.SD, function(x)x/shift(x) - 1), .SDcols = 1:ncol(df)]
 #30/11/2021 huw 说不要用月度的85inflation，要用年度的85inflation
 #公式应该是
 #（这个月的cpi数据-去年这个月cpi的数据）/去年这个月的cpi数据
-#test
-df<-as.data.table(df)[, lapply(.SD, function(x)x/shift(x) - 12), .SDcols = 1:ncol(df)]
+#shift(x,12,type="lag")就是x/x_(t-12)-1
+df<-as.data.table(df)[, lapply(.SD, function(x)x/shift(x,12,type = "lag")-1), .SDcols = 1:ncol(df)]
 #不会在function里×100 只能笨办法了
 df<-df*100
 date = seq(from = as.Date("1988-01-01"), to = as.Date("2019-12-01"),
@@ -278,8 +282,6 @@ labs(x="Time",y="Inflation")
 
 ```
 
-
-
 ```{r  echo=FALSE, fig.cap = "68 classes CPI and core inflation excluding food and energy.",fig.topcaption=TRUE}
 p + theme(legend.title = element_blank()) 
 ```
@@ -288,7 +290,5 @@ p + theme(legend.title = element_blank())
 #把weight zhuanzhi
 write.csv(df.excluding,"weight_wide.csv")
 #把年度weight转成月度weight
-m.w<-cbind(df.excluding, i=rep(1:12,each=ncol(df.excluding)))
+#m.w<-cbind(df.excluding, i=rep(1:12,each=ncol(df.excluding)))
 ```
-
-
