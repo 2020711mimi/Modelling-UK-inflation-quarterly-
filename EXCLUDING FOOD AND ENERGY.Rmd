@@ -51,6 +51,8 @@ library(zoo)
 library(xts)
 library(hydroTSM)
 library(openair)
+library(tibble)
+
 ```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
@@ -159,7 +161,35 @@ df<-df*100
 date = seq(from = as.Date("1988-01-01"), to = as.Date("2019-12-01"),
            by = "month")#生成日期
 zxc <- data.frame(date, df)#合并日期和原数据到新df
+#为啥合并以后名字不对了呢
+#合并少一列，并且名字有问题
+zxc<-add_column(df,date,.before = 1)
 #只保留2005年之后的
 qwe<-zxc[zxc$date>="2005-01-01",]#这部分数据和read to work.csv 里是完全一样的，也就是和我的病历本 得inflation计算结果是相同的. 证明都没错。
+#从数据里挑选我需要的68个 
+#我需要的是68个不带数字的版本的名字
+name.68<-which(
+  nd$name %in% df.excluding$...1 ==TRUE
+)
+df_name_68<-nd[name.68,]
+#所有68个部门都能在qwe数据里找到
+length(
+  which(colnames(qwe) %in% df_name_68$`index date`==TRUE)
+)
+#68名字的位置
+p.cpi.68<-  which(colnames(qwe) %in% df_name_68$`index date`==TRUE)
+#把日期也保留吧，
+p.cpi.68<-append(p.cpi.68,1,0)
+#只保留着68个部门加日期
+cpi.68<-qwe[,..p.cpi.68]
 
 ```
+
+```{r}
+#把weight zhuanzhi
+write.csv(df.excluding,"weight_wide.csv")
+#把年度weight转成月度weight
+m.w<-cbind(df.excluding, i=rep(1:12,each=ncol(df.excluding)))
+```
+
+
