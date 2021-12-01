@@ -56,6 +56,7 @@ library(hydroTSM)
 library(openair)
 library(tibble)
 library(miscTools)
+
 ```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
@@ -184,6 +185,7 @@ df[] <- lapply(df, function(x) as.numeric(as.character(x)))
 #30/11/2021 huw 说不要用月度的85inflation，要用年度的85inflation
 #公式应该是
 #（这个月的cpi数据-去年这个月cpi的数据）/去年这个月的cpi数据
+df<-as.data.table(df)[, lapply(.SD, function(x)x/shift(x) - 12), .SDcols = 1:ncol(df)]
 #不会在function里×100 只能笨办法了
 df<-df*100
 date = seq(from = as.Date("1988-01-01"), to = as.Date("2019-12-01"),
@@ -275,6 +277,17 @@ labs(x="Time",y="Inflation")
 
 ```
 
+
+
 ```{r  echo=FALSE, fig.cap = "68 classes CPI and core inflation excluding food and energy.",fig.topcaption=TRUE}
 p + theme(legend.title = element_blank()) 
 ```
+
+```{r}
+#把weight zhuanzhi
+write.csv(df.excluding,"weight_wide.csv")
+#把年度weight转成月度weight
+m.w<-cbind(df.excluding, i=rep(1:12,each=ncol(df.excluding)))
+```
+
+
