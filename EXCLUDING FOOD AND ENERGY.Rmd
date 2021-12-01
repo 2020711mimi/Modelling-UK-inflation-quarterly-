@@ -269,7 +269,7 @@ s<-which(cpi05[,1]=="2005")
 e<-which(cpi05[,1]=="2019")
 ddd<-cpi05[s:e,]
 cpi05<-read_excel("core inflation excluding food and energy.xlsx","summary")
-
+cpi05$`Core inflation(excluding food and energy)`<-core_inflation
 
 #ggplot
 nt<-ts(cpi05$...1,start = c(2005),frequency = 12 )
