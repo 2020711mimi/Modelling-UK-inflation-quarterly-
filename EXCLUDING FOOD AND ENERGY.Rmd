@@ -3,6 +3,9 @@ title: "EXCLUDING FOOD AND ENERGY"
 author: "Yiyi"
 date: "`r Sys.Date()`"
 output:
+  word_document:
+    toc: yes
+    toc_depth: '3'
   html_document:
     highlight: tango
     number_sections: yes
@@ -12,8 +15,8 @@ output:
   pdf_document:
     toc: yes
     toc_depth: '3'
-editor_options: 
-  markdown: 
+editor_options:
+  markdown:
     wrap: 72
 ---
 
@@ -51,6 +54,8 @@ library(zoo)
 library(xts)
 library(hydroTSM)
 library(openair)
+library(tibble)
+library(miscTools)
 ```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
@@ -58,6 +63,12 @@ Sys.setlocale("LC_TIME","English")
 ```
 
 # Weight
+
+The weights data for COICOP level I can find are all yearly frequency.
+However, from the ONS description, weights barely changed except January
+of each year. So I regarded annual weights frequency data as monthly
+frequency data, in this way, I can use monthly inflation of COICOP class
+data to calculate monthly frequency core inflation.
 
 ```{r eval=FALSE, include=FALSE}
 #因为之前用85部门名字替换找weight的时候是避免了重复的，如果还从122部门重新开始，重新删除，那么势必还是要重新经过避免重复这一步骤。 所以 85部门就是个基础版本（避免了重复计算）的。所以只要从85部门里开始删除就可以了
@@ -144,22 +155,126 @@ n_17_p<-  which(
 #从df85里移除这些,生成新的，是68行
 df.excluding<-df85[-n_17_p,]
 #weight部分处理结束
+#
+v.shan.chu<-as.character(shan.chu.wan)
+
 ```
 
 # CPI
+
+I am not sure whether some classes should be deleted, so I listed them
+in detail so that you can check again.
+
+17 classes related to food and energy have been removed from the
+original CPI composed of 85 classes，they are：
+
+```{r}
+n_a_m_e
+```
+
+The rest 68 components are listed in the spreadsheet.
 
 ```{r include=FALSE}
 df<-read_excel("85 cpi idex dat.xlsx",sheet="Sheet1")#读取85部门cpi 数据
 #有些列不是numerical，
 df[] <- lapply(df, function(x) as.numeric(as.character(x)))
 #把所有cpi index 转化为增长率
-df<-as.data.table(df)[, lapply(.SD, function(x)x/shift(x) - 1), .SDcols = 1:ncol(df)]
+#月度增长率
+#df<-as.data.table(df)[, lapply(.SD, function(x)x/shift(x) - 1), .SDcols = 1:ncol(df)]
+#30/11/2021 huw 说不要用月度的85inflation，要用年度的85inflation
+#公式应该是
+#（这个月的cpi数据-去年这个月cpi的数据）/去年这个月的cpi数据
 #不会在function里×100 只能笨办法了
 df<-df*100
 date = seq(from = as.Date("1988-01-01"), to = as.Date("2019-12-01"),
            by = "month")#生成日期
 zxc <- data.frame(date, df)#合并日期和原数据到新df
+#为啥合并以后名字不对了呢
+#合并少一列，并且名字有问题
+zxc<-add_column(df,date,.before = 1)
 #只保留2005年之后的
 qwe<-zxc[zxc$date>="2005-01-01",]#这部分数据和read to work.csv 里是完全一样的，也就是和我的病历本 得inflation计算结果是相同的. 证明都没错。
+#从数据里挑选我需要的68个 
+#我需要的是68个不带数字的版本的名字
+name.68<-which(
+  nd$name %in% df.excluding$...1 ==TRUE
+)
+df_name_68<-nd[name.68,]
+#所有68个部门都能在qwe数据里找到
+length(
+  which(colnames(qwe) %in% df_name_68$`index date`==TRUE)
+)
+#68名字的位置
+p.cpi.68<-  which(colnames(qwe) %in% df_name_68$`index date`==TRUE)
+#把日期也保留吧，
+p.cpi.68<-append(p.cpi.68,1,0)
+#只保留着68个部门加日期
+cpi.68<-qwe[,..p.cpi.68]#180*69
 
+```
+
+```{r include=FALSE}
+#把weight zhuanzhi
+write.csv(df.excluding,"weight_wide.csv")
+#把年度weight转成月度weight
+long.df<-read_excel("weight_long.xlsx")
+#除第一行每行复制12遍
+data_new_2 <- long.df %>% slice(rep(2:n(), each = 12))        # dplyr package
+#把名字当作列名
+colnames(data_new_2)<-long.df[1,]
+write.csv(data_new_2,"montly weight.csv")
+remove_jan<-read_excel("remove jan.xlsx")#180*70
+#去除前两列，不要时间的版本
+weight68<-remove_jan[,-(1:2)]
+#应该有多少行
+#05-16 12年 12*12=144
+#17-19 3年 3*12=36
+#总共144+36=180
+#remove jan确实有180
+cpi.68_notime<-cpi.68[,-1]
+write_csv(cpi.68_notime,"cpi 68.csv")
+#weight 总和不是1000，
+#每行的每个数加上（1000-每行的和）/68
+for (i in 1:nrow(weight68)) {
+  new_w<-weight68[i,]+(1000- rowSums(weight68[i,]))/68
+}
+for (i in 1:nrow(weight68)) {
+  new_w[i,]<-weight68[i,]+(1000- rowSums(weight68[i,]))/68
+}
+write.csv(new_w,"newweight.csv")
+#sumproduct
+www<-new_w/1000
+wcpi<-data.frame(cpi.68_notime)
+www*wcpi
+core_inflation<-rowSums(www*wcpi)
+```
+
+# Plot
+
+```{r include=FALSE}
+#把真实cpi 和core 放到一个df里 ggplot
+ccc<-data.frame(matrix(nrow = length(core_inflation),ncol = 2))
+#两列，一列core 一列cpi
+colnames(ccc)<-c("core","cpi")
+#
+cpi05<-read_excel("annual cpi.xls")
+s<-which(cpi05[,1]=="2005")
+e<-which(cpi05[,1]=="2019")
+ddd<-cpi05[s:e,]
+cpi05<-read_excel("core inflation excluding food and energy.xlsx","summary")
+
+
+#ggplot
+nt<-ts(cpi05$...1,start = c(2005),frequency = 12 )
+colnames(cpi05)[2:3]<-c("cpi","core")
+p<-ggplot(data=cpi05, aes(x=time(nt)))+
+ geom_line(aes(y = core,color = "Core Inflation excluding food and energy") )+ 
+geom_line(aes(y = cpi, color="CPI Inflation")) +
+labs(x="Time",y="Inflation")
+  
+
+```
+
+```{r  echo=FALSE, fig.cap = "68 classes CPI and core inflation excluding food and energy.",fig.topcaption=TRUE}
+p + theme(legend.title = element_blank()) 
 ```
