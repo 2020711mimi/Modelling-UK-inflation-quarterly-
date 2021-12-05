@@ -1,0 +1,137 @@
+---
+title: "V2 Trimmed Mean"
+author: "Yiyi"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 3
+  word_document:
+    toc: yes
+    toc_depth: '3'
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+ rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+
+## 
+
+```{r Library, include=FALSE}
+#Packages
+library(readxl)
+library(data.table)
+library(lubridate)#extract cpi time to newdata(furniture48)
+library(dplyr) 
+library(tidyverse) 
+library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
+library(dplyr)
+library(moments)
+library(Inflation)
+library(ggplot2)
+library(zoo)
+library(xts)
+library(hydroTSM)
+library(openair)
+library(tibble)
+library(miscTools)
+library(priceR)
+library(haven)
+
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+Sys.setlocale("LC_TIME","English")
+```
+
+# DATA
+
+![](C:/Users/44869/AppData/Local/RStudio/tmp/paste-30449D41.png)
+
+```{r data, include=FALSE}
+df<-read_dta("db_prices.dta")
+# Data table, with index
+dt <- data.table(df)
+db_date<-read_dta("db_date.dta")
+db_item<-read_dta("db_item.dta")
+db_region<-read_dta("db_region.dta")
+price_quote_2012_q1<-read.csv("price_quote_2012_q1.csv")
+db_sample<-read_dta("db_prices_5percentSample.dta")
+#validation 
+#remove any invalid quotes (where ‘validity’ status is not in 3, 4, 53 or 54) 
+price_quote_2012_q1<-price_quote_2012_q1[- grep("REVERSE", price_quote_2012_q1$validity),]
+```
+
+```{r}
+#现在问题还是没有stratum weight
+#查找201201日期里最后一行
+first_quarter<-which(price_quote_2012_q1$quote_date=="201201")
+tail(first_quarter)
+#2012 01 最后一行是122458
+#所有2012 01的stratum weight3481649  也他妈太大了
+colSums(price_quote_2012_q1[,10,drop=FALSE])
+colSums(price_quote_2012_q1[1:122458,10,drop=FALSE])
+#尝试210102的所有weight
+#item id =210102 & item id=210102 & stratum cell =3的
+item_210102<-which(price_quote_2012_q1$quote_date=="201201" 
+                   & price_quote_2012_q1$item_id=="210102" 
+                   & price_quote_2012_q1$stratum_cell=="3")
+                  # |price_quote_2012_q1$validity=="3"
+                   #|price_quote_2012_q1$validity=="4"
+                   #&price_quote_2012_q1$validity=="53"
+                   #&price_quote_2012_q1$validity=="54")
+asd<-price_quote_2012_q1[item_210102,]
+item_210102[-grep("1")]
+
+
+
+colSums(asd[1:nrow(asd),10,drop=FALSE])
+#时间，id，stratum cell.
+stratume_210102<-which(price_quote_2012_q1$quote_date=="201202" 
+                       & price_quote_2012_q1$item_id=="210403")
+
+dfstratume_210102<-price_quote_2012_q1[stratume_210102,]
+#validity=1无效 剔除
+no1<-dfstratume_210102[-grep("1",dfstratume_210102$validity),]
+#no1<-no1[-grep("N",no1$indicator_box),]
+
+colSums(no1[1:nrow(no1),10,drop=FALSE])
+#第一季度的210102的weight是1237.15
+colSums((price_quote_2012_q1[1:133,10,drop=FALSE]))
+#第二季度1119·
+colSums((price_quote_2012_q1[122459:122578,10,drop=FALSE]))
+#
+
+```
+
+price quote里有weight，
+但是RD里虽然都拼接成了，但是没有weight。根据quote_date，item_id，shop_code和region能在相对应的price
+quote里找到对应的 price值，也能找到相对应的weight。现在的目标是
+
+```{r}
+which(dt$quote_date=="201201"& dt$item_id=="210102" & dt$shop_code=="25" & dt$region=="5" )
+```
+
+```{r}
+(1.934/23)^(1/14)*100
+-4^(1/2)
+```

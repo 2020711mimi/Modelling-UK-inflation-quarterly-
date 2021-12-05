@@ -1,0 +1,186 @@
+---
+title: "Trimmed mean ITEM"
+author: "Yiyi"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 3
+  word_document:
+    toc: yes
+    toc_depth: '3'
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+ rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+
+## 
+
+```{r Library, include=FALSE}
+#Packages
+library(readxl)
+library(data.table)
+library(lubridate)#extract cpi time to newdata(furniture48)
+library(dplyr) 
+library(tidyverse) 
+library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
+library(dplyr)
+library(moments)
+library(Inflation)
+library(ggplot2)
+library(zoo)
+library(xts)
+library(hydroTSM)
+library(openair)
+library(tibble)
+library(miscTools)
+library(priceR)
+
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+Sys.setlocale("LC_TIME","English")
+```
+# item index
+## The trimmed means used here are calculated on a month-on-month basis
+```{r year on year inflation include=FALSE}
+#读取数据
+item_cpi<-read_excel("item_indices_complete.xlsx","Sheet2")
+#合并第一行和列名
+colnames(item_cpi)=paste(colnames(item_cpi),item_cpi[1,])
+#第一行和第二列没啥东西 都删了
+item_cpi<-item_cpi[-1,-2]
+
+#各列属性目前是character
+#sapply(item_cpi,class)
+#转化为numerical
+#除了前第一列以外别的列转化为numerical
+item_cpi[, 2:ncol(item_cpi)] <- sapply(item_cpi[,2:ncol(item_cpi)], as.numeric)
+#
+
+#把cpi指数换算成年度inflation， 第一列是时间
+#这里到底用年度还是月度？
+df<-as.data.table(item_cpi)[, lapply(.SD, function(x)x/shift(x,12,type = "lag")-1), .SDcols = 2:ncol(item_cpi)]
+df<-df*100
+#添加日期
+date = seq(from = as.Date("2005-02-01"), to = as.Date("2021-04-01"),
+           by = "month")#生成日期
+#合并日期
+zxc<-add_column(df,date,.before = 1)
+#只保留2006年之后的，因为数据从05年开始，年度inflation的话inflation 没有之前一年的数据相比了。
+qwe<-zxc[zxc$date>="2006-02-01",]
+
+write.csv(qwe,file = "ITEM Index 2016.csv")
+qwe<-qwe[,-1]
+#把na换成0
+qwe<-as.data.frame(qwe)
+qwe[is.na(qwe)]<-0
+item_index_final<-qwe
+#转化成从2005年开始的年度ts 数据类型
+ix.ts<-ts(qwe,start = c(2006,2),frequency = 12 )
+```
+# ITEM Weight
+```{r include=FALSE}
+item_weight<-read_excel("item_indices_complete.xlsx","Sheet3")
+#合并第一行和列名
+colnames(item_weight)=paste(colnames(item_weight),item_weight[1,])
+#第一行和第二列没啥东西 都删了
+item_weight<-item_weight[-1,-2]
+#除了前第一列以外别的列转化为numerical
+item_weight[, 2:ncol(item_weight)] <- sapply(item_weight[,2:ncol(item_weight)], as.numeric)
+#我看看每个月（行的和）weight 和是多少
+#从来没有等于过1000.
+#有nan值似乎无法计算
+item_weight<-as.data.frame(item_weight)
+item_weight[is.na(item_weight)]<-0
+#合并日期
+item_weight_final<-add_column(item_weight,date,.before = 1)
+#只保留2006年之后的，因为数据从05年开始，年度inflation的话inflation 没有之前一年的数据相比了。
+item_weight_final<-item_weight_final[item_weight_final$date>="2006-02-01",]
+#删除时间
+item_weight_final<-item_weight_final[,-(1:2)]
+#全都是900多。就没有个1000的
+#rowSums(item_weight_final[,2:ncol(item_weight_final)])
+#现在都是千分比，需不需要换成百分比？
+##巴西的例子 权重是百分比。
+#全部/10和就是100了
+item_weight_final<-item_weight_final/10
+#rowSums(item_weight_final[,2:ncol(item_weight_final)])
+w.ts<-ts(item_weight_final,start = c(2006,2),frequency = 12)
+
+```
+#Five thresholds are used: 2,5 ,10, 15 and 25%.
+```{r Trimmed mean, include=FALSE}
+#run core inflation
+cf<-INFL.core_tm(subits.var = ix.ts,weights = w.ts)
+nt<-ts(cf$core,start = c(2006,2),frequency = 12)
+```
+#25%
+```{r}
+cf25<-INFL.core_tm(subits.var = ix.ts,weights = w.ts, inf = 25, sup = 25)
+nt25<-ts(cf25$core,start = c(2006,2),frequency = 12)
+```
+#15%
+```{r}
+cf15<-INFL.core_tm(subits.var = ix.ts,weights = w.ts, inf = 15, sup = 15)
+nt15<-ts(cf15$core,start = c(2006,2),frequency = 12)
+```
+#10%
+```{r}
+cf10<-INFL.core_tm(subits.var = ix.ts,weights = w.ts, inf = 10, sup = 10)
+nt10<-ts(cf10$core,start = c(2006,2),frequency = 12)
+```
+# Plot
+
+```{r include=FALSE}
+#从cf里先导出结果
+#ccc 是存放结果的df
+ccc<-data.frame(matrix(nrow = length(cf$core),ncol = 7))
+colnames(ccc)<-c("date","CPI Inflatio","Trimmed 2%","5%","10%","15%","25%")
+#时间
+date06 = seq(from = as.Date("2006-02-01"), to = as.Date("2021-04-01"),
+           by = "month")#生成日期
+ccc<-add_column(ccc,date06,.before = 1)
+write.csv(ccc,"trimmed mean 06-21.csv")
+#
+cpi05<-read_excel("annual cpi.xls")
+s<-which(cpi05[,1]=="2005")
+e<-which(cpi05[,1]=="2019")
+ddd<-cpi05[s:e,]
+cpi05<-read_excel("V2 core excluding food and energy.xlsx","Comparision")
+cpi05[14:length(cpi05),7]<-cf$core
+
+#ggplot
+nt<-ts(cpi05$...1,start = c(2005),frequency = 12 )
+colnames(cpi05)[2:3]<-c("cpi","core")
+p<-ggplot(data=cpi05, aes(x=time(nt)))+
+ geom_line(aes(y = core,color = "Core Inflation excluding food and energy") )+ 
+geom_line(aes(y = cpi, color="CPI Inflation")) +
+labs(x="Time",y="Inflation")
+  
+
+```
+
+```{r  echo=FALSE, fig.cap = "68 classes CPI and core inflation excluding food and energy.",fig.topcaption=TRUE}
+p + theme(legend.title = element_blank()) 
+```

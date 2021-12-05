@@ -83,14 +83,18 @@ hist(data)
 ```
 
 # 巴西 core inflation package
-
+#巴西的例子 权重是百分比。
 ```{r}
 ipca_sub <- Inflation::ipca_sub
 nuc <- Inflation::INFL.core_tm(subits.var = ipca_sub$ipca_ts, weights = ipca_sub$weights_ts)
 aaa<-data.frame(ipca_sub$ipca)
 bbb<-data.frame(ipca_sub$ipca_ts)
+ccc<-data.frame(ipca_sub$weights)
+rowSums(ccc[,1:ncol(ccc),drop=FALSE])
+#巴西的例子 权重是百分比。
 asdasda<-data.frame(ipca_sub$weights_ts)
 asdasda[] <- lapply(asdasda, function(x) as.numeric(as.character(x)))
+colSums(asdasda[2:nrow(asdasda),1,drop=FALSE])
 plot(nuc$core)
 
 
