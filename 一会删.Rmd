@@ -1,0 +1,68 @@
+---
+title: "R Notebook"
+output:
+  word_document: default
+  html_notebook: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+ rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+
+```{r Library, include=FALSE}
+#Packages
+library(readxl)
+library(data.table)
+library(lubridate)#extract cpi time to newdata(furniture48)
+library(dplyr) 
+library(tidyverse) 
+library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
+library(dplyr)
+library(moments)
+library(Inflation)
+library(ggplot2)
+library(zoo)
+library(xts)
+library(hydroTSM)
+library(openair)
+library(tibble)
+library(miscTools)
+library(priceR)
+library(Metrics)
+
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+Sys.setlocale("LC_TIME","English")
+```
+
+# Criteria for evaluation : forecasting future inflation
+
+The ability of the core inflation indicator to predict future headline inflation can be quantified by the following regression equation.
+
+```{r include=FALSE}
+#想在r markdown里输入latex公式居中 首先需要首位$$\begin{} \end{}$$
+#这个 公式模型 我自己用ols也能做啊？
+#就做一个df，有三列数据，第一列x_t+12,第二列x_t,第三列core
+#日期的问题
+#
+```
+
+
+Here, x represents the headline inflation rate and core x represents some core inflation indicator, both year-on-year data. Parameter h is 12 (month) ahead in this case. For sufficiently large H, the core deviation, $\left(x_{t}^{\text {core }}-x_{t}\right)$, should be inversely related to subsequent changes in inflation, $x_{t+h}-x_{t}$. Moreover, in order for the candidate to satisfy equation (1), the coefficients in the regression, should satisfy $\alpha=0$ and $\beta_H = -1$.
+
+
+\begin{equation}
+x_{t+h}-x_{t}=\alpha+\beta\left(x_{t}^{\text {core }}-x_{t}\right)+\varepsilon_{t}
+\end{equation}

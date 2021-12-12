@@ -3,15 +3,15 @@ title: "Trimmed mean ITEM"
 author: "Yiyi"
 date: "`r Sys.Date()`"
 output:
+  word_document:
+    toc: yes
+    toc_depth: '3'
   html_document:
     highlight: tango
     number_sections: yes
     theme: united
     toc: yes
     toc_depth: 3
-  word_document:
-    toc: yes
-    toc_depth: '3'
   pdf_document:
     toc: yes
     toc_depth: '3'
@@ -55,15 +55,28 @@ library(openair)
 library(tibble)
 library(miscTools)
 library(priceR)
+library(Metrics)
 
 ```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
 Sys.setlocale("LC_TIME","English")
 ```
-# item index
-## The trimmed means used here are calculated on a month-on-month basis
-```{r year on year inflation include=FALSE}
+
+# DATA
+
+For this time Trimmed means I did based on items level. The data set
+started from 2.2006 to 4.2021 and covers 1144 items.
+
+The trimmed means used here are calculated on a Year-on-year basis, but
+I the paper "MEASURING AND ASSESSING UNDERLYING INFLATION" you suggested
+are calculated on a month-on-month basis. Year-on-year or three-month
+inflation rates are then obtained by compounding monthly trimmed mean
+inflation rates.
+
+# Item index
+
+```{r include=FALSE}
 #读取数据
 item_cpi<-read_excel("item_indices_complete.xlsx","Sheet2")
 #合并第一行和列名
@@ -99,7 +112,9 @@ item_index_final<-qwe
 #转化成从2005年开始的年度ts 数据类型
 ix.ts<-ts(qwe,start = c(2006,2),frequency = 12 )
 ```
+
 # ITEM Weight
+
 ```{r include=FALSE}
 item_weight<-read_excel("item_indices_complete.xlsx","Sheet3")
 #合并第一行和列名
@@ -117,6 +132,8 @@ item_weight[is.na(item_weight)]<-0
 item_weight_final<-add_column(item_weight,date,.before = 1)
 #只保留2006年之后的，因为数据从05年开始，年度inflation的话inflation 没有之前一年的数据相比了。
 item_weight_final<-item_weight_final[item_weight_final$date>="2006-02-01",]
+#
+write.csv(item_weight_final,file = "weight Index 2016.csv")
 #删除时间
 item_weight_final<-item_weight_final[,-(1:2)]
 #全都是900多。就没有个1000的
@@ -125,60 +142,71 @@ item_weight_final<-item_weight_final[,-(1:2)]
 ##巴西的例子 权重是百分比。
 #全部/10和就是100了
 item_weight_final<-item_weight_final/10
+
+
 #rowSums(item_weight_final[,2:ncol(item_weight_final)])
 w.ts<-ts(item_weight_final,start = c(2006,2),frequency = 12)
 
 ```
-#Five thresholds are used: 2,5 ,10, 15 and 25%.
+
+#Three thresholds are used: 15, 20 and 25%.
+
 ```{r Trimmed mean, include=FALSE}
 #run core inflation
 cf<-INFL.core_tm(subits.var = ix.ts,weights = w.ts)
 nt<-ts(cf$core,start = c(2006,2),frequency = 12)
 ```
+
 #25%
-```{r}
+
+```{r include=FALSE}
 cf25<-INFL.core_tm(subits.var = ix.ts,weights = w.ts, inf = 25, sup = 25)
 nt25<-ts(cf25$core,start = c(2006,2),frequency = 12)
 ```
+
 #15%
-```{r}
+
+```{r include=FALSE}
 cf15<-INFL.core_tm(subits.var = ix.ts,weights = w.ts, inf = 15, sup = 15)
 nt15<-ts(cf15$core,start = c(2006,2),frequency = 12)
 ```
-#10%
-```{r}
-cf10<-INFL.core_tm(subits.var = ix.ts,weights = w.ts, inf = 10, sup = 10)
-nt10<-ts(cf10$core,start = c(2006,2),frequency = 12)
+
+```{r include=FALSE}
+#10% 10以下开始不执行了
+#cf10<-INFL.core_tm(subits.var = ix.ts,weights = w.ts, inf = 10, sup = 10)
+#nt10<-ts(cf10$core,start = c(2006,2),frequency = 12)
 ```
+
 # Plot
 
 ```{r include=FALSE}
-#从cf里先导出结果
-#ccc 是存放结果的df
-ccc<-data.frame(matrix(nrow = length(cf$core),ncol = 7))
-colnames(ccc)<-c("date","CPI Inflatio","Trimmed 2%","5%","10%","15%","25%")
+#cpi是数据是05到19的，cf数据是06到21的
+#我他妈重新下一个cpi数据把 cpi数据是2.06-4.21
+CPI_ANNUAL_06_21<-read_excel("2.06-4.21 cpi ANNUAL RATE.xlsx")
+trimmed_CPI<-add_column(CPI_ANNUAL_06_21,cf25$core,cf$core,cf15$core,.after = 2)
+trimmed_CPI<-trimmed_CPI[,-1]
 #时间
 date06 = seq(from = as.Date("2006-02-01"), to = as.Date("2021-04-01"),
            by = "month")#生成日期
-ccc<-add_column(ccc,date06,.before = 1)
-write.csv(ccc,"trimmed mean 06-21.csv")
-#
-cpi05<-read_excel("annual cpi.xls")
-s<-which(cpi05[,1]=="2005")
-e<-which(cpi05[,1]=="2019")
-ddd<-cpi05[s:e,]
-cpi05<-read_excel("V2 core excluding food and energy.xlsx","Comparision")
-cpi05[14:length(cpi05),7]<-cf$core
+#插入日期
+trimmed_CPI<-add_column(trimmed_CPI,date06,.before = 1)
+#命名
+colnames(trimmed_CPI)<-c("date","CPIInflation","Trimmed25percent","Trimmed20percent","Trimmed15percent")
+
+
+
+write.csv(trimmed_CPI,"trimmed mean 06-21.csv",row.names = FALSE)
+#读取cpi inflation数据
 
 #ggplot
-nt<-ts(cpi05$...1,start = c(2005),frequency = 12 )
-colnames(cpi05)[2:3]<-c("cpi","core")
-p<-ggplot(data=cpi05, aes(x=time(nt)))+
- geom_line(aes(y = core,color = "Core Inflation excluding food and energy") )+ 
-geom_line(aes(y = cpi, color="CPI Inflation")) +
+nt<-ts(trimmed_CPI$date,start = c(2006,2),frequency = 12 )
+p<-ggplot(data=trimmed_CPI, aes(x=time(nt)))+
+ geom_line(aes(y = CPIInflation, color="CPI Inflation")) +
+   geom_line(aes(y = Trimmed25percent, color="25 Trimming percentage")) +
+     geom_line(aes(y = Trimmed20percent, color="20 Trimming percentage")) +
+       geom_line(aes(y = Trimmed15percent, color="15 Trimming percentage")) +
 labs(x="Time",y="Inflation")
   
-
 ```
 
 ```{r  echo=FALSE, fig.cap = "68 classes CPI and core inflation excluding food and energy.",fig.topcaption=TRUE}

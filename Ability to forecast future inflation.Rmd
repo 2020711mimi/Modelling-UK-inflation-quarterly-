@@ -1,0 +1,160 @@
+---
+title: "EVALUATING EXCLUDING FOOD AND ENERGY CORE INFLATION MEASURES"
+author: "Yiyi"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+          toc: yes
+  header-includes:
+  - \usepackage{placeins}
+  - \usepackage{multirow}
+  - \usepackage{multicolumn}
+  - \usepackage{caption}
+  - \usepackage[absolute,overlay]{textpos}
+  - \usepackage{float}
+  - \usepackage{graphicx}
+  - \usepackage{booktabs}
+  html_document:
+    toc: yes
+    df_print: paged
+  word_document: default
+  html_notebook: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+ rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+
+```{r Library, include=FALSE}
+#Packages
+library(readxl)
+library(data.table)
+library(lubridate)#extract cpi time to newdata(furniture48)
+library(dplyr) 
+library(tidyverse) 
+library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
+library(dplyr)
+library(moments)
+library(Inflation)
+library(ggplot2)
+library(zoo)
+library(xts)
+library(hydroTSM)
+library(openair)
+library(tibble)
+library(miscTools)
+library(priceR)
+library(Metrics)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+Sys.setlocale("LC_TIME","English")
+```
+
+# Criteria for evaluation : forecasting future inflation
+
+This work uses Cogley's model to test the forecasting ability of core inflation rate, and compares the forecasting ability of excluding food and energy core inflation rates. Cogley's model is based on Bryan and Cecchetti's definition of core inflation: "Core inflation is changes in the price level that are expected to persist over a long period of time."
+
+According to Bryan and Cecchetti's definition, a valid core inflation is one that is "pure" after removing temporary factors from measured real inflation. On this basis, Cogley developed the following model to evaluate the predictive power of core inflation:
+
+```{r include=FALSE}
+#想在r markdown里输入latex公式居中 首先需要首位$$\begin{} \end{}$$
+#html公式后面是没有标号的，pdf有
+#这个 公式模型 我自己用ols也能做啊？
+#就做一个df，有三列数据，第一列x_t+12,第二列x_t,第三列core
+#日期的问题
+#
+```
+
+```{=tex}
+\begin{equation}
+x_{t+h}-x_{t}=\alpha+\beta\left(x_{t}^{\text {core }}-x_{t}\right)+\varepsilon_{t}
+\end{equation}
+```
+Here, x represents the headline inflation rate and core x represents some core inflation indicator, both year-on-year data. Parameter h is 12 (month) ahead in this case. For sufficiently large H, the core deviation, $\left(x_{t}^{\text {core }}-x_{t}\right)$, should be inversely related to subsequent changes in inflation, $x_{t+h}-x_{t}$. Moreover, in order for the candidate to satisfy equation (1), the coefficients in the regression, should satisfy $\alpha=0$ and $\beta = -1$.
+
+Of importance to the forecasting model is the estimated coefficient of $\beta$, which indicates whether core inflation has sufficiently purified the transitory component. Because if the absolute value of the estimated coefficient is equal to 1, it indicates that the model is a random walk process, and the components removed from the core inflation do not contain any information that predicts future overall inflation. If $\beta=-1$, the forecasting capacity for core inflation is the best . This proves that core inflation has fully captured the trend components of overall inflation and has a complete forecasting ability for future inflation.
+
+1.  If the $|\beta|<1$, it indicates that subsequent changes in inflation are overestimated;
+
+2.  If the $|\beta|>1$, it shows that underestimation of the current temporary movement in headline inflation.
+
+Therefore, the closer the absolute value of the estimated regression coefficient $\beta$ is to 1, the better the predictive power of core inflation is. In addition, the root mean square error RMSE $=\sqrt{\frac{1}{\mathrm{~T}} \sum_{\mathrm{t}=1}^{\mathrm{T}}\left(\pi_{\mathrm{t}}-\hat\pi_{\mathrm{t}}\right)^{2}}$obtained by Cogley regression represents the deviation between the predicted value and the actual value. $\hat\pi_{\mathrm{t}}$ is the forecast value of the inflation rate. The smaller the RMSE, the more accurate the forecast. and the better the forecast of core inflation.
+
+$$
+x_{t+h}-x_{t}=\alpha+\beta\left(x_{t}^{\text {core }}-x_{t}\right)+\varepsilon_{t}
+$$
+
+```{r include=FALSE}
+#首先导入数据
+#05.1对应的是x+12是06.1
+#那尾部又不够了， 重新搞一份全的cpi重新提取把
+core_headline<-read_excel("V2 core excluding food and energy.xlsx","Comparision")
+#读取全部的cpi数据
+headline_df<-read_excel("UK ALL year CPI.xls")
+#提取2006JAN -2020 DEC的数据作为x+12
+#开始结束的位置
+start_poisition<-which(headline_df$Title=="2006 JAN")
+end_poisition<-which(headline_df$Title=="2020 DEC")
+#把开始结束的之间的内容提取到主df里
+core_headline[,7]<-headline_df[start_poisition:end_poisition,2]
+#命名新的列
+colnames(core_headline)[7]<-c("x+12")
+#把几个数据都改为numerical
+core_headline[, 4:7] <- sapply(core_headline[,4:7], as.numeric)
+core_headline<-data.frame(core_headline)
+#生成x_core-x -> difference
+core_headline$difference<-core_headline$Core.inflation.excluding.food.and.energy.- core_headline$CPI.ANNUAL.RATE.00..ALL.ITEMS.2015.100
+#left difference
+colnames(core_headline)<-c("titlle","time","origin","core","CPI","approx","x+12","difference")
+core_headline$left_difference<-core_headline$`x+12`- core_headline$CPI
+#core_jeadline$difference 改名字为beta方便输出
+colnames(core_headline)[8]<-c("beta")
+#regression
+regression<-lm(core_headline$left_difference~ beta,data = core_headline)
+
+```
+
+# Results
+From the above discussion, I used my own data to re-simulate the values of the parameters.The results please see Table 1.
+
+## RMSE
+
+```{r echo=FALSE}
+#RMSE
+RSS <- c(crossprod(regression$residuals))
+MSE <- RSS / length(regression$residuals)
+sig2 <- RSS / regression$df.residual
+
+sqrt(mean(regression$residuals^2))
+```
+
+## Coefficients
+
+```{r echo=FALSE}
+stargazer(regression,column.labels = "xt+12-xt",dep.var.labels.include = FALSE ,type = "text")
+```
+
+s
+\begin{table}[h]
+\centering
+\caption{Forecasting future inflation}
+\label{tab:my-table}
+\begin{tabular}{|c|ccc|}
+\hline
+H & \multicolumn{3}{c|}{Excluding Food and Energy}                     \\ \hline
+12& \multicolumn{1}{c|}{$\alpha$}     & \multicolumn{1}{c|}{$\beta$}     & RMSE     \\ \hline
+  & \multicolumn{1}{c|}{0.229} & \multicolumn{1}{c|}{0.817} & 1.155487 \\ \hline
+\end{tabular}
+\end{table}
+

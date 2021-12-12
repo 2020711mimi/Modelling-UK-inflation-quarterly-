@@ -1,0 +1,375 @@
+---
+title: "Sticky  CPI"
+author: "Yiyi"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+          toc: yes
+  header-includes:
+  - \usepackage{placeins}
+  - \usepackage{multirow}
+  - \usepackage{multicolumn}
+  - \usepackage{caption}
+  - \usepackage[absolute,overlay]{textpos}
+  - \usepackage{float}
+  - \usepackage{graphicx}
+  - \usepackage{booktabs}
+  html_document:
+    toc: yes
+    df_print: paged
+  word_document: default
+  html_notebook: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+ rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+
+```{r Library, include=FALSE}
+#Packages
+library(readxl)
+library(data.table)
+library(lubridate)#extract cpi time to newdata(furniture48)
+library(dplyr) 
+library(tidyverse) 
+library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
+library(dplyr)
+library(moments)
+library(Inflation)
+library(ggplot2)
+library(zoo)
+library(xts)
+library(hydroTSM)
+library(openair)
+library(tibble)
+library(miscTools)
+library(priceR)
+library(Metrics)
+library(hablar)
+library(berryFunctions)
+
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+Sys.setlocale("LC_TIME","English")
+```
+
+```{r eval=FALSE, include=FALSE}
+#frequency 的计算估计是要从product开始计算，不能简简单单的从item数变化就可以的，下面的code是只是数变化的，不太行。
+df <- data.frame(ID=1:10,Score=4*10:1)
+data.frame(diff(as.matrix(df)))
+tail(df, -1)
+head(df, -1)
+apply( df , 2 , diff )
+#读取数据
+item_cpi<-read_excel("item_indices_complete.xlsx","Sheet2")
+#合并第一行和列名
+colnames(item_cpi)=paste(colnames(item_cpi),item_cpi[1,])
+#第一行和第二列没啥东西 都删了
+item_cpi<-item_cpi[-1,-2]
+#除了前第一列以外别的列转化为numerical
+item_cpi[, 2:ncol(item_cpi)] <- sapply(item_cpi[,2:ncol(item_cpi)], as.numeric)
+#
+diff<-tail(item_cpi, -1) - head(item_cpi, -1)
+diff[diff$`210102 LARGE LOAF-WHITE-UNSLICED-800G`=-1.527,]
+which(diff[,1:194]== 0)
+test<-diff[which(diff[,1:194]==0),]
+#查找0的位置
+which(diff==0, arr.ind=TRUE)
+```
+
+# Separating point
+
+Here I use the Dixon and Tian 570 items frequency data. The monthly frequency of price changes averages 21.78278%. For the median category the time between price change averages 20 months.
+
+If price changes for a particular CPI component occur less often, on average, than every 20 months, we called that component a "sticky-price" good. Goods that change prices more frequently than this we labeled "flexible price" goods.
+
+# Data
+
+There are 284 items frequency less than 20 months, from which we form the sticky-price CPI.
+
+The 284 items CPI and weights monthly data from Feb 2006 to Apr 21. The weight are made to add up to 1000.
+
+```{r include=FALSE}
+#从Dixon and tian的数据里， 把frequency划分为sticky 和 flexible
+#再根据名字找相应的年份的cpi 和weight 构建stickey price把
+Dixon_tian<-read_excel("Dixon_and_Tian_570_item_Freq yiyi.xlsx","Sheet2")
+#data.frame
+Dixon_tian<-data.frame(Dixon_tian)
+#all numerical col 3 4 5
+Dixon_tian[,3:7]<-sapply(Dixon_tian[,3:7],as.numeric)
+Dixon_tian<-Dixon_tian[-570,]
+colnames(Dixon_tian)[6:7]<-c("null","Accumulative weight")
+#寻找col 4小于4.3的行
+sticky_row<-which(Dixon_tian$frequency<4.3)
+#很明显，这里不能用4.3做分界
+#For the median category the time between price change averages 4.3 months.
+#中位数？平均数？cpi权重的中位数？
+#Median by CPI weight
+#location_median_cpiweight<-which(Dixon_tian$...7==median(Dixon_tian$...7))
+#Dixon_tian[location_median_cpiweight,]
+
+
+#Dixon_tian[location_Means,]
+
+#weighted media
+#matrixStats::weightedMedian(Dixon_tian$rebase.weight,Dixon_tian$frequency)
+
+#For the median category the time between price change averages 4.3 months.
+#中位数的平均数是20， 20以下就是sticky
+
+```
+
+## Mean
+
+The monthly frequency of pricechanges averages
+
+```{r}
+#Means (weighted and unweighted)
+mean(Dixon_tian$frequency)
+```
+
+## Median
+
+For the median category the time between price change averages
+
+```{r echo=FALSE}
+#Median in list.
+location_median<-which(Dixon_tian$frequency==median(Dixon_tian$frequency))
+Dixon_tian[location_median,]
+```
+
+```{r include=FALSE}
+#那就不管20的了？ 直接 大于 小于20的 把20扔了吧
+#寻找col 4小于20的行
+sticky_row<-which(Dixon_tian$frequency<20)
+#一共多少个/284
+length(sticky_row)
+#用他们的id在 item completely里找对应的cpi和weight把
+#读取数据
+#马勒戈壁读取名字的时候 会把colname改名字
+#所以列名不能实名制
+item_cpi<-read_excel("item_indices_complete.xlsx","Sheet2",col_names = FALSE)
+#第一行和第二列没啥东西 都删了
+item_cpi<-item_cpi[-2,-2]
+#除了前第一列以外别的列转化为numerical
+item_cpi<-data.frame(item_cpi)
+#
+item_cpi[2:nrow(item_cpi), 2:ncol(item_cpi)] <-as.numeric(unlist(item_cpi[2:nrow(item_cpi), 2:ncol(item_cpi)]))
+#
+
+#
+#只在cpi里数据里找到了个290个， 但是应该有的sticky 是284个,。
+df<-Dixon_tian[sticky_row,1]#284
+df2<-item_cpi[1,]#1144
+#common_id<-intersect(df,df2)#282
+#setdiff(df,common_id)
+#410103 410101 两个狗崽中 在item cpi里找不到 操你妈的
+location_in_cpi<-which(item_cpi[1,] %in% Dixon_tian[sticky_row,1]==TRUE)
+new<-item_cpi[,location_in_cpi]
+setdiff(df,new[1,])
+#   是有共同用id的问题
+# 例如212917就有两个
+
+
+```
+
+```{r eval=FALSE, include=FALSE}
+#有他妈了个和逼的共用一个id的
+shu<-read_excel("item_indices_complete.xlsx","ITEM_INDEX")
+poit<-which(
+duplicated(shu$INDEX_DATE)==TRUE
+)
+shu[poit,1]
+#有32个 重复的至少
+duplicated(shu[poit,1]
+)
+#看看我想找的284 在竖列的名字里能找到多少个
+test<- which(shu$INDEX_DATE %in% df)#也是他妈290个
+```
+
+```{r eval=FALSE, include=FALSE}
+#duplitcaed 只能对列用 草泥马的 睡觉
+
+which(shu$INDEX_DATE=="210211")
+library(plyr)
+#所有item 出现的次数
+show_times_per_item<-ddply(shu,.(INDEX_DATE),nrow)
+#出现大于1次的item
+repeate_item<-show_times_per_item[which(show_times_per_item$V1>1),] 
+#重复出现的总数 62次
+sum(repeate_item$V1)
+#我想找的282个有几个是重复的？
+#
+repeat_in_282<-repeate_item[which(repeate_item$INDEX_DATE %in% df),]
+sum(repeat_in_282$V1)#16次总共，也就是8次应该
+#本来有182个，在dixon_tian的数据里有没有重复值呢？
+#让我们政审一下
+head(Dixon_tian)
+#所有item 出现的次数
+dixon_tian_showtimes<-ddply(Dixon_tian,.(item_id),nrow)
+#出现大于1次的item
+repeate_item_dixon<-dixon_tian_showtimes[which(dixon_tian_showtimes$V1>1),] 
+#dixon_tian的item_id没有重复值
+#他们的284就是真284个， 这284个有8个值在item completely里重复了两遍
+#所以284+8=292
+#又有两个值没了
+#410103 410101 两个狗崽中 在item cpi里找不到 操你妈的
+#292-2=290
+```
+
+```{r eval=FALSE, include=FALSE}
+#处理一份带id number name的item 数据
+#读取数据
+item_cpi<-read_excel("item_indices_complete.xlsx","Sheet2",col_names = FALSE)
+#合并第一行和列名
+#第一行和第二列没啥东西 都删了
+iD.vect<-item_cpi[1,]
+
+item_cpi<-item_cpi[-(1:2),-2]
+
+#各列属性目前是character
+#sapply(item_cpi,class)
+#转化为numerical
+#除了前第一列以外别的列转化为numerical
+item_cpi[, 2:ncol(item_cpi)] <- sapply(item_cpi[,2:ncol(item_cpi)], as.numeric)
+#
+
+#把cpi指数换算成年度inflation， 第一列是时间
+#这里到底用年度还是月度？
+df<-as.data.table(item_cpi)[, lapply(.SD, function(x)x/shift(x,12,type = "lag")-1), .SDcols = 2:ncol(item_cpi)]
+df<-df*100
+#添加日期
+date = seq(from = as.Date("2005-02-01"), to = as.Date("2021-04-01"),
+           by = "month")#生成日期
+#合并日期
+zxc<-add_column(df,date,.before = 1)
+#只保留2006年之后的，因为数据从05年开始，年度inflation的话inflation 没有之前一年的数据相比了。
+qwe<-zxc[zxc$date>="2006-02-01",]
+
+#write.csv(qwe,"item ID number name start 2016.csv",row.names   = FALSE)
+
+```
+
+# Sticky CPI index
+
+Please see spreadsheets.
+
+```{r include=FALSE}
+#读取数据
+newdf<-read_csv("item ID number name start 2016.csv")
+#newdf<-data.frame(newdf,stringsAsFactors=FALSE)
+#转化数据类型
+newdf[, 2:ncol(newdf)] <- sapply(newdf[,2:ncol(newdf)], as.numeric)
+#因为两个data的列是完全一模一样的，item_cpi 和 newdf 
+#196 * 1144
+#根据之前匹配的含有dixon_tian里的284个items 在 item_CPI 和在newdf的 ##列的位置是完全一样的，这样根据列的位置保留需要的来构成 sticky-284（290）cpi数据
+item_290_cpi_idex<-newdf[,location_in_cpi]
+#有na无法计算
+item_290_cpi_idex<-as.data.frame(item_290_cpi_idex)
+item_290_cpi_idex[is.na(item_290_cpi_idex)]<-0
+write.csv(item_290_cpi_idex,"sticky CPI index.csv")
+
+```
+
+# Sticky component weight
+
+Please see spreadsheets.
+
+```{r include=FALSE}
+sticky_weight<-read_excel("item_indices_complete.xlsx","Sheet3")
+#去除第二列（空），第二行（英文名字），dim 应该就和 item_cpi数据dim一样了
+sticky_weight_remove2cols<-sticky_weight[-1,-(1:2)]
+#
+
+#date
+date = seq(from = as.Date("2005-02-01"), to = as.Date("2021-04-01"),
+           by = "month")#生成日期
+
+sticky_time<-add_column(sticky_weight_remove2cols,date,.before = 1)
+#06 onward
+sticky_06onward<-sticky_time[sticky_time$date>="2006-02-01",]
+#sapply(sticky_weight_remove2cols,class)
+#转化数据类型
+sticky_06onward[, 2:ncol(sticky_06onward)] <- sapply(sticky_06onward[,2:ncol(sticky_06onward)], as.numeric)
+#
+#有na无法计算
+sticky_06onward<-as.data.frame(sticky_06onward)
+sticky_06onward[is.na(sticky_06onward)]<-0
+#提取
+sticky_weight_290<-sticky_06onward[,location_in_cpi]
+dim(item_290_cpi_idex)==dim(sticky_weight_290)
+#重新权重weight
+#weight 总和不是1000，
+#每行的每个数加上（1000-每行的和）/290
+new_w<-data.frame(matrix(nrow = 183,ncol = 290))
+for (i in 1:nrow(sticky_weight_290)) {
+  new_w[i,]<-sticky_weight_290[i,]+(1000- rowSums(sticky_weight_290[i,]))/ncol(sticky_weight_290)
+}
+#
+rowSums(new_w[,])
+www<-new_w/1000
+dim(www)==dim(item_290_cpi_idex)
+
+write.csv(www,"sticky CPI weight.csv")
+```
+
+## Following is their total share in CPI, around 200.
+
+```{r}
+rowSums(sticky_weight_290)
+```
+
+# Sticky CPI
+
+```{r include=FALSE}
+core_inflation<-rowSums(www*item_290_cpi_idex)
+
+```
+
+```{r include=FALSE}
+#cpi是数据是05到19的，cf数据是06到21的
+#我他妈重新下一个cpi数据把 cpi数据是2.06-4.21
+CPI_ANNUAL_06_21<-read_excel("2.06-4.21 cpi ANNUAL RATE.xlsx")
+trimmed_CPI<-add_column(CPI_ANNUAL_06_21,core_inflation,.after = 2)
+trimmed_CPI<-trimmed_CPI[,-1]
+#时间
+date06 = seq(from = as.Date("2006-02-01"), to = as.Date("2021-04-01"),
+           by = "month")#生成日期
+#插入日期
+trimmed_CPI<-add_column(trimmed_CPI,date06,.before = 1)
+#命名
+colnames(trimmed_CPI)<-c("date","CPIInflation","StickyCPI")
+
+
+
+write.csv(trimmed_CPI,"Sticky CPI 06-21.csv",row.names = FALSE)
+#读取cpi inflation数据
+
+#ggplot
+nt<-ts(trimmed_CPI$date,start = c(2006,2),frequency = 12 )
+p<-ggplot(data=trimmed_CPI, aes(x=time(nt)))+
+ geom_line(aes(y = CPIInflation, color="CPI Inflation")) +
+   geom_line(aes(y = StickyCPI, color="Sticky CPI")) +
+
+labs(x="Time",y="Inflation")
+  
+
+```
+
+```{r fig.cap="Sticky CPI and Headline CPI.", fig.topcaption=TRUE, message=FALSE, warning=FALSE, include=FALSE}
+p + theme(legend.title = element_blank()) 
+
+```
+
+![](C:/Users/44869/AppData/Local/RStudio/tmp/paste-1D361145.png)
