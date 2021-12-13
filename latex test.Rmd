@@ -1,0 +1,74 @@
+---
+title: "latex test"
+author: "Yiyi"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+          toc: yes
+  header-includes:
+  - \usepackage{placeins}
+  - \usepackage{multirow}
+  - \usepackage{multicolumn}
+  - \usepackage{caption}
+  - \usepackage[absolute,overlay]{textpos}
+  - \usepackage{float}
+  - \usepackage{graphicx}
+  - \usepackage{booktabs}
+  html_document:
+    toc: yes
+    df_print: paged
+  word_document: default
+  html_notebook: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+ rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+
+```{r Library, include=FALSE}
+#Packages
+library(readxl)
+library(data.table)
+library(lubridate)#extract cpi time to newdata(furniture48)
+library(dplyr) 
+library(tidyverse) 
+library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
+library(dplyr)
+library(moments)
+library(Inflation)
+library(ggplot2)
+library(zoo)
+library(xts)
+library(hydroTSM)
+library(openair)
+library(tibble)
+library(miscTools)
+library(priceR)
+library(Metrics)
+```
+
+
+\begin{table}[]
+\centering
+\caption{Forecasting future inflation}
+\label{tab:my-table}
+\begin{tabular}{|c|cll|}
+\hline
+H                       & \multicolumn{3}{c|}{Excluding Food and Energy}                              \\ \hline
+                        & \multicolumn{1}{c|}{a} & \multicolumn{1}{c|}{b} & \multicolumn{1}{c|}{RMSE} \\ \hline
+\multicolumn{1}{|l|}{6} & \multicolumn{1}{l|}{}  & \multicolumn{1}{l|}{}  &                           \\ \hline
+\multicolumn{1}{|l|}{9} & \multicolumn{1}{l|}{}  & \multicolumn{1}{l|}{}  &                           \\ \hline
+12 & \multicolumn{1}{c|}{0.229} & \multicolumn{1}{c|}{0.817} & \multicolumn{1}{c|}{1.155487} \\ \hline
+\end{tabular}
+\end{table}
+

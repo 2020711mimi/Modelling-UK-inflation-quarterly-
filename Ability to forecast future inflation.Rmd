@@ -55,6 +55,9 @@ library(tibble)
 library(miscTools)
 library(priceR)
 library(Metrics)
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
 ```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
@@ -78,10 +81,10 @@ According to Bryan and Cecchetti's definition, a valid core inflation is one tha
 
 ```{=tex}
 \begin{equation}
-x_{t+h}-x_{t}=\alpha+\beta\left(x_{t}^{\text {core }}-x_{t}\right)+\varepsilon_{t}
+\pi_{t+h}-\pi_{t}=\alpha_{h}+\beta_{h}\left(\pi_{t}-\pi_{t}^{c}\right)+u_{t+h}
 \end{equation}
 ```
-Here, x represents the headline inflation rate and core x represents some core inflation indicator, both year-on-year data. Parameter h is 12 (month) ahead in this case. For sufficiently large H, the core deviation, $\left(x_{t}^{\text {core }}-x_{t}\right)$, should be inversely related to subsequent changes in inflation, $x_{t+h}-x_{t}$. Moreover, in order for the candidate to satisfy equation (1), the coefficients in the regression, should satisfy $\alpha=0$ and $\beta = -1$.
+Here, x represents the headline inflation rate and core x represents some core inflation indicator, both year-on-year data. Parameter h is 6,9 and 12 (month) ahead in this case. For sufficiently large H, the core deviation, $\left(\pi_{t}-\pi_{t}^{c}\right)$, should be inversely related to subsequent changes in inflation, $\pi_{t+h}-\pi_{t}$. Moreover, in order for the candidate to satisfy equation (1), the coefficients in the regression, should satisfy $\alpha=0$ and $\beta = -1$.
 
 Of importance to the forecasting model is the estimated coefficient of $\beta$, which indicates whether core inflation has sufficiently purified the transitory component. Because if the absolute value of the estimated coefficient is equal to 1, it indicates that the model is a random walk process, and the components removed from the core inflation do not contain any information that predicts future overall inflation. If $\beta=-1$, the forecasting capacity for core inflation is the best . This proves that core inflation has fully captured the trend components of overall inflation and has a complete forecasting ability for future inflation.
 
@@ -91,9 +94,7 @@ Of importance to the forecasting model is the estimated coefficient of $\beta$, 
 
 Therefore, the closer the absolute value of the estimated regression coefficient $\beta$ is to 1, the better the predictive power of core inflation is. In addition, the root mean square error RMSE $=\sqrt{\frac{1}{\mathrm{~T}} \sum_{\mathrm{t}=1}^{\mathrm{T}}\left(\pi_{\mathrm{t}}-\hat\pi_{\mathrm{t}}\right)^{2}}$obtained by Cogley regression represents the deviation between the predicted value and the actual value. $\hat\pi_{\mathrm{t}}$ is the forecast value of the inflation rate. The smaller the RMSE, the more accurate the forecast. and the better the forecast of core inflation.
 
-$$
-x_{t+h}-x_{t}=\alpha+\beta\left(x_{t}^{\text {core }}-x_{t}\right)+\varepsilon_{t}
-$$
+
 
 ```{r include=FALSE}
 #首先导入数据
@@ -114,7 +115,7 @@ colnames(core_headline)[7]<-c("x+12")
 core_headline[, 4:7] <- sapply(core_headline[,4:7], as.numeric)
 core_headline<-data.frame(core_headline)
 #生成x_core-x -> difference
-core_headline$difference<-core_headline$Core.inflation.excluding.food.and.energy.- core_headline$CPI.ANNUAL.RATE.00..ALL.ITEMS.2015.100
+core_headline$difference<- core_headline$CPI.ANNUAL.RATE.00..ALL.ITEMS.2015.100 - core_headline$Core.inflation.excluding.food.and.energy.
 #left difference
 colnames(core_headline)<-c("titlle","time","origin","core","CPI","approx","x+12","difference")
 core_headline$left_difference<-core_headline$`x+12`- core_headline$CPI
@@ -125,13 +126,62 @@ regression<-lm(core_headline$left_difference~ beta,data = core_headline)
 
 ```
 
+```{r include=FALSE}
+#6 months ahead
+start_poisition_6<-which(headline_df$Title=="2005 JUL")
+end_poisition_6<-which(headline_df$Title=="2020 JUN")
+#把开始结束的之间的内容提取到主df里
+core_headline$"6 month ahead"<-headline_df[start_poisition_6:end_poisition_6,2]
+#9 months 
+start_poisition_9<-which(headline_df$Title=="2005 OCT")
+end_poisition_9<-which(headline_df$Title=="2020 SEP")
+#把开始结束的之间的内容提取到主df里
+core_headline$"9 month ahead"<-headline_df[start_poisition_9:end_poisition_9,2]
+core_headline[, 10:11] <- sapply(unlist(core_headline[,10:11]), as.numeric)
+#6 month diff
+core_headline$"6 months diff"<-core_headline$`6 month ahead`-core_headline$CPI
+#9month diff
+core_headline$"9 months diff"<-core_headline$`9 month ahead`- core_headline$CPI
+#regression 6 head
+regression_6<-lm(core_headline$`6 months diff`~ beta,data = core_headline)
+#regression 9 head
+regression_9<-lm(core_headline$`9 months diff`~ beta,data = core_headline)
+```
+
 # Results
 From the above discussion, I used my own data to re-simulate the values of the parameters.The results please see Table 1.
 
 ## RMSE
 
+
+### 6 months ahead
+
 ```{r echo=FALSE}
-#RMSE
+#RMSE 6
+RSS <- c(crossprod(regression_6$residuals))
+MSE <- RSS / length(regression_6$residuals)
+sig2 <- RSS / regression_6$df.residual
+
+sqrt(mean(regression_6$residuals^2))
+```
+
+### 9 months ahead
+
+
+```{r echo=FALSE}
+#RMSE 9
+RSS <- c(crossprod(regression_9$residuals))
+MSE <- RSS / length(regression_9$residuals)
+sig2 <- RSS / regression_9$df.residual
+
+sqrt(mean(regression_9$residuals^2))
+```
+
+
+### 12 months ahead
+
+```{r echo=FALSE}
+#RMSE 12
 RSS <- c(crossprod(regression$residuals))
 MSE <- RSS / length(regression$residuals)
 sig2 <- RSS / regression$df.residual
@@ -139,22 +189,40 @@ sig2 <- RSS / regression$df.residual
 sqrt(mean(regression$residuals^2))
 ```
 
+
+
+
 ## Coefficients
 
-```{r echo=FALSE}
-stargazer(regression,column.labels = "xt+12-xt",dep.var.labels.include = FALSE ,type = "text")
+### 6 months ahead
+
+```{r}
+summary(regression_6)
+```
+### 9 months ahead
+
+```{r}
+summary(regression_9)
+```
+### 12 months ahead
+
+```{r}
+summary(regression)
 ```
 
-s
 \begin{table}[h]
 \centering
 \caption{Forecasting future inflation}
 \label{tab:my-table}
-\begin{tabular}{|c|ccc|}
+\begin{tabular}{|c|cll|}
 \hline
-H & \multicolumn{3}{c|}{Excluding Food and Energy}                     \\ \hline
-12& \multicolumn{1}{c|}{$\alpha$}     & \multicolumn{1}{c|}{$\beta$}     & RMSE     \\ \hline
-  & \multicolumn{1}{c|}{0.229} & \multicolumn{1}{c|}{0.817} & 1.155487 \\ \hline
+H                       & \multicolumn{3}{c|}{Excluding Food and Energy}                                               \\ \hline
+                        & \multicolumn{1}{c|}{a}       & \multicolumn{1}{c|}{b}        & \multicolumn{1}{c|}{RMSE}     \\ \hline
+\multicolumn{1}{|l|}{6} & \multicolumn{1}{l|}{0.12189} & \multicolumn{1}{l|}{-0.38370} & 0.879791                      \\ \hline
+\multicolumn{1}{|l|}{9} & \multicolumn{1}{l|}{0.17481} & \multicolumn{1}{l|}{-0.60511} & 1.053181                      \\ \hline
+12                      & \multicolumn{1}{c|}{0.229}   & \multicolumn{1}{c|}{-0.81695} & \multicolumn{1}{c|}{1.155487} \\ \hline
 \end{tabular}
 \end{table}
 
+# Conclusions
+As expected, all Cogley regressions of the core inflation rate with $\beta$ estimates are all negative. The beta keeps falling as the number of forecast periods rises; The forecast RMSE for core inflation rates increases as the number of forecast periods increases continuously. This suggests that the longer the forecast period, the more inaccurate the forecast.
