@@ -1,9 +1,10 @@
 ---
-title: "EVALUATING EXCLUDING FOOD AND ENERGY CORE INFLATION MEASURES"
+title: "EVALUATING  CORE INFLATION MEASURES"
 author: "Yiyi"
 date: "`r Sys.Date()`"
 output:
   pdf_document:
+    toc: yes
   header-includes:
   - \usepackage{placeins}
   - \usepackage{multirow}
@@ -17,6 +18,8 @@ output:
     toc: yes
     df_print: paged
   word_document: default
+  bookdown::pdf_document2:
+    toc: yes
   html_notebook: default
 ---
 
@@ -34,7 +37,6 @@ Sys.setlocale("LC_TIME", "English")
 library(readxl)
 library(data.table)
 library(lubridate)#extract cpi time to newdata(furniture48)
-library(dplyr) 
 library(tidyverse) 
 library(broom)
 library(stargazer)
@@ -58,16 +60,154 @@ library(sjPlot)
 library(sjmisc)
 library(sjlabelled)
 library(kableExtra)
-
+library(gridExtra)
+library(egg)
+library(grid)
+library(cowplot)
+library(spatstat)#shift有重复
+library(SciViews)
+library(sos)
 ```
 
 ```{r language,message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
 Sys.setlocale("LC_TIME","English")
 ```
 
+# Sticky price measures
+
+We examine the frequency of price changes for 570 categories of goods and services covering about 66.4% of consumer spending based on "Dixon and Tian items frequency data". Then, I looked up the monthly CPI index and weights data for these 570 items based on their ID one by one for the years 2005 to 2021. This is used to construct CORE inflation measures of sticky and flexible CPI.
+
+Dixon and Tian items frequency data provides the frequency (expressed as a %) of prices changing per month for 570 items that were contained in the VML data set for the whole period January 1996 to December 2007. Column A is the COICOP item id. The frequency is in Colmn D. The "clear weight" in column C is the actual CPI weight (total across all categories sum to 1000). The rebase weight in column are made to add up to 1000 (their total share in CPI is 664). Let $\lambda=$ the monthly frequency of price changes. Mo = the mean duration between price changes implied by $[=-1 / \ln (1-\lambda)]$. If prices can change at any moment, not just at the monthly interval, the instantaneous probability of a price change is $-\operatorname{In}(1-\lambda)$ and the mean time between price changes $-1 / \ln (1-\lambda)$ months. We used this formula to calculate the Mo. column from the Freq. column in Table 1. If prices instead change at most once per month, then the mean duration is simply $1 / \lambda$, about half a month longer.
+
+The monthly frequency of price changes averages 21.78278%. The weighted median is 17.9%.
+
+```{r sticky price, include=FALSE}
+#从Dixon and tian的数据里， 把frequency划分为sticky 和 flexible
+#再根据名字找相应的年份的cpi 和weight 构建stickey price把
+
+Dixon_tian<-read_excel("Dixon_and_Tian_570_item_Freq yiyi (version 1).xlsx","Sheet2")
+#data.frame
+Dixon_tian<-data.frame(Dixon_tian)
+#all numerical col 3 4 5
+
+Dixon_tian[,3:7]<-sapply(Dixon_tian[,3:7],as.numeric)
+Dixon_tian<-Dixon_tian[-570,]
+colnames(Dixon_tian)[7]<-c("Accumulative weight")
+#寻找col 4小于4.3的行
+sticky_row<-which(Dixon_tian$frequency<4.3)
+#很明显，这里不能用4.3做分界
+#For the median category the time between price change averages 4.3 months.
+#中位数？平均数？cpi权重的中位数？
+#Median by CPI weight
+#location_median_cpiweight<-which(Dixon_tian$...7==median(Dixon_tian$...7))
+#Dixon_tian[location_median_cpiweight,]
+
+
+#Dixon_tian[location_Means,]
+
+#weighted media
+#matrixStats::weightedMedian(Dixon_tian$rebase.weight,Dixon_tian$frequency)
+
+#For the median category the time between price change averages 4.3 months.
+#中位数的平均数是20， 20以下就是sticky
+sum(Dixon_tian$clear.weight)
+tail(Dixon_tian)
+sum(Dixon_tian$rebase.weight)
+#Means (weighted and unweighted)
+
+mean(Dixon_tian$frequency)#21.78278 正确答案21 573.53
+mean(Dixon_tian$`Accumulative weight`)#525.5079
+
+
+weighted.mean(Dixon_tian$frequency,Dixon_tian$rebase.weight)#22.31121 607.82
+
+weighted.mean(Dixon_tian$frequency,Dixon_tian$`Accumulative weight`)
+#weighted Median in list.
+#17.9
+weighted.median(Dixon_tian$frequency,Dixon_tian$rebase.weight)#17.9 496.34
+
+weighted.median(Dixon_tian$frequency,Dixon_tian$clear.weight)#17.9
+
+median(Dixon_tian$frequency)#20
+#location_median<-which(Dixon_tian$frequency==median(Dixon_tian$frequency))
+#Dixon_tian[location_median,]
+
+#除了mean不对，别的都能和excel表中的黄色对应的上
+#文章里用的是weight median
+#17.9介于18和17.8之间
+#直接按照18作为分界线
+#location_median<-which(Dixon_tian$frequency==weighted.median(Dixon_tian$frequency,Dixon_tian$rebase.weight))
+#Dixon_tian[location_median,]
+kbl(Dixon_tian,caption = "The Frequency of Price Changes by Category",col.names=c("item_id
+","$item_des$","$clear weight$","frequency","$rebase weight$","$Mo$","Accumulative weight" ),escape = FALSE) %>%
+  kable_classic() %>%
+  kable_styling(latex_options = c("striped", "hold_position"))
+
+#取消spatstat package 还原shift funciton
+unloadNamespace("spatstat")
+
+```
+
+```{r include=FALSE}
+
+#寻找col 4小于17.9的行
+sticky_row<-which(Dixon_tian$frequency<17.9)
+#一共多少个/284
+length(sticky_row)
+#用他们的id在 item completely里找对应的cpi和weight把
+#读取数据
+#马勒戈壁读取名字的时候 会把colname改名字
+#所以列名不能实名制
+item_cpi<-read_excel("item_indices_complete.xlsx","Sheet2",col_names = FALSE)
+#第一行和第二列没啥东西 都删了
+item_cpi<-item_cpi[-2,-2]
+#除了前第一列以外别的列转化为numerical
+item_cpi<-data.frame(item_cpi)
+#
+item_cpi[2:nrow(item_cpi), 2:ncol(item_cpi)] <-as.numeric(unlist(item_cpi[2:nrow(item_cpi), 2:ncol(item_cpi)]))
+#
+
+#
+#只在cpi里数据里找到了个290个， 但是应该有的sticky 是284个,。
+df<-Dixon_tian[sticky_row,1]#284
+df2<-item_cpi[1,]#1144
+#common_id<-intersect(df,df2)#282
+#setdiff(df,common_id)
+#410103 410101 两个狗崽中 在item cpi里找不到 操你妈的
+location_in_cpi<-which(item_cpi[1,] %in% Dixon_tian[sticky_row,1]==TRUE)
+new<-item_cpi[,location_in_cpi]
+setdiff(df,new[1,])
+#   是有共同用id的问题
+# 例如212917就有两个
+
+
+```
+
+```{r eval=FALSE, include=FALSE}
+Dixon_tian<-read_excel("Dixon_and_Tian_570_item_Freq yiyi.xlsx","Data")
+
+Dixon_tian<-data.frame(Dixon_tian)
+
+Dixon_tian[,3:5]<-sapply(Dixon_tian[,3:5],as.numeric)
+
+Dixon_tian<-Dixon_tian[-571,]
+Dixon_tian[is.na(Dixon_tian)]<-0
+
+tail(Dixon_tian)
+
+sum(Dixon_tian$rebase.weight)
+sum(Dixon_tian$clear.weight)
+
+weighted.mean(Dixon_tian$frequency,Dixon_tian$rebase.weight)#17.9
+
+weighted.median(Dixon_tian$frequency,Dixon_tian$rebase.weight)#22.31
+
+mean(Dixon_tian$frequency)#21.74456
+```
+
 # Criteria for evaluation : forecasting future inflation
 
-This work uses Cogley's model to test the forecasting ability of core inflation rate, and compares the forecasting ability of excluding food and energy core inflation rates. Cogley's model is based on Bryan and Cecchetti's definition of core inflation: "Core inflation is changes in the price level that are expected to persist over a long period of time."
+This work uses Cogley's model to test the forecasting ability of core inflation rate, and it also compares the forecasting ability of various core inflation measures, including Excluding food and energy and Trimmed mean  Cogley's model is based on Bryan and Cecchetti's definition of core inflation: "Core inflation is changes in the price level that are expected to persist over a long period of time."
 
 According to Bryan and Cecchetti's definition, a valid core inflation is one that is "pure" after removing temporary factors from measured real inflation. On this basis, Cogley developed the following model to evaluate the predictive power of core inflation:
 
@@ -80,10 +220,9 @@ According to Bryan and Cecchetti's definition, a valid core inflation is one tha
 #
 ```
 
-
 $$\pi_{t+h}-\pi_{t}=\alpha_{h}+\beta_{h}\left(\pi_{t}-\pi_{t}^{c}\right)+u_{t+h}$$
 
-Here, x represents the headline inflation rate and core x represents some core inflation indicator, both year-on-year data. Parameter h is 6,9 and 12 (month) ahead in this case. For sufficiently large H, the core deviation, $\left(\pi_{t}-\pi_{t}^{c}\right)$, should be inversely related to subsequent changes in inflation, $\pi_{t+h}-\pi_{t}$. Moreover, in order for the candidate to satisfy equation (1), the coefficients in the regression, should satisfy $\alpha=0$ and $\beta = -1$.
+Here, x represents the headline inflation rate and core x represents some core inflation indicator, both year-on-year data. Parameter h is N (month) ahead. For sufficiently large H, the core deviation, $\left(\pi_{t}-\pi_{t}^{c}\right)$, should be inversely related to subsequent changes in inflation, $\pi_{t+h}-\pi_{t}$. Moreover, in order for the candidate to satisfy equation (1), the coefficients in the regression, should satisfy $\alpha=0$ and $\beta = -1$.
 
 Of importance to the forecasting model is the estimated coefficient of $\beta$, which indicates whether core inflation has sufficiently purified the transitory component. Because if the absolute value of the estimated coefficient is equal to 1, it indicates that the model is a random walk process, and the components removed from the core inflation do not contain any information that predicts future overall inflation. If $\beta=-1$, the forecasting capacity for core inflation is the best . This proves that core inflation has fully captured the trend components of overall inflation and has a complete forecasting ability for future inflation.
 
@@ -145,9 +284,7 @@ regression_6<-lm(core_headline$`6 months diff`~ beta,data = core_headline)
 regression_9<-lm(core_headline$`9 months diff`~ beta,data = core_headline)
 ```
 
-#Trimmed Mean
-
-```{r first try trimmed, include=FALSE}
+```{r  trimmed, include=FALSE}
 #Trend
 #我把trend的也向前做了12期，其实是错误的
 #我唯一要做的就是ukcpi向前推12期
@@ -161,6 +298,9 @@ TM<-as.data.table(TM)
 #1.首先生成12列lead，每一行第一个数都是上一列的第二行
 #2. 这样后面十二列都减去第一列就是x12— x。也就是等式左边的数据了
 #lead 超前12个月的预测
+
+
+#TM[, paste0("lead", 1L:3L) := shift(`CPI-trim (5%)`, 1L:3L, type = "lead"), by = groups]
 TM <- TM[, unlist(lapply(.SD, shift,type = "lead", n = 0:12), recursive = FALSE),.SDcol=2]
 #
 TM<-data.frame(TM)
@@ -178,8 +318,11 @@ TM_05<-TM[TM$date_t>="2005-01-01" & TM$date_t<="2019-12-01",]
 
 ```
 
+# Results
 
-```{r all time forcast main code,include=FALSE}
+From the above discussion, I used my own data to re-simulate the values of the parameters.The results please see Table \@ref(tab:summary), figure \@ref(fig:overall).
+
+```{r  forcast main code,include=FALSE}
 
 #读取cpi 数据
 #1989 JAn 开始
@@ -192,6 +335,8 @@ CPI_alll[,1]<-as.numeric(unlist(CPI_alll[,1]))
 #
 CPI_alll<-as.data.table(CPI_alll)
 #lead 超前12个月的预测
+library(data.table) 
+
 CPI_alll <- CPI_alll[, unlist(lapply(.SD, shift,type = "lead", n = 0:12), recursive = FALSE),.SDcol=1]
 #
 CPI_alll<-data.frame(CPI_alll)
@@ -234,34 +379,83 @@ cof_trimmed_beta<-unlist(lapply(1:12, function(x) res_trimmed[[x]]$coefficients[
 #
 dt<-cbind(RMSE_food,cof_food_alpha,cof_food_beta)
 rownames(dt)<-paste(1:12,"months ahead")
-colnames(dt)<-c("RMSE","$\\alpha$","$\\beta$" )
+colnames(dt)<-c("RMSE","$\alpha$","$\beta$" )
 dt %>%
   kbl() %>%
   kable_paper("hover", full_width = F)
 
 ```
 
-```{r output, echo=FALSE}
+```{r summary, echo=FALSE}
 together<-cbind(RMSE_food,cof_food_alpha,cof_food_beta,RMSE_trimmed,cof_trimmed_alpha,cof_trimmed_beta)
 rownames(together)<-paste(1:12,"months ahead")
 colnames(together)<-c("RMSE","$\\alpha$","$\\beta$","RMSE","$\\alpha$","$\\beta$" )
 
-kbl(together) %>%
+kbl(together,caption = "Headline CPI Forecast Accuracy: Root Mean Squared Errors and Beta",col.names=c("RMSE","$\\alpha$","$\\beta$","RMSE","$\\alpha$","$\\beta$" ),escape = FALSE) %>%
   kable_classic() %>%
+  kable_styling(latex_options = c("striped", "hold_position")) %>%
   add_header_above(c(" " , "Excluding Food and Energy" = 3, "Trimmed Mean" = 3)) %>%
-  add_header_above(c(" ", "Core Inflation 6" = 6))
+  add_header_above(c(" ", "Core Inflation " = 6))
 
 
 ```
 
+```{r plot RMSE, echo=FALSE}
+together<-data.table(together)
+colnames(together)<-paste0("c",1:6)
+#ggplot
+together$idu <- as.numeric(row.names(together))
 
-# Results
-
-From the above discussion, I used my own data to re-simulate the values of the parameters.The results please see Table 1.
-
-## RMSE
 
 
+```
+
+```{r RMSE, echo=FALSE, fig.cap="Cogley Regression RMSE", fig.topcaption=TRUE, message=FALSE, warning=FALSE,results='asis'}
+p<-ggplot(data=together, aes(x=idu))+
+ geom_line(aes(y =c1, color="Ex F&E")) +
+   geom_line(aes(y = c2, color="Trimmed Mean ")) +
+labs(x="Forecast Horizon (Months)",y="RMSE")
+#p + theme(legend.title = element_blank()) 
+
+```
+
+```{r beta,  echo=FALSE, fig.cap="Cogley Regression Beta estimates", fig.topcaption=TRUE, message=FALSE, warning=FALSE}
+#beta
+q<-ggplot(data=together, aes(x=idu))+
+ geom_line(aes(y =c3, color="Ex F&E")) +
+   geom_line(aes(y = c6, color="Trimmed Mean ")) +
+labs(x="Forecast Horizon (Months)",y="Beta")
+#q + theme(legend.title = element_blank())
+
+```
+
+```{r cpi trend, echo=FALSE}
+trend05<-cbind(CPI519$date_all,CPI519$CPI,TM_05$CPI.trim..5..1,core_headline$core)
+CPI519$TM<-TM_05$CPI.trim..5..1
+CPI519$EXFD<-core_headline$core
+#ggplot
+nt<-ts(CPI519$date,start = c(2005,1),frequency = 12 )
+
+```
+
+```{r coreheadlinecpi, echo=FALSE, fig.cap="Core CPI and Headline CPI.", fig.topcaption=TRUE, message=FALSE, warning=FALSE}
+w<-ggplot(data=CPI519, aes(x=time(nt)))+
+ geom_line(aes(y = TM, color="Trimmed Mean")) +
+   geom_line(aes(y = EXFD, color="Ex F&E")) +
+     geom_line(aes(y = CPI, color="CPI Inflation")) +
+labs(x="Time",y="Inflation")
+#w + theme(legend.title = element_blank()) 
+```
+
+```{r overall, fig.cap= "overall", echo=FALSE,fig.topcaption=TRUE, message=FALSE, warning=FALSE}
+grid.arrange(arrangeGrob(p, top = 'Cogley Regression RMSE') , arrangeGrob(q, top = 'Cogley Regression Beta estimates'),arrangeGrob(w, top = 'Core CPI and Headline CPI'), nrow=3)
+```
+
+\newpage
+
+# Conclusions
+
+As expected, all Cogley regressions of the core inflation rate with $\beta$ estimates are all negative. The beta keeps falling as the number of forecast periods rises; The forecast RMSE for core inflation rates increases as the number of forecast periods increases continuously. This suggests that the longer the forecast period, the more inaccurate the forecast. It can be seen that the forecast ability of Excluding Food and Energy is not good as Trimmed Mean. Excluding Food and Energy coefficient estimates of the Cogley regression deviate the furthest from - 1 within 10 months forecast horizon and the root mean squared error (RMSE) of the predictions is the largest in all prediction periods. The interesting point is that when forecast horizon exceeds 10 months, the coefficient estimates of the Trimmed mean deviate from -1 becoming further away than EX F&E.
 
 ```{r eval=FALSE, include=FALSE}
 ### 6 months ahead
@@ -309,22 +503,3 @@ summary(regression_9)
 
 summary(regression)
 ```
-
-```{=tex}
-\begin{table}[h]
-\centering
-\caption{Forecasting future inflation}
-\label{tab:my-table}
-\begin{tabular}{|c|cll|}
-\hline
-H                       & \multicolumn{3}{c|}{Excluding Food and Energy}                                               \\ \hline
-                        & \multicolumn{1}{c|}{a}       & \multicolumn{1}{c|}{b}        & \multicolumn{1}{c|}{RMSE}     \\ \hline
-\multicolumn{1}{|l|}{6} & \multicolumn{1}{l|}{0.12189} & \multicolumn{1}{l|}{-0.38370} & 0.879791                      \\ \hline
-\multicolumn{1}{|l|}{9} & \multicolumn{1}{l|}{0.17481} & \multicolumn{1}{l|}{-0.60511} & 1.053181                      \\ \hline
-12                      & \multicolumn{1}{c|}{0.229}   & \multicolumn{1}{c|}{-0.81695} & \multicolumn{1}{c|}{1.155487} \\ \hline
-\end{tabular}
-\end{table}
-```
-# Conclusions
-
-As expected, all Cogley regressions of the core inflation rate with $\beta$ estimates are all negative. The beta keeps falling as the number of forecast periods rises; The forecast RMSE for core inflation rates increases as the number of forecast periods increases continuously. This suggests that the longer the forecast period, the more inaccurate the forecast.
