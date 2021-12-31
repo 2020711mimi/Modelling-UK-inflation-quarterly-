@@ -3,7 +3,7 @@ title: "EVALUATING  CORE INFLATION MEASURES"
 author: "Yiyi"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
+  bookdown::pdf_document2:
     toc: yes
   header-includes:
   - \usepackage{placeins}
@@ -18,9 +18,7 @@ output:
     toc: yes
     df_print: paged
   word_document: default
-  bookdown::pdf_document2:
-    toc: yes
-  html_notebook: default
+
 ---
 
 ```{r setup, include=FALSE}
@@ -67,6 +65,7 @@ library(cowplot)
 library(spatstat)#shift有重复
 library(SciViews)
 library(sos)
+
 ```
 
 ```{r language,message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
@@ -77,13 +76,18 @@ Sys.setlocale("LC_TIME","English")
 
 We examine the frequency of price changes for 570 categories of goods and services covering about 66.4% of consumer spending based on "Dixon and Tian items frequency data". Then, I looked up the monthly CPI index and weights data for these 570 items based on their ID one by one for the years 2005 to 2021. This is used to construct CORE inflation measures of sticky and flexible CPI.
 
-Dixon and Tian items frequency data provides the frequency (expressed as a %) of prices changing per month for 570 items that were contained in the VML data set for the whole period January 1996 to December 2007. Column A is the COICOP item id. The frequency is in Colmn D. The "clear weight" in column C is the actual CPI weight (total across all categories sum to 1000). The rebase weight in column are made to add up to 1000 (their total share in CPI is 664). Let $\lambda=$ the monthly frequency of price changes. Mo = the mean duration between price changes implied by $[=-1 / \ln (1-\lambda)]$. If prices can change at any moment, not just at the monthly interval, the instantaneous probability of a price change is $-\operatorname{In}(1-\lambda)$ and the mean time between price changes $-1 / \ln (1-\lambda)$ months. We used this formula to calculate the Mo. column from the Freq. column in Table 1. If prices instead change at most once per month, then the mean duration is simply $1 / \lambda$, about half a month longer.
+Dixon and Tian items frequency data provides the frequency (expressed as a %) of prices changing per month for 570 items that were contained in the VML data set for the whole period January 1996 to December 2007. Column A is the COICOP item name. The frequency is in Colmn B. The rebase weight in column C are made to add up to 1000 (their total share in CPI is 664). Let $\lambda=$ the monthly frequency of price changes. Mo = the mean duration between price changes implied by $[=-1 / \ln (1-\lambda)]$. If prices can change at any moment, not just at the monthly interval, the instantaneous probability of a price change is $-\operatorname{In}(1-\lambda)$ and the mean time between price changes $-1 / \ln (1-\lambda)$ months. We used this formula to calculate the Mo. column from the Freq. column in Table 1. If prices instead change at most once per month, then the mean duration is simply $1 / \lambda$, about half a month longer.
+In Table \@ref(tab:frequency) we list, for each of the 570 categories, the 1996-2007 average monthly frequency of price changes.
+Table \@ref(tab:frequency) also provides the weight and the mean duration between price changes. The monthly frequency of price changes averages 21.9%. The weighted median is 17.9%. 
+For the median category the time between price change averages 5 months. Thus, for items comprising one half of consumption, prices change less frequently than every 5 months.
 
-The monthly frequency of price changes averages 21.78278%. The weighted median is 17.9%.
+Using this information, we break down the monthly CPI's published components into  "sticky price" and "flexible price" aggregates.
+If price changes for a particular CPI component occur less often, on average, than every 5 months, we called that component a "sticky-price" good. Goods that change prices more frequently than this we labeled "flexible price" goods.
 
+Next, I looked up the monthly CPI index and weight for sticky price items based on their ID one by one for the years 2005 to 2021.
 ```{r sticky price, include=FALSE}
 #从Dixon and tian的数据里， 把frequency划分为sticky 和 flexible
-#再根据名字找相应的年份的cpi 和weight 构建stickey price把
+#再根据名字找相应的年份的cpi 和weight 构建sticky price把
 
 Dixon_tian<-read_excel("Dixon_and_Tian_570_item_Freq yiyi (version 1).xlsx","Sheet2")
 #data.frame
@@ -138,21 +142,43 @@ median(Dixon_tian$frequency)#20
 #直接按照18作为分界线
 #location_median<-which(Dixon_tian$frequency==weighted.median(Dixon_tian$frequency,Dixon_tian$rebase.weight))
 #Dixon_tian[location_median,]
-kbl(Dixon_tian,caption = "The Frequency of Price Changes by Category",col.names=c("item_id
-","$item_des$","$clear weight$","frequency","$rebase weight$","$Mo$","Accumulative weight" ),escape = FALSE) %>%
-  kable_classic() %>%
-  kable_styling(latex_options = c("striped", "hold_position"))
 
-#取消spatstat package 还原shift funciton
-unloadNamespace("spatstat")
-
+#dIXON TIAN只保留4：6列，不然太宽页面放不下
+D46<-Dixon_tian[,c(2,4:6)]
+#Mo 保留一位小数
+D46<-D46 %>% mutate_at(vars(starts_with("Mo")), funs(round(., 1)))
+#最后一行 会中行
+sum(D46$rebase.weight)
+colnames(D46)[2:4]<-c("Freq","Weight","MO")
 ```
 
-```{r include=FALSE}
+```{r rubbish, summary, eval=FALSE, include=FALSE}
+kbl(Dixon_tian,caption = "The Frequency of Price Changes by Category",col.names=c("item_id","item_des","clear weight","frequency","rebase weight","Mo","Accumulative weight" ),escape = FALSE) %>%
+  kable_classic() %>%
+  kable_styling(latex_options = c("striped", "scale_down")) %>%
+  kable_styling(latex_options = c("striped", "hold_position"))
+#英雄无用武之地
+    footnote(general = " ",
+           number = c("Mo = the mean duration between price changes implied by $\\lambda =-1 / \\ln (1-\\lambda)]$. ", "Wgt = Share of the Level Item  in the  VML  data set for the whole period  January 1996 to December 2007 (these sum to 1000).","Freq = the estimated average monthly frequency of price changes ($\\lambda$ in the text)."),escape=FALSE) %>%
+```
+
+
+```{r frequency,echo=FALSE}
+kbl(D46, longtable = T, booktabs = F, caption = "The Frequency of Price Changes by Category") %>%
+
+kable_styling(latex_options = c("repeat_header"))
+
+```
+Mo = the mean duration between price changes implied by $\lambda =-1 / \ln (1-\lambda)]$.
+
+Weight = Share of the Level Item  in the  VML  data set for the whole period  January 1996 to December 2007 (these sum to 1000).
+
+Freq = the estimated average monthly frequency of price changes ($\lambda$ in the text).
+```{r sticky row,include=FALSE}
 
 #寻找col 4小于17.9的行
 sticky_row<-which(Dixon_tian$frequency<17.9)
-#一共多少个/284
+#一共多少个/244
 length(sticky_row)
 #用他们的id在 item completely里找对应的cpi和weight把
 #读取数据
@@ -168,13 +194,13 @@ item_cpi[2:nrow(item_cpi), 2:ncol(item_cpi)] <-as.numeric(unlist(item_cpi[2:nrow
 #
 
 #
-#只在cpi里数据里找到了个290个， 但是应该有的sticky 是284个,。
-df<-Dixon_tian[sticky_row,1]#284
+#只在cpi数据里找到了个290个， 但是应该有的sticky 是244个,。
+df<-Dixon_tian[sticky_row,1]#244
 df2<-item_cpi[1,]#1144
 #common_id<-intersect(df,df2)#282
 #setdiff(df,common_id)
 #410103 410101 两个狗崽中 在item cpi里找不到 操你妈的
-location_in_cpi<-which(item_cpi[1,] %in% Dixon_tian[sticky_row,1]==TRUE)
+location_in_cpi<-which(item_cpi[1,] %in% Dixon_tian[sticky_row,1]==TRUE)#249个
 new<-item_cpi[,location_in_cpi]
 setdiff(df,new[1,])
 #   是有共同用id的问题
@@ -183,26 +209,59 @@ setdiff(df,new[1,])
 
 ```
 
-```{r eval=FALSE, include=FALSE}
-Dixon_tian<-read_excel("Dixon_and_Tian_570_item_Freq yiyi.xlsx","Data")
+```{r keep sticky from all, include=FALSE}
+#读取数据
+newdf<-read_csv("item ID number name start 2016.csv")
+#newdf<-data.frame(newdf,stringsAsFactors=FALSE)
+#转化数据类型
+newdf[, 2:ncol(newdf)] <- sapply(newdf[,2:ncol(newdf)], as.numeric)
+#因为两个data的列是完全一模一样的，item_cpi 和 newdf 
+#196 * 1144
+#根据之前匹配的含有dixon_tian里的284个items 在 item_CPI 和在newdf的 ##列的位置是完全一样的，这样根据列的位置保留需要的来构成 sticky-284（290）cpi数据
+item_290_cpi_idex<-newdf[,location_in_cpi]
+#有na无法计算
+item_290_cpi_idex<-as.data.frame(item_290_cpi_idex)
+item_290_cpi_idex[is.na(item_290_cpi_idex)]<-0
+write.csv(item_290_cpi_idex,"sticky 249 CPI index.csv")
 
-Dixon_tian<-data.frame(Dixon_tian)
+```
 
-Dixon_tian[,3:5]<-sapply(Dixon_tian[,3:5],as.numeric)
+```{r sticky weight,include=FALSE}
+sticky_weight<-read_excel("item_indices_complete.xlsx","Sheet3")
+#去除第二列（空），第二行（英文名字），dim 应该就和 item_cpi数据dim一样了
+sticky_weight_remove2cols<-sticky_weight[-1,-(1:2)]
+#
 
-Dixon_tian<-Dixon_tian[-571,]
-Dixon_tian[is.na(Dixon_tian)]<-0
+#date
+date = seq(from = as.Date("2005-02-01"), to = as.Date("2021-04-01"),
+           by = "month")#生成日期
 
-tail(Dixon_tian)
-
-sum(Dixon_tian$rebase.weight)
-sum(Dixon_tian$clear.weight)
-
-weighted.mean(Dixon_tian$frequency,Dixon_tian$rebase.weight)#17.9
-
-weighted.median(Dixon_tian$frequency,Dixon_tian$rebase.weight)#22.31
-
-mean(Dixon_tian$frequency)#21.74456
+sticky_time<-add_column(sticky_weight_remove2cols,date,.before = 1)
+#06 onward
+sticky_06onward<-sticky_time[sticky_time$date>="2006-02-01",]
+#sapply(sticky_weight_remove2cols,class)
+#转化数据类型
+sticky_06onward[, 2:ncol(sticky_06onward)] <- sapply(sticky_06onward[,2:ncol(sticky_06onward)], as.numeric)
+#
+#有na无法计算
+sticky_06onward<-as.data.frame(sticky_06onward)
+sticky_06onward[is.na(sticky_06onward)]<-0
+#提取
+sticky_weight_290<-sticky_06onward[,location_in_cpi]
+dim(item_290_cpi_idex)==dim(sticky_weight_290)
+#重新权重weight
+#weight 总和不是1000，
+#每行的每个数加上（1000-每行的和）/290
+new_w<-data.frame(matrix(nrow = 183,ncol = 249))
+for (i in 1:nrow(sticky_weight_290)) {
+  new_w[i,]<-sticky_weight_290[i,]+(1000- rowSums(sticky_weight_290[i,]))/ncol(sticky_weight_290)
+}
+#
+rowSums(new_w[,])
+www<-new_w/1000
+dim(www)==dim(item_290_cpi_idex)
+rowSums(www)
+wowrite.csv(www,"sticky CPI weight new.csv")
 ```
 
 # Criteria for evaluation : forecasting future inflation
@@ -298,7 +357,12 @@ TM<-as.data.table(TM)
 #1.首先生成12列lead，每一行第一个数都是上一列的第二行
 #2. 这样后面十二列都减去第一列就是x12— x。也就是等式左边的数据了
 #lead 超前12个月的预测
+#取消spatstat package 还原shift funciton
+detach("package:spatstat")
+detach("package:spatstat.linnet", unload=TRUE)
+detach("package:spatstat.core", unload=TRUE)
 
+detach("package:spatstat.geom", unload=TRUE)
 
 #TM[, paste0("lead", 1L:3L) := shift(`CPI-trim (5%)`, 1L:3L, type = "lead"), by = groups]
 TM <- TM[, unlist(lapply(.SD, shift,type = "lead", n = 0:12), recursive = FALSE),.SDcol=2]
