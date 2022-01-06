@@ -170,11 +170,14 @@ item_cpi[2:nrow(item_cpi), 2:ncol(item_cpi)] <-as.numeric(unlist(item_cpi[2:nrow
 
 #
 #只在cpi里数据里找到了个290个， 但是应该有的sticky 是284个,。
+#那284个id的name
 df<-Dixon_tian[sticky_row,1]#284
+#id
 df2<-item_cpi[1,]#1144
 #common_id<-intersect(df,df2)#282
 #setdiff(df,common_id)
 #410103 410101 两个狗崽中 在item cpi里找不到 操你妈的
+#在item_cpi里 那284个id的位置
 location_in_cpi<-which(item_cpi[1,] %in% Dixon_tian[sticky_row,1]==TRUE)
 new<-item_cpi[,location_in_cpi]
 setdiff(df,new[1,])
@@ -229,6 +232,7 @@ repeate_item_dixon<-dixon_tian_showtimes[which(dixon_tian_showtimes$V1>1),]
 ```
 
 ```{r eval=FALSE, include=FALSE}
+#原有item complete 数据是cpi，转化为inflation
 #处理一份带id number name的item 数据
 #读取数据
 item_cpi<-read_excel("item_indices_complete.xlsx","Sheet2",col_names = FALSE)
