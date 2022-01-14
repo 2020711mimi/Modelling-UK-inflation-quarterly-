@@ -283,8 +283,9 @@ sticky_06_19<-sticky.df[sticky.df$date0521<="2019-12-01",]
 Beside the core inflation measures, we also includes stochastic model in our comparison. 
 The main purpose of modeling time series using stochastic processes is to explain how the phenomenon evolves and to make predictions based on the estimated model. 
 The main idea of this method is to predict the future through inflation historical data, which is used as the baseline in comparison.
+
 ## Autoregressive process (AR)
-A stationary series, $Y_t $, follows a process $AR (p)$ if the condition if fullfilled:
+A stationary series, $Y_t$, follows a process $AR (p)$ if the condition if fullfilled:
 $$Y_{t}=\beta_{0}+\beta_{1} Y_{t-1}+\ldots+\beta_{p} Y_{t-p}+\varepsilon_{t}$$
 where $\varepsilon_{\mathrm{t}} \sim \mathrm{N}\left(0, \sigma_{\varepsilon}^{2}\right)$ stationary time series, $\mathrm{E}\left(\varepsilon_{\mathrm{t}}\right)=0, \mathrm{E}\left(\varepsilon_{\mathrm{t}}^{2}\right)=\sigma^{2}, \mathrm{E}\left(\varepsilon_{\mathrm{t},} \varepsilon_{\mathrm{s}}\right)=0$,if $\mathrm{t} \neq \mathrm{s} ; \beta_{0}, \beta_{1}, . ., \beta_{\mathrm{p}}$ parameters.
 
@@ -298,6 +299,7 @@ The representation of the model is $\mathrm{Y}_{\mathrm{t}}=\mathrm{Y}_{\mathrm{
 
 As a result, the value of a series in a given period depends on the value of the series in the previous period and a
 random term whose value is expected to be zero.
+
 ## Data used
 The data used are represented by the monthly data series from January 2005 to December 2019 for the inflation rate in UK.
 
@@ -321,7 +323,23 @@ adf.test((CPI.89_1_2021_10$CPI.ANNUAL.RATE.00..ALL.ITEMS.2015.100))
 #P-value: 0.3013
 #Since the p-value is not less than .05, we fail to reject the null hypothesis.
 #This means the time series is non-stationary. In other words, it has some time-dependent structure and does not have constant variance over time.
+```
 
+
+
+According to Augmented Dickey-Fuller test, for a significance apron of 0.05, the test’s value is -2.6532 and P-value is 0.3013. Since the p-value is not less than .05, we fail to reject the null hypothesis. This means the time series is non-stationary. In other words, it has some time-dependent structure and does not have constant variance over time.
+However, after applying on the series a logarithmic transformation to remove the negative effect induced by non-stationarity in variance, test statistic is -3.5831 and P-value is 0.03473. As the test value is lower than the critical value for any level of relevance, we can say that at 5% level of relevance, the null hypothesis is rejected or it is
+stationary, so the basis series is integrated by the first order.
+After this transformation, we will get a series with approximately the same trend but with milder amplitudes of the variance.
+            
+## Identification of the model’s type
+Using the data series with a monthly frequency of the inflation rate for the period January 2005 - December 2019
+there were estimated AR model to describe the inflation rate.
+
+The Akaike Information Criterion is used to choose the order of the autoregressive model. The results recommended an AR process (8).
+
+
+```{r AR order selection,include=FALSE}
 # subset data
 CPI.89_1_2021_10$log<-a
   GDPGRSub<-CPI.89_1_2021_10[CPI.89_1_2021_10$date_all>="2005-01-01" & CPI.89_1_2021_10$date_all<="2019-12-01",]
@@ -332,26 +350,76 @@ ar.ols(GDPGRSub$log,
        intercept = T)
 #转化成xts格式和原来直接做结果完全一模一样
 #都是 选择 lag 8 AR(8)
-library(tidyquant)
-ts.df<- as.xts(GDPGRSub, date_col =date_all )
+#library(tidyquant)
 
- qxts <- xts(GDPGRSub[,-(1:3)], order.by=as.Date( GDPGRSub[,2]))
+ #qxts <- xts(GDPGRSub[,-(1:3)], order.by=as.Date( GDPGRSub[,2]))
  
-ar.ols(qxts,
-       demean = F, 
-       intercept = T)
+#ar.ols(qxts,
+#       demean = F, 
+#       intercept = T)
+#非log的 inflation， order 是3
+#ar.ols(GDPGRSub$CPI.ANNUAL.RATE.00..ALL.ITEMS.2015.100,
+#       demean = F, 
+#       intercept = T)
 ```
-According to Augmented Dickey-Fuller test, for a significance apron of 0.05, the test’s value is -2.6532 and P-value is 0.3013. Since the p-value is not less than .05, we fail to reject the null hypothesis. This means the time series is non-stationary. In other words, it has some time-dependent structure and does not have constant variance over time.
-However, after applying on the series a logarithmic transformation to remove the negative effect induced by non-stationarity in variance, test statistic is -3.5831 and P-value is 0.03473. As the test value is lower than the critical value for any level of relevance, we can say that at 5% level of relevance, the null hypothesis is rejected or it is
-stationary, so the basis series is integrated by the first order.
-After this transformation, we will get a series with approximately the same trend but with milder amplitudes of the variance.
-            
-## Identification of the model’s type
+
+## Parameters estimation of the econometric models
+The estimated model is:
+$$\pi_t=0.06865  +0.4156   \pi_{t-1}+0.3868    \pi_{t-2} -0.1276   \pi_{t-3} +0.3274\pi_{t-4} -0.0032   \pi_{t-5} +0.2341   \pi_{t-6}+0.0212  \pi_{t-7} -0.3609  \pi_{t-8}$$
+```{r calculation ar inflation, include=FALSE}
+#要生成8列lag
+
+#从2005.9月开始,因为lag
+#把时间和inflation复制过来
+ar.lag<-GDPGRSub[,c(2,4)]
+#生成8列lag
+#必须要as.data.table 才能shift
+ar.lag<-as.data.table(ar.lag)
+#shift 指定package（data。table) 避免调用其他包
+ ar.lag <- ar.lag[, unlist(lapply(.SD, data.table:: shift,type = "lag", n = 0:8), recursive = FALSE),.SDcol=2]
+#把时间加入
+ ar.lag<-add_column(ar.lag,GDPGRSub[,2],.before = 1)
+#不要前八行
+ ar.lag<-ar.lag[-c(1:8),]
+#compare origin
+# compare.df<-GDPGRSub[,c(2,4)]
  
+ #ar inflation 计算
+ ar.inflation<-0.06865 +
+   0.4156   *ar.lag[,2] +
+   0.3868*ar.lag[,3]  +
+  -0.1276    *ar.lag[,4]  +
+  0.3274   *ar.lag[,5]  +
+  -0.0032    *ar.lag[,6]  +
+  0.2341    *ar.lag[,7]  +
+ 0.0212    *ar.lag[,8]  +
+  - 0.3609  *ar.lag[,9]  
+ #添加时间
+ ar.inflation<-add_column(ar.inflation,ar.lag[,1],.before = 1)
+ #把log过来的原数据添加进去试试
+ ar.inflation$inflation<-GDPGRSub$CPI.ANNUAL.RATE.00..ALL.ITEMS.2015.100[-c(1:8)]
+    ar.inflation$inflation.log<-GDPGRSub$log[-c(1:8)]
+
+#colnames(ar.inflation)<-c("c1","c2","c3","c4")
+```
+
+```{r ARCPI, echo=FALSE, fig.cap="AR(8) inflation", fig.topcaption=TRUE, message=FALSE, warning=FALSE,results='asis'}
+ttnn<-ts(ar.inflation[,1],start = c(2005,9),frequency = 12 )
+
+sadasda<-ggplot(data=ar.inflation, aes(x=time(ttnn)))+
+ geom_line(aes(y =ar.inflation$log1, color="AR(8) (logarithmic)")) +
+   geom_line(aes(y = ar.inflation$inflation, color="Headline")) +
+     geom_line(aes(y = ar.inflation$inflation.log, color="Headline(logarithmic)")) +
+labs(x="AR and Headline CPI",y="Inflation")
+sadasda + theme(legend.title = element_blank()) 
+
+
+```
+
 # Criteria for evaluation : forecasting future inflation
 
 This work uses Cogley's model to test the forecasting ability of core inflation rate, and it also compares the forecasting ability of various core inflation measures, including excluding food and energy(FE), sticky price(SP) and trimmed mean(TR).
-We also include the ability of current inflation to predict future inflation as a baseline in  comparison.
+We also include the ability of current inflation to predict future inflation as a baseline in  comparison(AR(8)).
 Cogley's model is based on Bryan and Cecchetti's definition of core inflation: "Core inflation is changes in the price level that are expected to persist over a long period of time."
 
 According to Bryan and Cecchetti's definition, a valid core inflation is one that is "pure" after removing temporary factors from measured real inflation. On this basis, Cogley developed the following model to evaluate the predictive power of core inflation:
@@ -444,14 +512,10 @@ TM<-as.data.table(TM)
 #2. 这样后面十二列都减去第一列就是x12— x。也就是等式左边的数据了
 #lead 超前12个月的预测
 #取消spatstat package 还原shift funciton
-detach("package:spatstat")
-detach("package:spatstat.linnet", unload=TRUE)
-detach("package:spatstat.core", unload=TRUE)
 
-detach("package:spatstat.geom", unload=TRUE)
 
 #TM[, paste0("lead", 1L:3L) := shift(`CPI-trim (5%)`, 1L:3L, type = "lead"), by = groups]
-TM <- TM[, unlist(lapply(.SD, shift,type = "lead", n = 0:12), recursive = FALSE),.SDcol=2]
+TM <- TM[, unlist(lapply(.SD, data.table::shift,type = "lead", n = 0:12), recursive = FALSE),.SDcol=2]
 #
 TM<-data.frame(TM)
 #这个式子不在data。frame里运行不了。
@@ -470,7 +534,8 @@ TM_05<-TM[TM$date_t>="2005-01-01" & TM$date_t<="2019-12-01",]
 
 # Results
 
-From the above discussion, I used my own data to re-simulate the values of the parameters.The results please see Table \@ref(tab:summary), Figure \@ref(fig:overall).
+From the above discussion, I used my own data to re-simulate the values of the parameters.
+The results please see Table \@ref(tab:summary),\@ref(tab:RMSEsummary) and Figure \@ref(fig:Overall).
 
 ```{r  forcast main code,include=FALSE}
 
@@ -493,7 +558,7 @@ CPI_alll<-as.data.table(CPI_alll)
 #lead 超前12个月的预测
 library(data.table) 
 
-CPI_alll <- CPI_alll[, unlist(lapply(.SD, shift,type = "lead", n = 0:12), recursive = FALSE),.SDcol=1]
+CPI_alll <- CPI_alll[, unlist(lapply(.SD, data.table::shift,type = "lead", n = 0:12), recursive = FALSE),.SDcol=1]
 #
 CPI_alll<-data.frame(CPI_alll)
 #这个式子不在data。frame里运行不了。
@@ -518,6 +583,8 @@ CPI519$excluding_food_and_energy<-CPI519$CPI - core_headline$core
 CPI519$Trimmed_mean<-CPI519$CPI -TM_05$CPI.trim..5..1
 #sticky
 CPI519$sticky<-CPI519$CPI-sticky_06_19$sticky_core_inflation
+#ar 8
+CPI519$ar<-c(rep(0,8),ar.inflation$inflation.log- ar.inflation$log1)
 #regression
 #每个core 对应12列
 # #excluding food and energy
@@ -539,8 +606,8 @@ RMSE_sticky<-unlist(lapply(1:12, function(x) sqrt(mean(res_sticky[[x]]$residuals
 )
 cof_sticky_alpha<-unlist(lapply(1:12, function(x) res_sticky[[x]]$coefficients[1]))
 cof_sticky_beta<-unlist(lapply(1:12, function(x) res_sticky[[x]]$coefficients[2]))
-#CPI_baseline
-res_cpi<-lapply(3:14, function(x) lm(CPI519[,x]~ CPI519$CPI))
+#AR
+res_cpi<-lapply(3:14, function(x) lm(CPI519[,x]~ CPI519$ar))
 RMSE_cpi<-unlist(lapply(1:12, function(x) sqrt(mean(res_cpi[[x]]$residuals^2)))
 )
 cof_cpi_alpha<-unlist(lapply(1:12, function(x) res_cpi[[x]]$coefficients[1]))
@@ -563,7 +630,7 @@ colnames(together)<-c("$\\alpha$","$\\beta$","$\\alpha$","$\\beta$","$\\alpha$",
 kbl(together,caption = "Headline CPI Forecast Accuracy: Coefficients",col.names=c("$\\alpha$","$\\beta$","$\\alpha$","$\\beta$","$\\alpha$","$\\beta$","$\\alpha$","$\\beta$" ),escape = FALSE) %>%
   kable_classic() %>%
   kable_styling(latex_options = c("striped", "hold_position","scale_down")) %>%
-  add_header_above(c(" " , "FE" = 2, "TR" = 2,"SP" = 2,"Baseline"=2)) %>%
+  add_header_above(c(" " , "FE" = 2, "TR" = 2,"SP" = 2,"AR(8)"=2)) %>%
   add_header_above(c(" ", "Core Inflation " = 8))
 
 
@@ -577,11 +644,11 @@ together$idu <- as.numeric(row.names(together))
 
 ```
 
-```{r RMSE summary, echo=FALSE}
+```{r RMSEsummary, echo=FALSE}
 together.rmse<-cbind(RMSE_food,RMSE_trimmed,RMSE_sticky,RMSE_cpi)
 rownames(together.rmse)<-paste(1:12,"months ahead")
 
-kbl(together.rmse,caption = "Headline CPI Forecast Accuracy: Root Mean Squared Errors ",col.names=c("FE","TR","SP","Baseline" ),escape = FALSE) %>%
+kbl(together.rmse,caption = "Headline CPI Forecast Accuracy: Root Mean Squared Errors ",col.names=c("FE","TR","SP","AR(8)" ),escape = FALSE) %>%
   kable_classic() %>%
   kable_styling(latex_options = c("striped", "hold_position","scale_down")) %>%
   add_header_above(c(" ", "Core Inflation " = 4))
@@ -592,21 +659,23 @@ kbl(together.rmse,caption = "Headline CPI Forecast Accuracy: Root Mean Squared E
 ```{r ranking RMSE,include=FALSE}
 RMSE.df<-together.rmse[,c(1:4)]
 RMSE.ranking<-data.frame(RMSE.df, t(apply(-RMSE.df, 1, rank, ties.method='min')))
-colnames(RMSE.ranking)<-c("FE", "TR", "SP","Baseline","FE", "TR", "SP","Baseline")
+colnames(RMSE.ranking)<-c("FE", "TR", "SP","AR(8)","FE", "TR", "SP","AR(8)")
 #<= 2MONTHS  FE>TR>SP
 #=3M TR>FE>SP
 #>3M TR>SP>FE
 ```
 
 ```{r RMSE, echo=FALSE, fig.cap="Cogley Regression RMSE", fig.topcaption=TRUE, message=FALSE, warning=FALSE,results='asis'}
+together.rmse<-as.data.frame(together.rmse)
+together.rmse$idu <- together$idu
+
 p<-ggplot(data=together.rmse, aes(x=idu))+
  geom_line(aes(y =RMSE_food, color="FE")) +
    geom_line(aes(y = RMSE_trimmed, color="TR")) +
    geom_line(aes(y =RMSE_sticky, color="SP")) +
-     geom_line(aes(y =RMSE_cpi, color="Baseline")) +
+     geom_line(aes(y =RMSE_cpi, color="AR(8)")) +
 labs(x="Forecast Horizon (Months)",y="RMSE")
 #p + theme(legend.title = element_blank()) 
-
 ```
 
 ```{r beta,  echo=FALSE, fig.cap="Cogley Regression Beta estimates", fig.topcaption=TRUE, message=FALSE, warning=FALSE}
@@ -615,18 +684,17 @@ q<-ggplot(data=together, aes(x=idu))+
  geom_line(aes(y =c2, color="FE")) +
    geom_line(aes(y = c4, color="TR")) +
      geom_line(aes(y = c6, color="SP")) +
-       geom_line(aes(y = c8, color="Baseline")) +
+       geom_line(aes(y = c8, color="AR(8)")) +
 labs(x="Forecast Horizon (Months)",y="Beta")
 #q + theme(legend.title = element_blank())
 
 ```
 
 ```{r cpi trend, echo=FALSE}
-trend05<-cbind(CPI519$date_all,CPI519$CPI,TM_05$CPI.trim..5..1,core_headline$core)
 CPI519$TM<-TM_05$CPI.trim..5..1
 CPI519$EXFD<-core_headline$core
 CPI519$Sticky<-sticky_06_19$sticky_core_inflation
-CPI519$Baseline<-
+CPI519$Baseline<-c(rep(0,8),ar.inflation$log1)
 #前13行（2005.01-2006.01没数据） 替换na
 CPI519$Sticky[1:13]<-NA
 #ggplot
@@ -640,11 +708,12 @@ w<-ggplot(data=CPI519, aes(x=time(nt)))+
    geom_line(aes(y = EXFD, color="Ex F&E")) +
      geom_line(aes(y = CPI, color="CPI Inflation")) +
        geom_line(aes(y = Sticky, color="Sticky CPI")) +
+         geom_line(aes(y = Baseline, color="AR(8)(logarithmic)"))+ 
 labs(x="Time",y="Inflation")
 #w + theme(legend.title = element_blank()) 
 ```
 
-```{r overall, fig.cap= "overall", echo=FALSE,fig.topcaption=TRUE, message=FALSE, warning=FALSE}
+```{r Overall, fig.cap= "overall", echo=FALSE,fig.topcaption=TRUE, message=FALSE, warning=FALSE}
 grid.arrange(arrangeGrob(p, top = 'Cogley Regression RMSE') , arrangeGrob(q, top = 'Cogley Regression Beta estimates'),arrangeGrob(w, top = 'Core CPI and Headline CPI'), nrow=3)
 ```
 
@@ -653,12 +722,17 @@ grid.arrange(arrangeGrob(p, top = 'Cogley Regression RMSE') , arrangeGrob(q, top
 # Conclusions
 
 As expected, all Cogley regressions of the core inflation rate with $\beta$ estimates are all negative. The beta keeps falling as the number of forecast periods rises; The forecast RMSE for core inflation rates increases as the number of forecast periods increases continuously. This suggests that the longer the forecast period, the more inaccurate the forecast. 
-Figure \@ref(fig:overall) shows that the predictive power of the core inflation of sticky CPI is the worst. The coefficient estimates of the Cogley regression deviate the furthest from - 1 and the predicted root mean square error (RMSE) was the largest over all forecast periods.
+
+Figure \@ref(fig:Overall) shows that the predictive power of the core inflation of AR(8) is the worst. The coefficient estimates of the Cogley regression deviate the furthest from - 1 and the predicted root mean square error (RMSE) was the largest except 1 month head.
 The Cogley regression $\beta$ estimate of the core inflation rate of Trimmed Mean is closet to 1 when the forecast period is less than 10 months.
-The $\beta$ of the Ex FE of the core inflation rate is between Trimmed mean and sticky CPI in this period.
+The $\beta$ of the Ex FE and SP are between Trimmed mean and AR(8) in this period.
 So from $\beta$ estimates, TR has the best prediction effect of core inflation rate when forecast horizon less 10 months.
 The FE core inflation rate is predicted to work best after 10 months periods. 
-From the root mean square error criteria, for months 1-2 the ranking is SP>TR>FE; month 3 SP>FE>TR; months 4-12 FE>SP>TR. All three similar.
+
+From the root mean square error criteria, for months 1 the ranking is SP>TR>AR(8)>FE;
+month 2 is SP>TR>FE>AR(8);
+month 3 SP>FE>TR>AR(8); 
+months 4-12 FE>SP>TR>AR(8). All four similar.
 ```{r eval=FALSE, include=FALSE}
 ### 6 months ahead
 #RMSE 6

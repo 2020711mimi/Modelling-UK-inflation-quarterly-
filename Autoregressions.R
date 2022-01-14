@@ -35,8 +35,9 @@ ar.ols(GDPGRSub,
 
 # length of data set
 N <-length(GDPGRSub)
-
+#去除第一行
 GDPGR_level <- as.numeric(GDPGRSub[-1])
+#去除最后一行
 GDPGR_lags <- as.numeric(GDPGRSub[-N])
 
 # estimate the model

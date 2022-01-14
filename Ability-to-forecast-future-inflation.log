@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.12.28)  7 JAN 2022 06:21
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.12.28)  14 JAN 2022 09:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -586,52 +586,75 @@ File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 LaTeX Font Info:    Trying to load font information for U+msb on input line 96.
 (c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) (./Ability-to-forecast-future-inflation.toc)
+) (./Ability-to-forecast-future-inflation.toc
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <10> on input line 3.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <7> on input line 3.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <5> on input line 3.
+)
 \tf@toc=\write4
 \openout4 = `Ability-to-forecast-future-inflation.toc'.
 
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 107.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 107.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 107.
 [1
 
 {c:/Users/44869/AppData/Roaming/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12] [13]
-<Ability-to-forecast-future-inflation_files/figure-latex/overall-1.pdf, id=99, 469.755pt x 325.215pt>
-File: Ability-to-forecast-future-inflation_files/figure-latex/overall-1.pdf Graphic file (type pdf)
-<use Ability-to-forecast-future-inflation_files/figure-latex/overall-1.pdf>
-Package pdftex.def Info: Ability-to-forecast-future-inflation_files/figure-latex/overall-1.pdf  used on input line 1345.
+Overfull \hbox (25.67989pt too wide) detected at line 1328
+\OML/lmm/m/it/10 ^^Y[] \OT1/lmr/m/n/10 = 0\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 06865 + 0\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 4156\OML/lmm/m/it/10 ^^Y[] \OT1/lmr/m/n/10 + 0\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 3868\OML/lmm/m/it/10 ^^Y[] \OMS/lmsy/m/n/10 ^^@ \OT1/lmr/m/n/10 0\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 1276\OML/lmm/m/it/10 ^^Y[] \OT1/lmr/m/n/10 + 0\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 3274\OML/lmm/m/it/10 ^^Y[] \OMS/lmsy/m/n/10 ^^@ \OT1/lmr/m/n/10 0\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 0032\OML/lmm/m/it/10 ^^Y[] \OT1/lmr/m/n/10 + 0\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 2341\OML/lmm/m/it/10 ^^Y[] \OT1/lmr/m/n/10 + 0\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 0212\OML/lmm/m/it/10 ^^Y[] \OMS/lmsy/m/n/10 ^^@ \OT1/lmr/m/n/10 0\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 3609\OML/lmm/m/it/10 ^^Y[]
+ []
+
+[14]
+<Ability-to-forecast-future-inflation_files/figure-latex/ARCPI-1.pdf, id=138, 469.755pt x 325.215pt>
+File: Ability-to-forecast-future-inflation_files/figure-latex/ARCPI-1.pdf Graphic file (type pdf)
+<use Ability-to-forecast-future-inflation_files/figure-latex/ARCPI-1.pdf>
+Package pdftex.def Info: Ability-to-forecast-future-inflation_files/figure-latex/ARCPI-1.pdf  used on input line 1332.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[14pdfTeX warning (ext4): destination with the same identifier (name{table.2}) has been already used, duplicate ignored
+[15pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1349 \newpage
-               ] [15pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) has been already used, duplicate ignored
+l.1348 
+        <./Ability-to-forecast-future-inflation_files/figure-latex/ARCPI-1.pdf>]
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+<Ability-to-forecast-future-inflation_files/figure-latex/Overall-1.pdf, id=154, 469.755pt x 325.215pt>
+File: Ability-to-forecast-future-inflation_files/figure-latex/Overall-1.pdf Graphic file (type pdf)
+<use Ability-to-forecast-future-inflation_files/figure-latex/Overall-1.pdf>
+Package pdftex.def Info: Ability-to-forecast-future-inflation_files/figure-latex/Overall-1.pdf  used on input line 1447.
+(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
+[16pdfTeX warning (ext4): destination with the same identifier (name{table.2}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1349 \newpage
-                <./Ability-to-forecast-future-inflation_files/figure-latex/overall-1.pdf>] [16] (./Ability-to-forecast-future-inflation.aux)
+l.1451 \newpage
+               ] [17pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1451 \newpage
+                <./Ability-to-forecast-future-inflation_files/figure-latex/Overall-1.pdf>] [18pdfTeX warning (ext4): destination with the same identifier (name{table.3}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1469 \end{document}
+                     ] (./Ability-to-forecast-future-inflation.aux)
 
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `Ability-to-forecast-future-inflation.out' has not changed.
-(rerunfilecheck)             Checksum: C53D9E36B46AC67017F6324081BAB414;661.
+(rerunfilecheck)             Checksum: A1B64CABE23AF69BC467CC03AF7C29B6;2082.
  ) 
 Here is how much of TeX's memory you used:
- 12670 strings out of 480313
- 200785 string characters out of 5895779
- 680676 words of memory out of 5000000
- 30270 multiletter control sequences out of 15000+600000
- 450086 words of font info for 66 fonts, out of 8000000 for 9000
+ 12708 strings out of 480313
+ 201908 string characters out of 5895779
+ 678916 words of memory out of 5000000
+ 30291 multiletter control sequences out of 15000+600000
+ 453084 words of font info for 67 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  60i,11n,63p,825b,440s stack positions out of 5000i,500n,10000p,200000b,80000s
-{c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}{c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}<c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb>
-Output written on Ability-to-forecast-future-inflation.pdf (16 pages, 262831 bytes).
+{c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}{c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}<c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb><c:/Users/44869/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb>
+Output written on Ability-to-forecast-future-inflation.pdf (18 pages, 289748 bytes).
 PDF statistics:
- 189 PDF objects out of 1000 (max. 8388607)
- 144 compressed objects within 2 object streams
- 31 named destinations out of 1000 (max. 500000)
- 38 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 251 PDF objects out of 1000 (max. 8388607)
+ 200 compressed objects within 2 object streams
+ 47 named destinations out of 1000 (max. 500000)
+ 91 words of extra memory for PDF output out of 10000 (max. 10000000)
 
