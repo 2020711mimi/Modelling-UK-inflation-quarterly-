@@ -1,0 +1,188 @@
+---
+title: "Total Expenditure into monthly data"
+author: "Yiyi"
+date: "`r Sys.Date()`"
+output:
+  bookdown::pdf_document2:
+    toc: yes
+  header-includes:
+  - \usepackage{placeins}
+  - \usepackage{multirow}
+  - \usepackage{multicolumn}
+  - \usepackage{caption}
+  - \usepackage[absolute,overlay]{textpos}
+  - \usepackage{float}
+  - \usepackage{graphicx}
+  - \usepackage{booktabs}
+  html_document:
+    toc: yes
+    df_print: paged
+  word_document: default
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r rm, include=FALSE}
+ rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+
+```{r Library, include=FALSE}
+#Packages
+library(readxl)
+library(data.table)
+library(lubridate)#extract cpi time to newdata(furniture48)
+library(tidyverse) 
+library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
+library(dplyr)
+library(moments)
+library(Inflation)
+library(ggplot2)
+library(zoo)
+library(xts)
+library(hydroTSM)
+library(openair)
+library(tibble)
+library(miscTools)
+library(priceR)
+library(Metrics)
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
+library(kableExtra)
+library(gridExtra)
+library(egg)
+library(grid)
+library(cowplot)
+library(spatstat)#shift有重复
+library(SciViews)
+library(sos)
+library(nowcasting)
+```
+
+```{r language,message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+Sys.setlocale("LC_TIME","English")
+```
+
+```{r , include=FALSE}
+DF<-read_excel("consumption data.xlsx")
+#分别生成
+#jan,april,jul,oct
+#96年q4*1/3+97年q1 * 2/3
+third<-DF$`0`*1/3
+san.fen.zhi.yi<-append(third,0,after = 0)
+#
+two<-DF$`0`*2/3
+san.fen.zhi.2<-append(two,0,after = 99)
+#
+di.1.yue<-rowMeans(cbind(san.fen.zhi.2, san.fen.zhi.yi), na.rm=TRUE)
+
+#去除最后一个数字 没用
+di.1.yue <- head(di.1.yue,-1)
+#第二个月
+di.2.yue<-DF$`0`/2
+#第三个月
+#  1997年3月等于2/3* 97q1 +1/3 * 97q
+#不需要q1的2/3
+new.one<-third[-1]
+new.two<-head(two,-1)
+di.3.yue<-rowMeans(cbind(new.one,new.two),na.rm=TRUE)
+di.3.yue<-append(di.3.yue,0,after = 98)
+#交叉合并
+ab <- as.vector(matrix(c(di.1.yue, di.2.yue,di.3.yue), nrow = 3, byrow = TRUE))
+ab
+#
+smooth.data<-data.frame(matrix(nrow = 298,ncol = 2))
+#date
+smooth.data$date <-seq(from = as.Date("1997-01-01"), to = as.Date("2021-10-01"),
+           by = "month")#生成日期
+smooth.data$Total_expenditure<-c(ab,0)
+fdf<-smooth.data[,-c(1:2)]
+#write.csv(fdf,"smooth data for total expenditure.csv",row.names = FALSE)
+fdf<-fdf[-c(297:298),]
+```
+# Process
+According to your suggestion, I made quarterly into smoothed monthly data. The idea is I give Jan, April, July and Oct 1/3 weight of the previous quarter and 2/3 current quarter, sum up and divided by 2. 
+Feb, May, August, Nov keep their quarter figures and divide by 2.
+March, June, Sept and Dec have given 1/3 of the previous quarter and 2/3 current quarter, sum up and divided by 2. 
+
+
+```{r , echo=FALSE, fig.cap="Total expenditure", fig.topcaption=TRUE, message=FALSE, warning=FALSE,results='asis'}
+p<-ggplot(data=fdf, aes(x=date))+
+ geom_line(aes(y =Total_expenditure, color="Total_expenditure")) +
+labs(x="Time",y="millions pounds")
+p
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(tseries)
+df.ts<-ts(fdf$Total_expenditure,frequency = 12,start = c(1997,1))
+adf.test(df.ts)
+```
+# Augmented Dickey-Fuller Test
+
+One way to test whether a time series is stationary is to perform an augmented Dickey-Fuller test, which uses the following null and alternative hypotheses:
+
+H0: The time series is non-stationary. In other words, it has some time-dependent structure and does not have constant variance over time.
+
+HA: The time series is stationary.
+
+P-value: 0.1469
+
+Since the p-value is  0.1469 not less than .05, we fail to reject the null hypothesis.
+
+This means the time series is non-stationary. In other words, it has some time-dependent structure and does not have constant variance over time.
+
+# Growh rate
+
+Since total expenditure monthly data is not stationary, I try to convert to a percentage growth rate.
+
+```{r growth rate, , include=FALSE}
+library(dplyr)
+growth_rate <- function(x)(x/lag(x)-1)*100 
+fdf$growth_rate <- growth_rate(fdf$Total_expenditure) 
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(tseries)
+fdf<-fdf[-(1:2),]
+df.ts<-ts(fdf$growth_rate,frequency = 12,start = c(1997,1))
+adf.test(df.ts)
+```
+
+We examine the growth rate stationary by applying the ADF test. The p-value is 0.01; we reject the null hypothesis. This means the time series is stationary now. 
+
+After we perform an augmented Dickey-Fuller test on the data, we can create a quick plot to visualize the data: There was a very clear fluctuation between March and August 2020.
+
+```{r , echo=FALSE, fig.cap="Growth rate", fig.topcaption=TRUE, message=FALSE, warning=FALSE,results='asis'}
+q<-ggplot(data=fdf, aes(x=date))+
+ geom_line(aes(y =growth_rate, color="growth rate")) +
+labs(x="Time",y="Growth rate percent change")
+q
+```
+
+\newpage
+
+# Questions:
+
+Now we have a stationary monthly demand variable, but I am not sure how I can do it for the general CPI model and the 12 COCOP divisions.
+The following formula is how we model inflation in chapter 1. My plans are: : replace CPI in the right hand to 12 lags demand variables and keep rest dummies variables. I would be appreciated it if you could provide more suggestions.
+$$
+\begin{aligned}
+	CPI_t=&CPI+\,\,\mathrm{Trend}_t+\beta _1Q_1+\beta _2Q_3+\beta _3Q_4\\
+	&+\beta _4D_{\mathrm{recesion}}+\beta _5D_{VAT_1}+\beta _6D_{VAT_2}+\beta _7D_{VAT_3}\\
+	+\sum_{i=1}^4{\lambda _i}CPI_{t-i}+\sigma _t\\
+\end{aligned}
+$$
+
+```{r eval=FALSE, include=FALSE}
+#write.csv(fdf,"monthly consumption data and growth rate.csv",row.names = FALSE)
+```
+

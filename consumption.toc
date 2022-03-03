@@ -1,0 +1,4 @@
+\contentsline {section}{\numberline {1}Process}{1}{section.1}%
+\contentsline {section}{\numberline {2}Augmented Dickey-Fuller Test}{1}{section.2}%
+\contentsline {section}{\numberline {3}Growh rate}{3}{section.3}%
+\contentsline {section}{\numberline {4}Questions:}{4}{section.4}%

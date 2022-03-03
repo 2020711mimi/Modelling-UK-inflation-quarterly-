@@ -717,6 +717,25 @@ labs(x="Time",y="Inflation")
 grid.arrange(arrangeGrob(p, top = 'Cogley Regression RMSE') , arrangeGrob(q, top = 'Cogley Regression Beta estimates'),arrangeGrob(w, top = 'Core CPI and Headline CPI'), nrow=3)
 ```
 
+```{r EX, echo=FALSE, fig.cap="Ex. Food & Energy", fig.topcaption=TRUE, message=FALSE, warning=FALSE,results='asis'}
+
+FE<-ggplot(data=CPI519, aes(x=time(nt)))+
+ geom_line(aes(y =EXFD, color="FE")) +
+   geom_line(aes(y = CPI, color="CPI all items")) +
+labs(x="Time",y="Inflation")
+FE + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
+```
+```{r Trimmed mean and cpi, echo=FALSE, fig.cap="CPI and trimmed mean inflation", fig.topcaption=TRUE, message=FALSE, warning=FALSE,results='asis'}
+
+FE<-ggplot(data=CPI519, aes(x=time(nt)))+
+ geom_line(aes(y =TM, color="Trimmed mean inflation")) +
+   geom_line(aes(y = CPI, color="CPI inflation")) +
+labs(x="Time",y="Inflation")
+FE + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
+```
+
 \newpage
 
 # Conclusions
