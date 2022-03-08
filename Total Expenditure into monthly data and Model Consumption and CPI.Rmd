@@ -426,8 +426,9 @@ stargazer(CPI_cosumption_reg,
           summary=FALSE,
           se = NULL, type = "text")
 ```
-# Model and data
-## CPI all items level
+# CPI all items level
+## Model and data
+
 The data set is monthly CPI all items and total expenditure for the UK from March 1997 to November 2019. We ignore the data after December 2019 since it is impacted by the Covid effect in 2020 Q1.
 
 One of the significant  differences between this model and the previous one is that we use total consumption as the demand variable for the overall CPI rate. This model for monthly data not only assumes inflation depends on 12 lagged inflation, dummies variables of each month, three VAT change announcements, and the great $D_{recession}$, but also Consumption C.
@@ -442,7 +443,7 @@ Where CPI is the inflation for CPI all itmes, $D_{JAN}$   to $D_{Dec}$   are ele
 
 
 
-# Stepwise function
+## Stepwise function
 
 To further discover the independent variables that have a more significant influence on inflation and remove less critical coefficients, we introduce stepwise regression. In our simplified process, we apply backward elimination selection based on P-value criteria. For CPI all items, we go through a systematic procedure to simplify the lag structure: Omit the least significant independent variable and rerun until all variables are significant at 5% or 1%. In this process, we always leave the dummy variables in (VAT, monthly, crisis etc.) in regression, even if insignificant.
 ```{r include=FALSE}
@@ -591,12 +592,13 @@ names(slr.total$coefficients)<-c('Constant',"lag3","lag12",
                                         "growth lag2","growth lag10","growth lag12")
 ```
 
-### Results
-#### The original results
+## Results
+### The original results
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 stargazer(CPI_cosumption_reg,
           star.cutoffs = c(0.05, 0.01),
-          
+                    dep.var.labels.include = FALSE,
+
           report = "vc*",
           align=TRUE,           
           header = FALSE,
@@ -608,7 +610,7 @@ stargazer(CPI_cosumption_reg,
           se = NULL, type = "text")
 ```
 
-#### The simplified result
+### The simplified result
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 stargazer(slr.total,
           star.cutoffs = c(0.05, 0.01),
@@ -627,11 +629,11 @@ stargazer(slr.total,
 
 Comparing the results before and after simplification, we can see that after simplification, 2, 10 and 12 monthly lags  consumption growth variables are significant. However, before stepwise, the results show that only one monthly lag consumption out of 12 is significant.
 
-##  Divisions level
+#  Divisions level
 
 Besides modelling CPI for all items and Consumption, we also try with the divisions level.
 
-### Model
+## Model
 
 
 $$
@@ -687,8 +689,10 @@ for (i in 1:length(slr.total)) {
 #                                         "time_May","time_Nov","time_Oct","time_Sep","VAT1","VAT2","VAT3","Recession","Trend",
 #                                        "growth lag2","growth lag10","growth lag12")
 ```
-### Output
-![consumption-division output](consumption-division output.png)
+## Output
+Please see Table \@ref(fig:bar).
+
+![(#fig:bar)consumption-division output](consumption-division output.png)
 ```{r message=FALSE, include=FALSE, results='asis'}
 library(stargazer)
 abr.div.name<-c("01FB",	"02AT",	"03CF",	"04HW",	"05FH",	"06HL",	"07TR",	"08CM",	"09RC",	"10ED",	"11RH",	"12MS")
@@ -707,7 +711,188 @@ stargazer(slr.total,
 
 ```
 
+\newpage
 
-### Conclusions
+## Conclusions
 
 From divisions stepwise results, we can see that all consumption lags of output in 01FB, 05FH, 08CM, 09RC and 12MS is insignificant.
+
+\newpage
+
+# Unemployment
+
+## Data and methods
+
+The data will be obtained from the ONS website of “Unemployment rate (aged 16 and over, seasonally adjusted)” in the Labor market statistics. To better examine how the unemployment rate affects monthly inflation, we turn the raw monthly unemployment data into monthly unemployment growth rates.
+
+Then we add the unemployment rate to the equation, and we repeat the process.
+
+
+$$
+\begin{aligned}
+	\pi _t=&\pi +\,\,\mathrm{Trend}_t+\beta _1D_{Jan}+....+\beta _{11}D_{Dec}+\beta _{12}D_{\mathrm{recesion}}+\\
+	&\beta _{13}D_{VAT_1}+\beta _{14}D_{VAT_2}+\beta _{15}D_{TAT_3}+\beta_{16}U_t+\sum_{j=1}^{12}{\alpha _j}\pi _{t-j}+\sum_{i=1}^{12}{\lambda _i}CPI_{t-i}+\sum_{k=1}^{12}{\theta _k}C _{t-k}+\sigma _t\\
+\end{aligned}
+$$
+```{r Unemployment,include=FALSE}
+u_rate<-read_excel("unemployment rate 97.3-19.11.xlsx")
+Unemployment<-u_rate$`Unemployment rate`
+```
+
+The values of unemployment and inflation are entered into figure \@ref(fig:acd), which shows their development in the period from 01.03.1997 to 01.11.2019.
+
+```{r acd, echo=FALSE, fig.cap="Unemployment and inflation", fig.topcaption=TRUE, message=FALSE, warning=FALSE,results='asis'}
+u_i<-newdata[,1]
+u_i$time<-newdata$time1
+u_i$unemployment<-Unemployment
+colnames(u_i)[1]<-c("Inflation")
+
+#growth 
+u_i[,3] <- growth_rate(u_i[,3]) 
+Unemployment<-u_i$unemployment
+#
+q<-ggplot(data=u_i, aes(x=time))+
+ geom_line(aes(y =unemployment, color="Unmployment rate")) +
+   geom_line(aes(y =Inflation, color="Inflation(Monthly)")) +
+labs(x="Time",y= "percent change")
+q
+```
+
+```{r CPI-unemployment, include=FALSE}
+CPI_cosumption_unemploy<-lm(COPY[,1] ~ lag1[,1]+lag2[,1]+lag3[,1]+lag4[,1]+
+                                            lag5[,1]+lag6[,1]+lag7[,1]+lag8[,1]+lag9[,1]+
+                                            lag10[,1]+lag11[,1]+lag12[,1]+ time_Aug + 
+                                            time_Dec+ time_Apr+ time_Jan+time_Jul+time_Jun +
+                                            time_Mar+time_May+time_Nov+time_Oct+time_Sep+VAT1+VAT2+VAT3+Recession+Trend+growth2+growth3+growth4+growth5+growth6+growth7+growth8+growth9+growth10+growth11+growth12+growth13+Unemployment)
+
+CPI_cosumption_unemploy$coefficients
+
+names(CPI_cosumption_unemploy$coefficients)<-c('Constant','lag1','lag2',"lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12",
+                                        "time_Aug" ,"time_Dec", "time_Apr ", "time_Jan","time_Jul","time_Jun" ,"time_Mar",
+                                         "time_May","time_Nov","time_Oct","time_Sep","VAT1","VAT2","VAT3","Recession","Trend",
+                                        "growth lag1","growth lag2","growth lag3","growth lag4","growth lag5","growth lag6","growth lag7","growth lag8",
+                                        "growth lag9","growth lag10","growth lag11","growth lag12","Unemployment")
+```
+
+
+```{r CPI-unemployment output, eval=FALSE, include=FALSE}
+stargazer(CPI_cosumption_unemploy,
+          star.cutoffs = c(0.05, 0.01),
+                    dep.var.labels.include = FALSE,
+
+          report = "vc*",
+          align=TRUE,           
+          header = FALSE,
+          model.numbers=FALSE,
+          column.labels = c(colnames(COPY[1])),
+          df=FALSE, 
+          digits=2, single.row = TRUE,
+          summary=FALSE,
+          se = NULL, type = "text")
+```
+
+```{r DIvision-unemployment, include=FALSE}
+regression <- lapply(1:122, function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+lag4[,x]+lag5[,x]+lag6[,x]+lag7[,x]+
+                                             lag8[,x]+lag9[,x]+lag10[,x]+lag11[,x]+lag12[,x]+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+CPI_lag5+CPI_lag6+CPI_lag7+
+                                             CPI_lag8+CPI_lag9+
+                                             CPI_lag10+CPI_lag11+CPI_lag12+ time_Aug + 
+                                             time_Dec+ time_Apr+ time_Jan+time_Jul+time_Jun +time_Mar+
+                                             time_May+time_Nov+time_Oct+time_Sep+VAT1+VAT2+VAT3+Recession+Trend+growth2+growth3+growth4+growth5+growth6+growth7+growth8+growth9+growth10+growth11+growth12+growth13+Unemployment)
+)
+for (i in 1:122) {
+  names(regression[[i]]$coefficients)<-c('Constant','lag1','lag2',"lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12",
+                                         "CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7","CPI_lag8","CPI_lag9",
+                                         "CPI_lag10","CPI_lag11","CPI_lag12","time_Aug" , 
+                                         "time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Mar",
+                                         "time_May","time_Nov","time_Oct","time_Sep","VAT1","VAT2","VAT3","Recession","Trend",
+                                         "growth lag1","growth lag2","growth lag3","growth lag4","growth lag5","growth lag6","growth lag7","growth lag8",
+                                        "growth lag9","growth lag10","growth lag11","growth lag12","Unemployment")
+}
+
+slr.total <- list()
+keep.dummies <- c("time_Aug","time_Apr",
+                  "time_Dec",  "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                  "VAT1","VAT2","VAT3","Recession","Trend")
+for (i in 1:length(div.reg)) {
+  slr.total[[i]] <- model.select(div.reg[[i]], keep = keep.dummies, sig = 0.05, verbose = F)
+}
+
+
+
+
+#替换名称
+search_for_these <- c("lag1[, x]","lag2[, x]","lag3[, x]","lag4[, x]","lag5[, x]","lag6[, x]","lag7[, x]","lag8[, x]","lag9[, x]","lag10[, x]","lag11[, x]","lag12[, x]")
+ replace_with_these <- c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12")
+ found<-list()
+for (i in 1:length(slr.total)) {
+  found[[i]] <- match(names(slr.total[[i]]$coefficients), search_for_these, nomatch = 0)
+  names(slr.total[[i]]$coefficients)[names(slr.total[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
+```
+
+```{r message=FALSE, include=FALSE, results='asis'}
+library(stargazer)
+abr.div.name<-c("01FB",	"02AT",	"03CF",	"04HW",	"05FH",	"06HL",	"07TR",	"08CM",	"09RC",	"10ED",	"11RH",	"12MS")
+stargazer(slr.total,
+          star.cutoffs = c(0.05, 0.01),
+          dep.var.labels.include = FALSE,
+          report = "vc*",
+          align=TRUE,           
+          header = FALSE,
+          model.numbers=FALSE,
+          column.labels = c(abr.div.name),
+          df=FALSE, 
+          digits=2, single.row = TRUE,
+          summary=FALSE,
+          se = NULL, type = "text")
+
+```
+
+```{r message=FALSE, include=FALSE, results='asis'}
+library(stargazer)
+#division 位置
+div.poi<-vector()
+
+for (i in 1:length(div.name)) {
+  div.poi[i]<-  which(colnames(COPY)==div.name[i])
+  
+}
+
+div.reg<-regression[div.poi]
+
+abr.div.name<-c("01FB",	"02AT",	"03CF",	"04HW",	"05FH",	"06HL",	"07TR",	"08CM",	"09RC",	"10ED",	"11RH",	"12MS")
+stargazer(CPI_cosumption_unemploy,div.reg,
+          star.cutoffs = c(0.05, 0.01),
+          dep.var.labels.include = FALSE,
+          report = "vc*",
+          align=TRUE,           
+          header = FALSE,
+          model.numbers=FALSE,
+          column.labels = c("CPI",abr.div.name),
+          df=FALSE, 
+          digits=2, single.row = TRUE,
+          summary=FALSE,
+          se = NULL, type = "text")
+
+```
+
+## Regression output
+
+The results are in Table \@ref(fig:bar2). As we can see, The unemployment change rate is not significant for the 12 divisions and aggregate CPI.
+
+![(#fig:bar2)consumption-Unemployment output](Regression-analysis-between-inflation-unemployment-and-real-GDP.png)
+
+## Some more lags of unemployment 
+
+### Model
+
+Since unemployment is not significant for division and aggreagte CPI, we  try 12 more lags of unemployment. 
+
+$$
+\begin{aligned}
+	\pi _t=&\pi +\,\,\mathrm{Trend}_t+\beta _1D_{Jan}+....+\beta _{11}D_{Dec}+\beta _{12}D_{\mathrm{recesion}}+\\
+	&\beta _{13}D_{VAT_1}+\beta _{14}D_{VAT_2}+\beta _{15}D_{TAT_3}+\sum_{h=1}^{12}{\psi _i}U_{t-h}+\sum_{j=1}^{12}{\alpha _j}\pi _{t-j}+\sum_{i=1}^{12}{\lambda _i}CPI_{t-i}+\sum_{k=1}^{12}{\theta _k}C _{t-k}+\sigma _t\\
+\end{aligned}
+$$
+
+
