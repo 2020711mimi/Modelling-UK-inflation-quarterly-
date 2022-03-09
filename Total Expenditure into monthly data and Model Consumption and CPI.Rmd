@@ -179,6 +179,9 @@ setDF(cpi)#convert to 'data.frame'
 #读取consumption growth rate 数据
 raw_growth<-read.csv("monthly consumption data and growth rate 97.3 - 19.11.csv")
 cpi$growth<-c(rep(0,110),raw_growth$growth_rate,rep(0,4)) 
+#读取unemployed rate
+raw_unemployment<-read_excel("unemployment rate 97.3-19.11.xlsx")
+  cpi$unemployment<-c(rep(0,110),raw_unemployment$`Unemployment rate`,rep(0,4)) 
 
 #
 cols.num <- c(colnames(cpi))
@@ -291,8 +294,20 @@ for (i in 1:length(monthname)) {
 #the correct version. 首先把月度虚拟变量存储到cpilag 里.
 #然后用同一迭代变量 送到各自的time_下. **注意, 双迭代变量还未完全掌握, i
 #和j 一起用 必出错**
-consumption<-newdata[,2250:2262]
-monthdummies<-newdata[,2264:2274]
+consumption_s<-which(colnames(newdata)=="growth1")
+consumption_cover<-consumption_s:(consumption_s+12)
+consumption<-newdata[,consumption_s:(consumption_s+12)]
+#consumption<-newdata[,2250:2262]
+
+monthdummies_s<-which(colnames(newdata)=="time_Apr")
+monthdummies_s_cover<-monthdummies_s:(monthdummies_s+10)
+monthdummies<-newdata[,monthdummies_s_cover:(monthdummies_s_cover+10)]
+
+unemployment1_s<-which(colnames(newdata)=="unemployment1")
+unemployment1_s_cover<-unemployment1_s:(unemployment1_s+12)
+unemployment<-newdata[,unemployment1_s_cover:(unemployment1_s_cover+12)]
+
+#monthdummies<-newdata[,2264:2274]
 
   for (i in 1:13) {
   assign(colnames(consumption)[i],as.numeric(unlist(consumption[[i]])))
@@ -301,6 +316,10 @@ monthdummies<-newdata[,2264:2274]
 
   for (i in 1:11) {
   assign(colnames(monthdummies)[i],as.numeric(unlist(monthdummies[[i]])))
+  }
+
+ for (i in 1:13) {
+  assign(colnames(unemployment)[i],as.numeric(unlist(unemployment[[i]])))
   }
 
 
@@ -809,6 +828,14 @@ for (i in 1:122) {
                                         "growth lag9","growth lag10","growth lag11","growth lag12","Unemployment")
 }
 
+div.poi<-vector()
+
+for (i in 1:length(div.name)) {
+  div.poi[i]<-  which(colnames(COPY)==div.name[i])
+  
+}
+
+div.reg<-regression[div.poi]
 slr.total <- list()
 keep.dummies <- c("time_Aug","time_Apr",
                   "time_Dec",  "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
@@ -848,7 +875,7 @@ stargazer(slr.total,
 
 ```
 
-```{r message=FALSE, include=FALSE, results='asis'}
+```{r CPI and 12,message=FALSE, include=FALSE, results='asis'}
 library(stargazer)
 #division 位置
 div.poi<-vector()
@@ -880,13 +907,79 @@ stargazer(CPI_cosumption_unemploy,div.reg,
 
 The results are in Table \@ref(fig:bar2). As we can see, The unemployment change rate is not significant for the 12 divisions and aggregate CPI.
 
-![(#fig:bar2)consumption-Unemployment output](Regression-analysis-between-inflation-unemployment-and-real-GDP.png)
+![(#fig:bar2)Consumption-Unemployment output](Regression-analysis-between-inflation-unemployment-and-real-GDP.png)
+
+## The simplified result
+
+Stepwise regression results (Table \@ref(fig:bar10)) confirm the previous conclusion that unemployment rate in the same period has no significant effect on CPI, no matter division or aggregate CPI level.
+
+![(#fig:bar10)Consumption-Unemployment stepwise output](1 lag unemployment_simply.png)
+
+
+```{r 12 lags simplified, include=FALSE}
+
+
+slr.total <- list()
+keep.dummies <- c("time_Aug","time_Apr",
+                  "time_Dec",  "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                  "VAT1","VAT2","VAT3","Recession","Trend")
+for (i in 1:length(div.reg)) {
+  slr.total[[i]] <- model.select(div.reg[[i]], keep = keep.dummies, sig = 0.05, verbose = F)
+}
+
+
+slr.total[[2]]$coefficients
+
+#替换名称
+search_for_these <- c("lag1[, x]","lag2[, x]","lag3[, x]","lag4[, x]","lag5[, x]","lag6[, x]","lag7[, x]","lag8[, x]","lag9[, x]","lag10[, x]","lag11[, x]","lag12[, x]",
+                      "growth2","growth3","growth4","growth5","growth6","growth7","growth8","growth9","growth10","growth11","growth12","growth13",
+ "unemployment2"         )
+ replace_with_these <- c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12",
+                         "growth lag1","growth lag2","growth lag3","growth lag4","growth lag5","growth lag6","growth lag7","growth lag8",
+                                        "growth lag9","growth lag10","growth lag11","growth lag12",
+                         "unemployment lag 1"
+                         )
+ found<-list()
+for (i in 1:length(slr.total)) {
+  found[[i]] <- match(names(slr.total[[i]]$coefficients), search_for_these, nomatch = 0)
+  names(slr.total[[i]]$coefficients)[names(slr.total[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
+ 
+ cpi.slr<- model.select(regression[[1]], keep = keep.dummies, sig = 0.05, verbose = F)
+ found<-list()
+  found[[1]] <- match(names(cpi.slr$coefficients), search_for_these, nomatch = 0)
+  names(cpi.slr$coefficients)[names(cpi.slr$coefficients) %in% search_for_these] <- replace_with_these[found[[1]]]
+```
+
+```{r message=FALSE, include=FALSE, results='asis'}
+library(stargazer)
+vars.order<-c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12","CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7",
+                                             "CPI_lag8","CPI_lag9",
+                                             "CPI_lag10","CPI_lag11","CPI_lag12","growth lag1","growth lag2","growth lag3","growth lag4","growth lag5","growth lag6","growth lag7","growth lag8",
+                                        "growth lag9","growth lag10","growth lag11","growth lag12","unemployment lag 1","unemployment lag 2","unemployment lag 3","unemployment lag 4","unemployment lag 5","unemployment lag 6","unemployment lag 7","unemployment lag 8","unemployment lag 9","unemployment lag 10","unemployment lag 11","unemployment lag 12")
+
+abr.div.name<-c("01FB",	"02AT",	"03CF",	"04HW",	"05FH",	"06HL",	"07TR",	"08CM",	"09RC",	"10ED",	"11RH",	"12MS")
+stargazer(cpi.slr,slr.total,
+          star.cutoffs = c(0.05, 0.01),
+                    order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          report = "vc*",
+          align=TRUE,           
+          header = FALSE,
+          model.numbers=FALSE,
+          column.labels = c("CPI",abr.div.name),
+          df=FALSE, 
+          digits=2, single.row = TRUE,
+          summary=FALSE,
+          se = NULL, type = "text")
+
+```
 
 ## Some more lags of unemployment 
 
-### Model
+### Model and data
 
-Since unemployment is not significant for division and aggreagte CPI, we  try 12 more lags of unemployment. 
+Since unemployment is not significant for division and aggreagte CPI, we  try 12 more lags of unemployment. I'm still using the rate of change of the unemployment rate instead of the level.
 
 $$
 \begin{aligned}
@@ -895,4 +988,123 @@ $$
 \end{aligned}
 $$
 
+```{r 12 lags ,include=FALSE}
+regression <- lapply(1:122, function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+lag4[,x]+lag5[,x]+lag6[,x]+lag7[,x]+
+                                             lag8[,x]+lag9[,x]+lag10[,x]+lag11[,x]+lag12[,x]+CPI_lag1+CPI_lag2+CPI_lag3+CPI_lag4+CPI_lag5+CPI_lag6+CPI_lag7+
+                                             CPI_lag8+CPI_lag9+
+                                             CPI_lag10+CPI_lag11+CPI_lag12+ time_Aug + 
+                                             time_Dec+ time_Apr+ time_Jan+time_Jul+time_Jun +time_Mar+
+                                             time_May+time_Nov+time_Oct+time_Sep+VAT1+VAT2+VAT3+Recession+Trend+growth2+growth3+growth4+growth5+growth6+growth7+growth8+growth9+growth10+growth11+growth12+growth13+unemployment2+unemployment3+unemployment4+unemployment5+unemployment6+unemployment7+unemployment8+unemployment9+unemployment10+unemployment11+unemployment12+unemployment13)
+)
+regression[[1]]$coefficients
+for (i in 1:122) {
+  names(regression[[i]]$coefficients)<-c('Constant','lag1','lag2',"lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12",
+                                         "CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7","CPI_lag8","CPI_lag9",
+                                         "CPI_lag10","CPI_lag11","CPI_lag12","time_Aug" , 
+                                         "time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Mar",
+                                         "time_May","time_Nov","time_Oct","time_Sep","VAT1","VAT2","VAT3","Recession","Trend",
+                                         "growth lag1","growth lag2","growth lag3","growth lag4","growth lag5","growth lag6","growth lag7","growth lag8",
+                                        "growth lag9","growth lag10","growth lag11","growth lag12","unemployment lag 1","unemployment lag 2","unemployment lag 3","unemployment lag 4","unemployment lag 5","unemployment lag 6","unemployment lag 7","unemployment lag 8","unemployment lag 9","unemployment lag 10","unemployment lag 11","unemployment lag 12")
+}
 
+```
+
+```{r 12 lags  output,eval=FALSE, include=FALSE}
+div.poi<-vector()
+
+for (i in 1:length(div.name)) {
+  div.poi[i]<-  which(colnames(COPY)==div.name[i])
+  
+}
+
+div.reg<-regression[div.poi]
+
+abr.div.name<-c("01FB",	"02AT",	"03CF",	"04HW",	"05FH",	"06HL",	"07TR",	"08CM",	"09RC",	"10ED",	"11RH",	"12MS")
+stargazer(regression[[1]],div.reg,
+          star.cutoffs = c(0.05, 0.01),
+          dep.var.labels.include = FALSE,
+          report = "vc*",
+          align=TRUE,           
+          header = FALSE,
+          model.numbers=FALSE,
+          column.labels = c("CPI",abr.div.name),
+          df=FALSE, 
+          digits=2, single.row = TRUE,
+          summary=FALSE,
+          se = NULL, type = "text")
+```
+
+### Regression output
+
+The results are in Table \@ref(fig:bar3). Some of unemployment lag variables are significant, especially for 06HL.
+
+![(#fig:bar3)Consumption-12 lag Unemployment output](12 lags unemployment.png)
+
+\newpage
+
+### The simplified result
+
+The results are in Table \@ref(fig:bar4).  The unemployment lag variables for 02AT, 03CF, 06HL, 09RC, 11RH and 12MS  are significant. It is worth noting that except for period lag of 1 and 2, which is not significant to 06HL, the other unemployment time lag variables are significant.
+
+The most interesting things is that 2 period lag unemployment is insignificant for all divisions and aggregate CPI.
+
+![(#fig:bar4)Consumption-12 lag Unemployment simplified output](12lag unemployment_ simplify.png)
+
+```{r 12  simplified, include=FALSE}
+
+
+slr.total <- list()
+keep.dummies <- c("time_Aug","time_Apr",
+                  "time_Dec",  "time_Jan","time_Jul","time_Jun" ,"time_Mar","time_May","time_Nov","time_Oct","time_Sep",
+                  "VAT1","VAT2","VAT3","Recession","Trend")
+for (i in 1:length(div.reg)) {
+  slr.total[[i]] <- model.select(div.reg[[i]], keep = keep.dummies, sig = 0.05, verbose = F)
+}
+
+
+slr.total[[2]]$coefficients
+
+#替换名称
+search_for_these <- c("lag1[, x]","lag2[, x]","lag3[, x]","lag4[, x]","lag5[, x]","lag6[, x]","lag7[, x]","lag8[, x]","lag9[, x]","lag10[, x]","lag11[, x]","lag12[, x]",
+                      "growth2","growth3","growth4","growth5","growth6","growth7","growth8","growth9","growth10","growth11","growth12","growth13",
+ "unemployment2","unemployment3","unemployment4","unemployment5","unemployment6","unemployment7","unemployment8","unemployment9","unemployment10","unemployment11","unemployment12","unemployment13"         )
+ replace_with_these <- c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12",
+                         "growth lag1","growth lag2","growth lag3","growth lag4","growth lag5","growth lag6","growth lag7","growth lag8",
+                                        "growth lag9","growth lag10","growth lag11","growth lag12",
+                         "unemployment lag 1","unemployment lag 2","unemployment lag 3","unemployment lag 4","unemployment lag 5","unemployment lag 6","unemployment lag 7","unemployment lag 8","unemployment lag 9","unemployment lag 10","unemployment lag 11","unemployment lag 12"
+                         )
+ found<-list()
+for (i in 1:length(slr.total)) {
+  found[[i]] <- match(names(slr.total[[i]]$coefficients), search_for_these, nomatch = 0)
+  names(slr.total[[i]]$coefficients)[names(slr.total[[i]]$coefficients) %in% search_for_these] <- replace_with_these[found[[i]]]
+}
+ 
+ cpi.slr<- model.select(regression[[1]], keep = keep.dummies, sig = 0.05, verbose = F)
+ found<-list()
+  found[[1]] <- match(names(cpi.slr$coefficients), search_for_these, nomatch = 0)
+  names(cpi.slr$coefficients)[names(cpi.slr$coefficients) %in% search_for_these] <- replace_with_these[found[[1]]]
+```
+
+```{r message=FALSE, include=FALSE, results='asis'}
+library(stargazer)
+vars.order<-c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12","CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7",
+                                             "CPI_lag8","CPI_lag9",
+                                             "CPI_lag10","CPI_lag11","CPI_lag12","growth lag1","growth lag2","growth lag3","growth lag4","growth lag5","growth lag6","growth lag7","growth lag8",
+                                        "growth lag9","growth lag10","growth lag11","growth lag12","unemployment lag 1","unemployment lag 2","unemployment lag 3","unemployment lag 4","unemployment lag 5","unemployment lag 6","unemployment lag 7","unemployment lag 8","unemployment lag 9","unemployment lag 10","unemployment lag 11","unemployment lag 12")
+
+abr.div.name<-c("01FB",	"02AT",	"03CF",	"04HW",	"05FH",	"06HL",	"07TR",	"08CM",	"09RC",	"10ED",	"11RH",	"12MS")
+stargazer(cpi.slr,slr.total,
+          star.cutoffs = c(0.05, 0.01),
+                    order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          report = "vc*",
+          align=TRUE,           
+          header = FALSE,
+          model.numbers=FALSE,
+          column.labels = c("CPI",abr.div.name),
+          df=FALSE, 
+          digits=2, single.row = TRUE,
+          summary=FALSE,
+          se = NULL, type = "text")
+
+```
