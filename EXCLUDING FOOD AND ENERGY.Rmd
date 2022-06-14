@@ -55,7 +55,7 @@ library(openair)
 library(tibble)
 library(miscTools)
 library(priceR)
-
+library(strucchange)
 ```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
@@ -292,3 +292,4 @@ write.csv(df.excluding,"weight_wide.csv")
 #把年度weight转成月度weight
 #m.w<-cbind(df.excluding, i=rep(1:12,each=ncol(df.excluding)))
 ```
+ 

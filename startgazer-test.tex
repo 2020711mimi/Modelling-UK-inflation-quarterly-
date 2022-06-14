@@ -1,0 +1,205 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+
+\hypertarget{changes-in-the-persistence-of-the-cpi-and-the-ppi}{%
+\section{Changes in the persistence of the CPI and the
+PPI}\label{changes-in-the-persistence-of-the-cpi-and-the-ppi}}
+
+The data set is Consumer price inflation (CPI) all items and Producer
+price inflation(PPI) for the UK from March 1997 to November 2019. Figure
+@ref(fig:Annualinflation) and @ref(fig:acd) plot the UK annual and
+monthly CPI and PPI. To analyze persistent changes in CPI and PPI, the
+first step is to determine their basic time series properties.
+Determining the sequence of data integration is of particular
+importance. That is, evaluating whether the PPI and CPI inflation rates
+are I (0) processes. If the inflation rate is a non-stationary I(1)
+process, then the price level will be an I(2) process, so the analysis
+to determine the pass-through of producer price shocks to consumer
+prices will be more complex.
+
+\begin{figure}
+\centering
+\includegraphics{startgazer-test_files/figure-latex/Annualinflation-1.pdf}
+\caption{UK Annual inflation: CPI vs PPI}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{startgazer-test_files/figure-latex/acd-1.pdf}
+\caption{UK Monthly CPI and PPI inflation}
+\end{figure}
+
+Another test we can conduct is the Augmented Dickey--Fuller (ADF)
+t-statistic test to find if the series has a unit root (a series with a
+trend line will have a unit root and result in a large p-value). ADF
+tests reject the null of non-stationarity of both PPI and CPI. The test
+identifies all stationary periods within the sample. The period
+identified as I(0) can be analysed according to the timing and operating
+rules of monetary policy.
+
+\begin{verbatim}
+## 
+##  Augmented Dickey-Fuller Test
+## 
+## data:  monthly_ppi_cpi$cpi
+## Dickey-Fuller = -5.2699, Lag order = 6, p-value = 0.01
+## alternative hypothesis: stationary
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Augmented Dickey-Fuller Test
+## 
+## data:  monthly_ppi_cpi$ppi
+## Dickey-Fuller = -6.1957, Lag order = 6, p-value = 0.01
+## alternative hypothesis: stationary
+\end{verbatim}
+
+\newpage
+
+\hypertarget{methodology-to-evaluate-the-predictive-content-of-the-ppi-for-the-cpi}{%
+\section{Methodology to evaluate the predictive content of the PPI for
+the
+CPI}\label{methodology-to-evaluate-the-predictive-content-of-the-ppi-for-the-cpi}}
+
+In order to study the forecasting ability of PPI inflation to CPI
+inflation, the related equation is:
+
+\[\pi_{t}^{C P I}=\mu_{0}+\sum_{j=1}^{p} \alpha_{j} \pi_{t-j}^{C P I}+\sum_{j=1}^{p} \beta_{j} \pi_{t-j}^{P P I}+\varepsilon_{t}\]
+
+where \(\varepsilon_{t}\) is considered as white noise. The model is
+typically estimated by ordinary least squares (OLS), and the number of
+lags, p, is usually determined by using an information criterion such as
+the Bayesian information criterion (BIC). We decide p as 12 in this
+case.
+
+\newpage
+
+\begin{table}[!htbp] \centering 
+  \caption{} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}}lD{.}{.}{-2} } 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{1}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-2} 
+\\[-1.8ex] & \multicolumn{1}{c}{COPY[, 1]} \\ 
+ & \multicolumn{1}{c}{CPI ALL ITEMS} \\ 
+\hline \\[-1.8ex] 
+ CPI\_lag1 & -0.13^{**} \\ 
+  CPI\_lag2 & -0.08 \\ 
+  CPI\_lag3 & -0.05 \\ 
+  CPI\_lag4 & -0.05 \\ 
+  CPI\_lag5 & -0.05 \\ 
+  CPI\_lag6 & 0.10^{*} \\ 
+  CPI\_lag7 & 0.005 \\ 
+  CPI\_lag8 & -0.02 \\ 
+  CPI\_lag9 & -0.06 \\ 
+  CPI\_lag10 & -0.07 \\ 
+  CPI\_lag11 & -0.05 \\ 
+  CPI\_lag12 & 0.66^{**} \\ 
+  ppi2 & 0.12^{**} \\ 
+  ppi3 & -0.07 \\ 
+  ppi4 & -0.03 \\ 
+  ppi5 & -0.003 \\ 
+  ppi6 & 0.01 \\ 
+  ppi7 & -0.05 \\ 
+  ppi8 & 0.004 \\ 
+  ppi9 & 0.02 \\ 
+  ppi10 & 0.05 \\ 
+  ppi11 & -0.001 \\ 
+  ppi12 & -0.05 \\ 
+  ppi13 & 0.02 \\ 
+  Constant & 0.09^{**} \\ 
+ \hline \\[-1.8ex] 
+Observations & \multicolumn{1}{c}{273} \\ 
+R$^{2}$ & \multicolumn{1}{c}{0.65} \\ 
+Adjusted R$^{2}$ & \multicolumn{1}{c}{0.62} \\ 
+Residual Std. Error & \multicolumn{1}{c}{0.22} \\ 
+F Statistic & \multicolumn{1}{c}{19.60$^{**}$} \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.05; $^{**}$p$<$0.01; $^{***}$p$<$[0.***]} \\ 
+\end{tabular} 
+\end{table}
+
+\end{document}

@@ -1,0 +1,226 @@
+---
+title: "ARIMA MODELS"
+author: "Yiyi"
+date: "`r Sys.Date()`"
+output:
+  bookdown::pdf_document2:
+    toc: yes
+  header-includes:
+  - \usepackage{placeins}
+  - \usepackage{multirow}
+  - \usepackage{multicolumn}
+  - \usepackage{caption}
+  - \usepackage[absolute,overlay]{textpos}
+  - \usepackage{float}
+  - \usepackage{graphicx}
+  - \usepackage{booktabs}
+  html_document:
+    toc: yes
+    df_print: paged
+  word_document: default
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r rm, include=FALSE}
+ rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+
+```{r Library, include=FALSE}
+#Packages
+library(readxl)
+library(data.table)
+library(lubridate)#extract cpi time to newdata(furniture48)
+library(tidyverse) 
+library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
+library(dplyr)
+library(moments)
+library(Inflation)
+library(ggplot2)
+library(zoo)
+library(xts)
+library(hydroTSM)
+library(openair)
+library(tibble)
+library(miscTools)
+library(priceR)
+library(Metrics)
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
+library(kableExtra)
+library(gridExtra)
+library(egg)
+library(grid)
+library(cowplot)
+library(spatstat)#shift有重复
+library(SciViews)
+library(sos)
+library(aTSA)
+library(tseries)
+library(vars)
+library(forecast)
+library(TSstudio)
+
+```
+
+```{r language,message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+Sys.setlocale("LC_TIME","English")
+```
+
+
+```{r warning=FALSE, include=FALSE}
+#这份数据是从读取的
+cpi_all_item_index <- read.csv("series-260522.csv")
+
+growth_rate <- function(x)
+  (x / lag(x) - 1) * 100
+
+cpi_all_item_index[, 2] <- as.numeric(cpi_all_item_index[, 2])
+
+cpi_all_item_index$inflation <-
+  growth_rate(cpi_all_item_index$CPI.INDEX.00..ALL.ITEMS.2015.100)
+
+MAR93_CPI_monthly <- which(cpi_all_item_index$Title == "1993 JAN")
+NOV2019_CPI_monthly <- which(cpi_all_item_index$Title == "2019 NOV")
+
+monthly_cpi_93_19 <-
+  cpi_all_item_index[c(MAR93_CPI_monthly:NOV2019_CPI_monthly), ]
+######################
+
+table57 <- read.csv("table57.csv")
+
+
+
+colnames(table57) <- c(table57[6,])
+
+table57 <- table57[-c(1:6), ]
+
+table57[,-c(1:2)] <- sapply(table57[,-c(1:2)], as.numeric)
+
+table57[,-c(1:2)] <- growth_rate(table57[,-c(1:2)])
+
+CPI_monthly_199301 <- which(table57$`index date   ` == "199301")
+CPI_monthly_201911 <- which(table57$`index date   ` == "201911")
+
+monthly_cpi_93_19_table57 <-
+  table57[c(CPI_monthly_199301:CPI_monthly_201911), ]
+
+monthly_cpi_93_19$table57 <-
+  monthly_cpi_93_19_table57$`CPI ALL ITEMS`
+
+#write.csv(monthly_cpi_93_19,"table57 and ons.csv")
+##########################################
+
+
+
+
+for (i in 3:5) {
+  print(adf.test(monthly_cpi_93_19[, i]))
+}
+
+# AR
+iinflaltion <- monthly_cpi_93_19
+
+VARselect(iinflaltion$table57)
+
+VARselect(iinflaltion$inflation)
+
+ar.ols(iinflaltion$table57,
+       demean = F,
+       intercept = T)
+# ARIMA
+cpi57 = ts(iinflaltion$table57,
+           frequency = 12,
+           start = c(1993, 1))
+
+autoplot(cpi57)
+
+fit_ARIMA <- auto.arima(cpi57, seasonal = FALSE)
+fit_ARIMA
+
+print(summary(fit_ARIMA))
+
+d7bt = ts(iinflaltion$inflation,
+          frequency = 12,
+          start = c(1993, 1))
+
+d7bt <- auto.arima(d7bt, seasonal = FALSE)
+d7bt
+#ARIMA(p,d,q)x(P,D,Q) model, where P=number of seasonal autoregressive (SAR) terms, D=number of seasonal differences, Q=number of seasonal moving average (SMA) terms
+
+forecast1 <- forecast(fit_ARIMA, h = 12)
+#
+forecast1
+#
+plot(forecast1)
+#
+plot(forecast1$residuals)
+#
+qqnorm(forecast1$residuals)
+#
+acf(forecast1$residuals)
+#
+pacf(forecast1$residuals)
+#
+summary(fit_ARIMA)
+#
+accuracy(fit_ARIMA)
+
+#In sample forecasting
+
+
+#Split the sample into traing and test sets
+
+split_inf <- ts_split(cpi57, sample.out = 12)
+
+traing <- split_inf$train
+testing <- split_inf$test
+
+length(traing)
+length(testing)
+
+#Use an Arima diagnostic plot on the traing set
+
+arima_diag(traing)
+
+# Series: cpi57 : ARIMA(2,0,1) with non-zero mean
+arima201 <- arima(traing, order = c(2, 0, 1))
+arima201
+autoplot(arima201)
+check_res(arima201)
+
+sarima <- arima(traing, order  = c(2, 0, 1), seasonal = list(order=c(1,0,0)))
+
+auto <- auto.arima(traing, seasonal = TRUE)
+auto
+autoplot(auto)
+check_res(auto)
+
+#forecast values and diagnostic
+
+fcast1<-forecast(arima201,h = 12)
+test_forecast(actual = cpi57,forecast.obj = fcast1,test = testing)
+accuracy(fcast1,testing)
+
+fcast2<-forecast(sarima,h = 12)
+test_forecast(actual = cpi57,forecast.obj = fcast2,test = testing)
+accuracy(fcast2,testing)
+
+
+fcasta<-forecast(auto,h = 12)
+test_forecast(actual = cpi57,forecast.obj = fcasta,test = testing)
+accuracy(fcasta,testing)
+```
+
+
+

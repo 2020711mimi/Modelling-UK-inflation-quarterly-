@@ -78,7 +78,7 @@ Varnames <- copy(names(Data_A))
 Data_A[, (names(Data_A)) := lapply(.SD, as.numeric)][,
                                                      rn := .I]
 melted <- melt(Data_A, id.vars="rn")[,
-                                     (paste0("lag_", 0:12)) := shift(value, 0:12, type="lag"),
+                                     (paste0("lag_", 0:12)) := data.table:: shift(value, 0:12, type="lag"),
                                      by=variable][, 
                                                   value:=NULL][]
 res <- dcast.data.table(melt(melted, id.vars=c("rn", "variable"), variable.name="lag"),
@@ -89,7 +89,7 @@ res[, ncol(res), with=FALSE]
 # lagged variable generation ----------------------------------------------
 
 
-cpi <- cpi[, unlist(lapply(.SD, shift, n = 0:12), recursive = FALSE)]#lags generation
+cpi <- cpi[, unlist(lapply(.SD, data.table:: shift, n = 0:12), recursive = FALSE)]#lags generation
 
 
 # Monthly Dummies ---------------------------------------------------------

@@ -1,0 +1,324 @@
+---
+title: "ECON7040 Research Assignment"
+author: "Haiyang Zhao"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
+    df_print: paged
+  header-includes:
+  - \usepackage{placeins}
+  - \usepackage{multirow}
+  - \usepackage{multicolumn}
+  - \usepackage{caption}
+  - \usepackage[absolute,overlay]{textpos}
+  - \usepackage{float}
+  - \usepackage{graphicx}
+  - \usepackage{booktabs}
+  bookdown::pdf_document2:
+    toc: yes
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r rm, include=FALSE}
+ rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+
+```{r Library, include=FALSE}
+#Packages
+library(readxl)
+library(data.table)
+library(lubridate)#extract cpi time to newdata(furniture48)
+library(tidyverse) 
+library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
+library(dplyr)
+library(moments)
+library(Inflation)
+library(ggplot2)
+library(zoo)
+library(xts)
+library(hydroTSM)
+library(openair)
+library(tibble)
+library(miscTools)
+library(priceR)
+library(Metrics)
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
+library(kableExtra)
+library(gridExtra)
+library(egg)
+library(grid)
+library(cowplot)
+library(spatstat)#shift有重复
+library(SciViews)
+library(sos)
+library(nowcasting)
+library(matrixStats)
+library(panelr)
+library(skimr)
+library(ExPanDaR)
+library(plm)
+library(miceadds)
+options(scipen=999)
+```
+
+
+```{r include=FALSE}
+df<-read_excel("JSTdatasetR5(1).xlsx","tidy")
+
+#convert into a panel_data frame
+panel.df <- panel_data(df, id = country, wave = year)
+panel.df
+#summary(panel.df)
+#pop growth
+pop_growth<-df %>% 
+  select(country,pop) %>%
+  group_by(country) %>%
+  mutate(growth = c(NA,diff(pop))/lag(pop, 1))
+
+df$pop_growth<-pop_growth$growth
+```
+# Descriptive statistics
+```{r Descriptive Statistics, echo=FALSE}
+#Let’s see whether country and period identify a panel observation.
+any(duplicated(df[,c("country", "year")]))
+#Descriptive Statistics
+t <- prepare_descriptive_table(df[,5:13])
+t$kable_ret  %>%
+  kable_styling("condensed", full_width = F, position = "center")
+```
+# Pooled Regression Equation
+
+$$
+rgdpmad_{it}=\alpha+\beta_{1}pop_{it}
++\beta_{2}rconpc_{it}
++\beta_{3}iy_{it}
++\beta_{4}imports_{it}
++\beta_{5}exports_{it}
++\beta_{6}hpnom_{it}
++\beta_{7}revenue_{it}
++\beta_{8}crisisJST_{it}
++u_{it}
+$$
+## Descriptive statistics
+```{r pooling, echo=FALSE}
+pdata=pdata.frame(df,index = c("country","year"))
+#logarithmic all variables except iy and crisisJST
+pdata[,5:6]<-log(pdata[,5:6])
+pdata[,8:11]<-log(pdata[,8:11])
+#Descriptive Statistics
+t <- prepare_descriptive_table(pdata[,5:13])
+t$kable_ret  %>%
+  kable_styling("condensed", full_width = F, position = "center")
+```
+
+
+`
+
+
+ ## Pooled results
+```{r pooled, echo=FALSE}
+library(estimatr)
+pooled_method=lm_robust(log(rgdpmad)~pop_growth+log(rconpc)+iy+log(imports)+log(exports)+log(hpnom)+log(revenue)+crisisJST,
+                        data=df,clusters = country)
+summary(pooled_method)
+
+```
+```{r include=FALSE}
+OLS_method=lm(log(rgdpmad)~pop_growth+log(rconpc)+iy+log(imports)+log(exports)+log(hpnom)+log(revenue)+crisisJST,
+                        data=df)
+summary(OLS_method)
+newdf<-df
+newdf[,5:6]<-log(df[,5:6])
+newdf[,8:11]<-log(df[,8:11])
+
+OLS_method=lm((rgdpmad)~pop_growth+(rconpc)+iy+(imports)+(exports)+(hpnom)+(revenue)+crisisJST,
+                        data=newdf)
+summary(OLS_method)
+
+```
+
+# Fixed effect 
+
+## Fixed effect
+```{r fixed effect}
+fe<-plm(rgdpmad~pop_growth+rconpc+iy+imports+exports+hpnom+revenue+crisisJST,data=pdata,model="within")
+summary(fe)
+```
+##  Cluster-robust standard errors
+
+```{r fixed effect Cluster-robust standard errors}
+library(clubSandwich)
+#Cluster-robust standard errors
+coef_test(fe, vcov = "CR1", test = "naive-t")[1:8,]
+```
+# Before war
+```{r before 1945}
+#subset year before 1945
+before.war=subset(df, year<=1945)
+#log-linear
+pdata=pdata.frame(before.war,index = c("country","year"))
+#logarithmic all variables except iy and crisisJST
+pdata[,5:6]<-log(pdata[,5:6])
+pdata[,8:11]<-log(pdata[,8:11])
+fe.before<- plm(rgdpmad~pop_growth+rconpc+iy+imports+exports+hpnom+revenue+crisisJST,data=pdata,model="within")
+summary(fe.before)
+```
+##  Cluster-robust standard errors
+```{r before war- fixed effect Cluster-robust standard errors}
+library(clubSandwich)
+#Cluster-robust standard errors
+coef_test(fe.before, vcov = "CR1", test = "naive-t")[1:8,]
+```
+# Post war
+```{r post war}
+#subset year after 1945
+after.war=subset(df, year>1945)
+#log-linear
+pdata=pdata.frame(after.war,index = c("country","year"))
+#logarithmic all variables except iy and crisisJST
+pdata[,5:6]<-log(pdata[,5:6])
+pdata[,8:11]<-log(pdata[,8:11])
+fe.after<- plm(rgdpmad~pop_growth+rconpc+iy+imports+exports+hpnom+revenue+crisisJST,data=pdata,model="within")
+summary(fe.after)
+```
+##  Cluster-robust standard errors
+
+```{r after war- fixed effect Cluster-robust standard errors}
+library(clubSandwich)
+#Cluster-robust standard errors
+coef_test(fe.after, vcov = "CR1", test = "naive-t")[1:8,]
+```
+
+## Comparison
+
+```{r table 1}
+
+stargazer(OLS_method, fe,fe.before,fe.after,   
+          column.labels = c("OLS","FE","Before War","Post War"),
+          single.row = TRUE, 
+          report = "vc*", 
+          header = FALSE, 
+          df=FALSE, 
+          digits=2, 
+          se = NULL,                    
+type = "html")
+```
+
+# Data selection
+
+```{r 7 coutries}
+seven.df<-subset(df,iso!="AUS" & iso!="US")
+
+```
+
+
+## Descriptive statistics
+```{r 7 Descriptive Statistics, echo=FALSE}
+#Let’s see whether country and period identify a panel observation.
+any(duplicated(df[,c("country", "year")]))
+#Descriptive Statistics
+t <- prepare_descriptive_table(seven.df[,5:13])
+t$kable_ret  %>%
+  kable_styling("condensed", full_width = F, position = "center")
+```
+
+## Pooled results
+```{r 7 pooled, echo=FALSE}
+library(estimatr)
+pooled_method=lm_robust(log(rgdpmad)~pop_growth+log(rconpc)+iy+log(imports)+log(exports)+log(hpnom)+log(revenue)+crisisJST,
+                        data=seven.df,clusters = country)
+summary(pooled_method)
+
+
+```
+## Fixed effect
+```{r  }
+pdata=pdata.frame(seven.df,index = c("country","year"))
+#logarithmic all variables except iy and crisisJST
+pdata[,5:6]<-log(pdata[,5:6])
+pdata[,8:11]<-log(pdata[,8:11])
+
+fe<-plm(rgdpmad~pop_growth+rconpc+iy+imports+exports+hpnom+revenue+crisisJST,data=pdata,model="within")
+summary(fe)
+```
+
+##  Cluster-robust standard errors
+
+```{r }
+library(clubSandwich)
+#Cluster-robust standard errors
+coef_test(fe, vcov = "CR1", test = "naive-t")[1:8,]
+```
+
+## Before war
+```{r before}
+#subset year before 1945
+before.war=subset(seven.df, year<=1945)
+#log-linear
+pdata=pdata.frame(before.war,index = c("country","year"))
+#logarithmic all variables except iy and crisisJST
+pdata[,5:6]<-log(pdata[,5:6])
+pdata[,8:11]<-log(pdata[,8:11])
+fe.before<- plm(rgdpmad~pop_growth+rconpc+iy+imports+exports+hpnom+revenue+crisisJST,data=pdata,model="within")
+summary(fe.before)
+```
+
+##  Cluster-robust standard errors
+```{r }
+library(clubSandwich)
+#Cluster-robust standard errors
+coef_test(fe.before, vcov = "CR1", test = "naive-t")[1:8,]
+```
+## Post war
+```{r }
+#subset year after 1945
+after.war=subset(seven.df, year>1945)
+#log-linear
+pdata=pdata.frame(after.war,index = c("country","year"))
+#logarithmic all variables except iy and crisisJST
+pdata[,5:6]<-log(pdata[,5:6])
+pdata[,8:11]<-log(pdata[,8:11])
+fe.after<- plm(rgdpmad~pop_growth+rconpc+iy+imports+exports+hpnom+revenue+crisisJST,data=pdata,model="within")
+summary(fe.after)
+```
+##  Cluster-robust standard errors
+
+```{r }
+library(clubSandwich)
+#Cluster-robust standard errors
+coef_test(fe.after, vcov = "CR1", test = "naive-t")[1:8,]
+```
+## table 2
+```{r include=FALSE}
+
+seven.df<-subset(newdf,iso!="AUS" & iso!="US")
+
+pooled_2=lm((rgdpmad)~pop_growth+(rconpc)+iy+(imports)+(exports)+(hpnom)+(revenue)+crisisJST,
+                        data=seven.df)
+
+#summary(pooled_2)
+
+stargazer(pooled_2, fe,fe.before,fe.after,   
+          column.labels = c("OLS","FE","Before War","Post War"),
+          single.row = TRUE, 
+          report = "vc*", 
+          header = FALSE, 
+          df=FALSE, 
+          digits=2, 
+          se = NULL,                    
+type = "html")
+```
+
