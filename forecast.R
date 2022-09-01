@@ -179,48 +179,11 @@ fcast_out <- forecast(inf_yf, model = finalyfit, h = 12)
 plot_forecast(fcast_out)
 summary(fcast_out)
 
-#
-auto_se <- auto.arima(traing, seasonal = isSeasonal(inf_yf))
-auto_se
-
-
-#
-arima_diag(traing)
-
-#seasonal vs actual
-
-
-
-#residual
-check_res(fcasta_auto)
-res <- fcasta_auto$residuals
-autoplot(res)
-
-# residual ----------------------------------------------------------------
+#到20年6月都在下降，之后上升。
+##page 54 -63
 
 
 
 
 
-#non-seasonal vs actual
-fcasta_ns <- forecast(auto_se, h = 12)
 
-library(plotly)
-library(tidyr)
-library(plyr)
-
-
-
-test_forecast(
-  actual = inf_yf,
-  forecast.obj = fcasta_ns,
-  test = testing,
-  Ygrid = TRUE,
-  Xgrid = TRUE
-) %>%
-  layout(title = 'Actual vs Forecasted and Fitted (ARIMA)',
-         yaxis = list(title = 'Percent'))
-
-#
-#
-accuracy(fcasta_ns, testing)

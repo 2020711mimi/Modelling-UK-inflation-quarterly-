@@ -231,7 +231,6 @@ reg.model <- lapply(1:173, function(x) lm(COPY[,x] ~ lag1[,x]+lag2[,x]+lag3[,x]+
                                             time_Dec+ time_Apr+ time_Jan+time_Jul+time_Jun +
                                             time_Mar+time_May+time_Nov+time_Oct+time_Sep+VAT1+VAT2+VAT3+Recession+Trend)
 )
-
 for (i in 1:173) {
   names(reg.model[[i]]$coefficients)<-c('Constant','lag1','lag2',"lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12",
                                         "time_Aug" , 
@@ -251,10 +250,17 @@ for (i in 1:122) {
                                          "CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7","CPI_lag8","CPI_lag9",
                                          "CPI_lag10","CPI_lag11","CPI_lag12","time_Aug" , 
                                          "time_Dec", "time_Feb", "time_Jan","time_Jul","time_Jun" ,"time_Mar",
-                                         "time_May","time_Nov","time_Oct","time_Sep","VAT1","VAT2","VAT3","Recession","Trend")
-}
+                                         "time_May","time_Nov","time_Oct","time_Sep","VAT1","VAT2","VAT3","Recession","Trend")}
+```
+
+
+
+
+
+
 
 ```
+
 
 ##前两列显著百分比
 
