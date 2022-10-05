@@ -1,6 +1,6 @@
-# source("stage 1.R")
-# source("stage2.R")
-# source("stage 3.R")
+ source("stage 1.R")
+ source("stage2.R")
+ source("stage 3.R")
 
 
 
@@ -34,7 +34,7 @@ stargazer(
   summary = FALSE,
   flip = FALSE,
   se = NULL,
-  out = "general 12 lag version P.html",
+  #out = "general 12 lag version P.html",
   type = "text"
 )
 
@@ -83,9 +83,32 @@ stargazer(
   summary = FALSE,
   flip = FALSE,
   se = NULL,
+  out = "table/The AIC minimised version P.html",
+  type = "text"
+)
+
+# same line p value-------------------------------------------------------------------------
+
+stargazer(
+  y.list1,
+  order = paste0("^", vars.order , "$"),
+  dep.var.labels.include = FALSE,
+  notes.append = FALSE,
+  column.labels = c(div.name),
+  report = "vc*p",
+  align = TRUE,
+  header = FALSE,
+  df = FALSE,
+  digits = 2,
+  single.row = TRUE,
+  model.numbers = FALSE,
+  summary = FALSE,
+  flip = FALSE,
+  se = NULL,
   out = "The AIC minimised version P.html",
   type = "text"
 )
+
 y.list2 <- y.list[[1]]
 names(y.list2) <- c(div.name)
 modelsummary(
@@ -133,7 +156,7 @@ stargazer(
   summary = FALSE,
   flip = FALSE,
   se = NULL,
-  out = "The  regressions when you have removed the insignificant variables using F tests P.html",
+  out = "table/The  regressions when you have removed the insignificant variables using F tests P.html",
   type = "text"
 )
 all_sig_output22 <- all_sig_output
@@ -185,7 +208,7 @@ stargazer(
   summary = FALSE,
   flip = FALSE,
   se = NULL,
-  out = "stage 2 using F tests P.html",
+  out = "table/stage 2 using F tests P.html",
   type = "text"
 )
 all_sig_output_stage2_2 <- stage_2_ver_1
@@ -223,7 +246,7 @@ stargazer(
   dep.var.labels.include = FALSE,
   notes.append = FALSE,
   column.labels = c(div.name),
-  report = "vc*p",
+  report = "vcs*",
   align = TRUE,
   header = FALSE,
   df = FALSE,
@@ -232,8 +255,8 @@ stargazer(
   model.numbers = FALSE,
   summary = FALSE,
   flip = FALSE,
-  se = NULL,
-  out = "F12 divs P.html",
+  se=lapply(final.list, function(x) summary(x)$coef[,4]),
+  out = "table/F12 divs P.html",
   type = "text"
 )
 

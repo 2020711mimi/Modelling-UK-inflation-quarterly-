@@ -6,6 +6,11 @@ Sys.setlocale("LC_TIME", "English")
 getwd()
 library(readxl)
 cpi <- read_excel("correct quarter cpi.xlsx")#108
+library(moments)
+skewness(cpi$`CPI ALL ITEMS`)
+
+library(EnvStats)
+EnvStats::kurtosis(cpi$`CPI ALL ITEMS`)
 library(data.table)
 
 setDF(cpi)#convert to 'data.frame'

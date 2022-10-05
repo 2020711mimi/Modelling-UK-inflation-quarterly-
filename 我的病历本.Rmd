@@ -216,7 +216,7 @@ for (i in 1:12) {
   
 }
 
-
+#write.csv(COPY,"CPI/cpi.csv")
 ```
 
 ## Rgression

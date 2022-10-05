@@ -271,7 +271,7 @@ cm
 
 
 cpi.list <- list(reg.cpi,step_CPI)
-names(cpi.list) <- c("CPI","CPI(AICstepwise")
+names(cpi.list) <- c("CPI","CPI(AICstepwise)")
 
 found <- list()
 for (i in 1:2) {
@@ -302,14 +302,16 @@ stargazer(
   notes.append = FALSE,
   notes = " * p<0.05; ** p<0.01 ",
   dep.var.labels.include = FALSE,
-  report=('vc*p'),  align = TRUE,
+  report=('vcs*'),  align = TRUE,
   header = FALSE,
   df = FALSE,
   digits = 2,
   single.row = TRUE,
   model.numbers = FALSE,
   summary = FALSE,
-  se = NULL
+  column.labels = c("CPI","CPI(AICstepwise)"),
+  se=lapply(cpi.list, function(x) summary(x)$coef[,4])
+  #out = "table/p value same line cpi.html"
 )
 
 stargazer(cpi.list,
@@ -328,6 +330,14 @@ stargazer(cpi.list,
   model.numbers = FALSE,
   summary = FALSE,
   se = NULL,
-  out = "table/p value cpi.html"
+  #out = "table/p value cpi.html"
 
+)
+library(texreg)
+texreg::screenreg(cpi.list, single.row=TRUE, 
+                  #reorder.coef=c(2:3, 1),
+                  #custom.model.names=c(div.name),
+                  override.se=lapply(cpi.list, function(x) summary(x)$coef[,4]),
+                  override.pvalues=lapply(cpi.list, function(x) summary(x)$coef[,4]),
+                  digits=3
 )
