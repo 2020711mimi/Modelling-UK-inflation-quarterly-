@@ -222,14 +222,14 @@ cpi.68<-qwe[,..p.cpi.68]#180*69
 
 ```{r include=FALSE}
 #把weight zhuanzhi
-write.csv(df.excluding,"weight_wide.csv")
+#write.csv(df.excluding,"weight_wide.csv")
 #把年度weight转成月度weight
 long.df<-read_excel("weight_long.xlsx")
 #除第一行每行复制12遍
 data_new_2 <- long.df %>% slice(rep(2:n(), each = 12))        # dplyr package
 #把名字当作列名
 colnames(data_new_2)<-long.df[1,]
-write.csv(data_new_2,"montly weight.csv")
+#write.csv(data_new_2,"montly weight.csv")
 remove_jan<-read_excel("remove jan.xlsx")#180*70
 #去除前两列，不要时间的版本
 weight68<-remove_jan[,-(1:2)]
@@ -239,7 +239,7 @@ weight68<-remove_jan[,-(1:2)]
 #总共144+36=180
 #remove jan确实有180
 cpi.68_notime<-cpi.68[,-1]
-write_csv(cpi.68_notime,"cpi 68.csv")
+#write_csv(cpi.68_notime,"cpi 68.csv")
 #weight 总和不是1000，
 #每行的每个数加上（1000-每行的和）/68
 for (i in 1:nrow(weight68)) {
@@ -248,7 +248,7 @@ for (i in 1:nrow(weight68)) {
 for (i in 1:nrow(weight68)) {
   new_w[i,]<-weight68[i,]+(1000- rowSums(weight68[i,]))/68
 }
-write.csv(new_w,"newweight.csv")
+#write.csv(new_w,"newweight.csv")
 #sumproduct
 www<-new_w/1000
 wcpi<-data.frame(cpi.68_notime)

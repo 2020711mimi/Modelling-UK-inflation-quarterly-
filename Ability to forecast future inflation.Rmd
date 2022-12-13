@@ -409,12 +409,13 @@ ttnn<-ts(ar.inflation[,1],start = c(2005,9),frequency = 12 )
 
 sadasda<-ggplot(data=ar.inflation, aes(x=time(ttnn)))+
  geom_line(aes(y =ar.inflation$log1, color="AR(8) (logarithmic)")) +
-   geom_line(aes(y = ar.inflation$inflation, color="Headline")) +
+   #geom_line(aes(y = ar.inflation$inflation, color="Headline")) +
      geom_line(aes(y = ar.inflation$inflation.log, color="Headline(logarithmic)")) +
 labs(x="AR and Headline CPI",y="Inflation")
 sadasda + theme(legend.title = element_blank()) 
 
-
+sadasda + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))
 ```
 
 # Criteria for evaluation : forecasting future inflation

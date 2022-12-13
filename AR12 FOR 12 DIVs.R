@@ -37,6 +37,11 @@ ts.divs <-
 
 ts.divs.percent <- 100 * (ts.divs / stats::lag(ts.divs,-1) - 1)
 
+# mom12 <- data.frame( ts.divs.percent)
+# mom12<- cbind( as.Date(time(ts.divs.percent)),mom12)
+# colnames(mom12) <- colnames(divs)
+# write.csv(mom12, file = "cpi data/mom.csv",row.names=FALSE)
+
 #crea a time for dummy create
 
 time1 = seq.Date(
@@ -44,6 +49,7 @@ time1 = seq.Date(
   by = "month",
   length.out = 417
 )
+
 
 
 #dummies var

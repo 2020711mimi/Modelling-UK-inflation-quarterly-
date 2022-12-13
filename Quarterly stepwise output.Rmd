@@ -265,17 +265,21 @@ keep.dummies <- c("quarter1","quarter3","quarter4",
 for (i in 2: length(regression)) {
   slr.total[[i]] <- model.select(regression[[i]], keep = keep.dummies, sig = 0.05, verbose = F)
 }
-
 CPI_ <- CPI.model[[1]]
 slr.cpi <- model.select(CPI_,keep = keep.dummies,sig = 0.05,verbose = F)
 
 ```
 ## 空集部分
 ```{r}
-names(slr.total) <- 1:length(slr.total)
+#names(slr.total) <- 1:length(slr.total)
+names(slr.total) <- colnames(COPY)
+
 class_with_no_significant <- slr.total[which(sapply(slr.total, is.null))]
-class_with_no_significant<-as.numeric(names(class_with_no_significant))
+#class_with_no_significant<-as.numeric(names(class_with_no_significant))
+class_with_no_significant<-as.character(names(class_with_no_significant))
+class_with_no_significant
 length(class_with_no_significant)
+slr.copy <- slr.total
 ```
 
 ```{r}
@@ -307,6 +311,7 @@ for (i in 1:length(slr.cpi )) {
 }
 ```
 
+
 ## 12 divisions output
 ```{r}
 vars.order<-c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","lag10","lag11","lag12","CPI_lag1","CPI_lag2","CPI_lag3","CPI_lag4","CPI_lag5","CPI_lag6","CPI_lag7",
@@ -314,15 +319,25 @@ vars.order<-c("lag1","lag2","lag3","lag4","lag5","lag6","lag7","lag8","lag9","la
                                              "CPI_lag10","CPI_lag11","CPI_lag12")
 
 div.122.poi<-c(2, 16, 22, 28 ,41,  54,  62, 77, 80,  102, 103, 108)
-
 division.name<-colnames(COPY[,div.122.poi])
 
-without.17na<-subset(COPY,select = -c((class_with_no_significant)))
+intersect(division.name,class_with_no_significant)
 
-na.name<-colnames(COPY)[class_with_no_significant]
+div.11<- division.name[!division.name %in% (intersect(division.name,class_with_no_significant))]
+
+length(class_with_no_significant)
+without.17na<-subset(COPY,select = -c((class_with_no_significant+1)))
+
+na.name<-colnames(COPY)[class_with_no_significant+1]
+
+intersect(division.name,na.name)
 
 idx=which(division.name %in% na.name)
 division.name=division.name[-idx]
+which(colnames(COPY) %in% division.name)
+slr.total.div.poi<- which(colnames(COPY) %in% division.name)-1
+
+colnames(COPY[1])
 div.poi.test<-vector()
 for (i in 1:length(division.name)) {
   div.poi.test[i]<-which(colnames(without.17na)==division.name[i])
@@ -331,25 +346,55 @@ for (i in 1:length(division.name)) {
 
 length(div.poi.test)
 
+
+
+slr.total[slr.total.div.poi]
 ```
 
-```{r}
-
-
-div.name<-c("CPI","01FB", "02AT", "03CF", "04HW", "05FH", "06HL", "07TR", "08CM", "09RC", "10ED" , "12MS")
-
-
-
-stargazer(slr.cpi,slr.total[div.poi.test],
-          star.char = c("*"),
-          star.cutoffs = c(0.01),
-          notes = c(" * p<0.01; "),
+```{r }
+#cpi compare
+stargazer(CPI.model,slr.cpi,
+          star.char = c("*","**"),
+          star.cutoffs = c(0.05,0.01),
+          notes = c(" * p<0.05; ** p<0.01"),
            omit = c("quarter1","quarter3","quarter4",
                    "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
           order=paste0("^", vars.order , "$"),
           dep.var.labels.include = FALSE,
           notes.append = FALSE,
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c("CPI","CPI (Stepwise)"),
+          summary = FALSE,
+          out = "newquarter/CPI.html",
+          
+          se = NULL,type = "html"
+)
 
+```
+
+```{r}
+stargazer(slr.total[div.11][3],type = "text")
+summary(slr.total[div.11][[3]])
+slr.total[div.11][3]
+round(summary(slr.total[div.11][3]$`CLOTHING AND FOOTWEAR`)$coefficients[,4],2)
+
+div.name<-c("CPI","01FB", "02AT", "03CF", "04HW", "05FH", "06HL", "07TR", "08CM", "09RC", "10ED" , "12MS")
+length(div.name)
+
+stargazer(slr.cpi,slr.total[div.11],
+          star.char = c("*","**"),
+          star.cutoffs = c(0.05,0.01),
+          notes = c(" * p<0.05; ** p<0.01"),
+           omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
           report = "vc*",
           align = TRUE,
           header = FALSE,
@@ -358,7 +403,7 @@ stargazer(slr.cpi,slr.total[div.poi.test],
           model.numbers = FALSE,
           column.labels = c(div.name),
           summary = FALSE,
-          out = "F:/R workspace/Modelling-UK-inflation-quarterly-/Quarterly-divisions.html",
+          out = "newquarter/Quarterly-divisions.html",
           
           se = NULL,type = "html"
 )
@@ -369,8 +414,43 @@ stargazer(slr.cpi,slr.total[div.poi.test],
 groups.name <- read_excel("groups name.xlsx")
 colnames(groups.name) = gsub("&", "and", colnames(groups.name))
 groups.name<-colnames(groups.name)
-na.name<-colnames(COPY)[class_with_no_significant]
-#groups 里h有 na.name 没有的
+
+intersect(groups.name,class_with_no_significant)
+'%!in%' <- function(x,y)!('%in%'(x,y))
+groupname<- groups.name[  groups.name%!in% class_with_no_significant]
+groupname
+length(groupname)
+```
+
+```{r}
+stargazer(slr.total[groupname],
+          star.char = c("*","**"),
+          star.cutoffs = c(0.05,0.01),
+          notes = c(" * p<0.05; ** p<0.01"),
+           omit = c("quarter1","quarter3","quarter4",
+                   "VAT1","VAT2","VAT3","Recession","Trend",'Constant'),
+          order=paste0("^", vars.order , "$"),
+          dep.var.labels.include = FALSE,
+          notes.append = FALSE,
+          report = "vc*",
+          align = TRUE,
+          header = FALSE,
+          df = FALSE,
+          digits = 2, single.row = TRUE,
+          model.numbers = FALSE,
+          column.labels = c(groupname[1:4]),
+          summary = FALSE,
+          out = "newquarter/groups.html",
+          
+          se = NULL,type = "html"
+)
+```
+
+
+```{r}
+na.name<-colnames(COPY)[class_with_no_significant+1]
+#全都不显著的名称
+
 na.groups<-intersect(na.name,groups.name)
 
 idx=which(groups.name %in% na.name)

@@ -1,0 +1,828 @@
+---
+title: "new EVALUATING  CORE INFLATION MEASURES"
+author: "Yiyi"
+date: "`r Sys.Date()`"
+output:
+  bookdown::pdf_document2:
+    toc: yes
+  header-includes:
+  - \usepackage{placeins}
+  - \usepackage{multirow}
+  - \usepackage{multicolumn}
+  - \usepackage{caption}
+  - \usepackage[absolute,overlay]{textpos}
+  - \usepackage{float}
+  - \usepackage{graphicx}
+  - \usepackage{booktabs}
+  html_document:
+    toc: yes
+    df_print: paged
+  word_document: default
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r rm, include=FALSE}
+ rm(list = ls())
+Sys.setlocale("LC_TIME", "English")
+```
+
+```{r Library, include=FALSE}
+#Packages
+library(readxl)
+library(data.table)
+library(lubridate)#extract cpi time to newdata(furniture48)
+library(tidyverse) 
+library(broom)
+library(stargazer)
+library(knitr)
+library(officer)
+library(flextable)
+library(magrittr)
+library(dplyr)
+library(moments)
+library(Inflation)
+library(ggplot2)
+library(zoo)
+library(xts)
+library(hydroTSM)
+library(openair)
+library(tibble)
+library(miscTools)
+library(priceR)
+library(Metrics)
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
+library(kableExtra)
+library(gridExtra)
+library(egg)
+library(grid)
+library(cowplot)
+library(spatstat)#shift有重复
+library(SciViews)
+library(sos)
+
+```
+
+```{r language,message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+Sys.setlocale("LC_TIME","English")
+```
+
+# Sticky price measures
+
+We examine the frequency of price changes for 570 categories of goods and services covering about 66.4% of consumer spending based on "Dixon and Tian items frequency data". Then, I looked up the monthly CPI index and weights data for these 570 items based on their ID one by one for the years 2005 to 2021. This is used to construct CORE inflation measures of sticky and flexible CPI.
+
+Dixon and Tian items frequency data provides the frequency (expressed as a %) of prices changing per month for 570 items that were contained in the VML data set for the whole period January 1996 to December 2007. 
+In table \@ref(tab:frequency), Column A is the COICOP item name. The frequency is in Colmn B. The rebase weight in column C are made to add up to 1000 (their total share in CPI is 664). Let $\lambda=$ the monthly frequency of price changes. Mo = the mean duration between price changes implied by $[=-1 / \ln (1-\lambda)]$. If prices can change at any moment, not just at the monthly interval, the instantaneous probability of a price change is $-\operatorname{In}(1-\lambda)$ and the mean time between price changes $-1 / \ln (1-\lambda)$ months. We used this formula to calculate the Mo. column from the Freq. column in Table 1. If prices instead change at most once per month, then the mean duration is simply $1 / \lambda$, about half a month longer.
+
+In Table \@ref(tab:frequency) we list, for each of the 570 categories, the 1996-2007 average monthly frequency of price changes.
+Table \@ref(tab:frequency) also provides the weight and the mean duration between price changes. The monthly frequency of price changes averages 21.9%. The weighted median is 17.9%. 
+For the median category the time between price change averages 5 months. Thus, for items comprising one half of consumption, prices change less frequently than every 5 months.
+
+Using this information, we break down the monthly CPI's published components into  "sticky price" and "flexible price" aggregates.
+If price changes for a particular CPI component occur less often, on average, than every 5 months, we called that component a "sticky-price" good. Goods that change prices more frequently than this we labeled "flexible price" goods.
+
+Next, I looked up the monthly CPI index and weight for sticky price items based on their ID one by one for the years 2005 to 2021. Since the monthly CPI data is calculated year-on-year, the CPI trend starts from February 2006. 
+```{r sticky price, include=FALSE}
+#从Dixon and tian的数据里， 把frequency划分为sticky 和 flexible
+#再根据名字找相应的年份的cpi 和weight 构建sticky price把
+
+Dixon_tian<-read_excel("Dixon_and_Tian_570_item_Freq yiyi (version 1).xlsx","Sheet2")
+#data.frame
+Dixon_tian<-data.frame(Dixon_tian)
+#all numerical col 3 4 5
+
+Dixon_tian[,3:7]<-sapply(Dixon_tian[,3:7],as.numeric)
+Dixon_tian<-Dixon_tian[-570,]
+colnames(Dixon_tian)[7]<-c("Accumulative weight")
+#寻找col 4小于4.3的行
+sticky_row<-which(Dixon_tian$frequency<4.3)
+#很明显，这里不能用4.3做分界
+#For the median category the time between price change averages 4.3 months.
+#中位数？平均数？cpi权重的中位数？
+#Median by CPI weight
+#location_median_cpiweight<-which(Dixon_tian$...7==median(Dixon_tian$...7))
+#Dixon_tian[location_median_cpiweight,]
+
+
+#Dixon_tian[location_Means,]
+
+#weighted media
+#matrixStats::weightedMedian(Dixon_tian$rebase.weight,Dixon_tian$frequency)
+
+#For the median category the time between price change averages 4.3 months.
+#中位数的平均数是20， 20以下就是sticky
+sum(Dixon_tian$clear.weight)
+tail(Dixon_tian)
+sum(Dixon_tian$rebase.weight)
+#Means (weighted and unweighted)
+
+mean(Dixon_tian$frequency)#21.78278 正确答案21 573.53
+mean(Dixon_tian$`Accumulative weight`)#525.5079
+
+
+weighted.mean(Dixon_tian$frequency,Dixon_tian$rebase.weight)#22.31121 607.82
+
+weighted.mean(Dixon_tian$frequency,Dixon_tian$`Accumulative weight`)
+#weighted Median in list.
+#17.9
+weighted.median(Dixon_tian$frequency,Dixon_tian$rebase.weight)#17.9 496.34
+
+weighted.median(Dixon_tian$frequency,Dixon_tian$clear.weight)#17.9
+
+median(Dixon_tian$frequency)#20
+#location_median<-which(Dixon_tian$frequency==median(Dixon_tian$frequency))
+#Dixon_tian[location_median,]
+
+#除了mean不对，别的都能和excel表中的黄色对应的上
+#文章里用的是weight median
+#17.9介于18和17.8之间
+#直接按照18作为分界线
+#location_median<-which(Dixon_tian$frequency==weighted.median(Dixon_tian$frequency,Dixon_tian$rebase.weight))
+#Dixon_tian[location_median,]
+
+#dIXON TIAN只保留4：6列，不然太宽页面放不下
+D46<-Dixon_tian[,c(2,4:6)]
+#Mo 保留一位小数
+D46<-D46 %>% mutate_at(vars(starts_with("Mo")), funs(round(., 1)))
+#最后一行 会中行
+sum(D46$rebase.weight)
+colnames(D46)[2:4]<-c("Freq","Weight","MO")
+```
+
+```{r rubbish, summary, eval=FALSE, include=FALSE}
+kbl(Dixon_tian,caption = "The Frequency of Price Changes by Category",col.names=c("item_id","item_des","clear weight","frequency","rebase weight","Mo","Accumulative weight" ),escape = FALSE) %>%
+  kable_classic() %>%
+  kable_styling(latex_options = c("striped", "scale_down")) %>%
+  kable_styling(latex_options = c("striped", "hold_position"))
+#英雄无用武之地
+    footnote(general = " ",
+           number = c("Mo = the mean duration between price changes implied by $\\lambda =-1 / \\ln (1-\\lambda)]$. ", "Wgt = Share of the Level Item  in the  VML  data set for the whole period  January 1996 to December 2007 (these sum to 1000).","Freq = the estimated average monthly frequency of price changes ($\\lambda$ in the text)."),escape=FALSE) %>%
+```
+
+
+```{r frequency,echo=FALSE}
+kbl(D46, longtable = T, booktabs = F, caption = "The Frequency of Price Changes by Category") %>%
+
+kable_styling(latex_options = c("repeat_header"))
+
+```
+Mo = the mean duration between price changes implied by $\lambda =-1 / \ln (1-\lambda)]$.
+
+Weight = Share of the Level Item  in the  VML  data set for the whole period  January 1996 to December 2007 (these sum to 1000).
+
+Freq = the estimated average monthly frequency of price changes ($\lambda$ in the text).
+```{r sticky row,include=FALSE}
+
+#寻找col 4小于17.9的行
+sticky_row<-which(Dixon_tian$frequency<17.9)
+#一共多少个/244
+length(sticky_row)
+#用他们的id在 item completely里找对应的cpi和weight把
+#读取数据
+#马勒戈壁读取名字的时候 会把colname改名字
+#所以列名不能实名制
+item_cpi<-read_excel("item_indices_complete.xlsx","Sheet2",col_names = FALSE)
+#第一行和第二列没啥东西 都删了
+item_cpi<-item_cpi[-2,-2]
+#除了前第一列以外别的列转化为numerical
+item_cpi<-data.frame(item_cpi)
+#
+item_cpi[2:nrow(item_cpi), 2:ncol(item_cpi)] <-as.numeric(unlist(item_cpi[2:nrow(item_cpi), 2:ncol(item_cpi)]))
+#
+
+#
+#只在cpi数据里找到了个290个， 但是应该有的sticky 是244个,。
+df<-Dixon_tian[sticky_row,1]#244
+df2<-item_cpi[1,]#1144
+#common_id<-intersect(df,df2)#282
+#setdiff(df,common_id)
+#410103 410101 两个狗崽中 在item cpi里找不到 操你妈的
+location_in_cpi<-which(item_cpi[1,] %in% Dixon_tian[sticky_row,1]==TRUE)#249个
+new<-item_cpi[,location_in_cpi]
+setdiff(df,new[1,])
+#   是有共同用id的问题
+# 例如212917就有两个
+
+
+```
+
+```{r keep sticky from all, include=FALSE}
+#读取数据 2006/02-2021/04
+newdf<-read_csv("item ID number name start 2016.csv")
+#newdf<-data.frame(newdf,stringsAsFactors=FALSE)
+#转化数据类型
+newdf[, 2:ncol(newdf)] <- sapply(newdf[,2:ncol(newdf)], as.numeric)
+#因为两个data的列是完全一模一样的，item_cpi 和 newdf 
+#196 * 1144
+#根据之前匹配的含有dixon_tian里的284个items 在 item_CPI 和在newdf的 ##列的位置是完全一样的，这样根据列的位置保留需要的来构成 sticky-284（290）cpi数据
+item_290_cpi_idex<-newdf[,location_in_cpi]
+#有na无法计算
+item_290_cpi_idex<-as.data.frame(item_290_cpi_idex)
+item_290_cpi_idex[is.na(item_290_cpi_idex)]<-0
+write.csv(item_290_cpi_idex,"sticky 249 CPI index.csv")
+
+```
+
+```{r sticky weight,include=FALSE}
+sticky_weight<-read_excel("item_indices_complete.xlsx","Sheet3")
+#去除第二列（空），第二行（英文名字），dim 应该就和 item_cpi数据dim一样了
+sticky_weight_remove2cols<-sticky_weight[-1,-(1:2)]
+#
+
+#date
+date = seq(from = as.Date("2005-02-01"), to = as.Date("2021-04-01"),
+           by = "month")#生成日期
+
+sticky_time<-add_column(sticky_weight_remove2cols,date,.before = 1)
+#06 onward
+sticky_06onward<-sticky_time[sticky_time$date>="2006-02-01",]
+#sapply(sticky_weight_remove2cols,class)
+#sapply(sticky_weight_remove2cols,class)
+#转化数据类型
+sticky_06onward[, 2:ncol(sticky_06onward)] <- sapply(sticky_06onward[,2:ncol(sticky_06onward)], as.numeric)
+#
+#有na无法计算
+sticky_06onward<-as.data.frame(sticky_06onward)
+sticky_06onward[is.na(sticky_06onward)]<-0
+#提取
+sticky_weight_290<-sticky_06onward[,location_in_cpi]
+dim(item_290_cpi_idex)==dim(sticky_weight_290)
+#重新权重weight
+#weight 总和不是1000，
+#每行的每个数加上（1000-每行的和）/290
+new_w<-data.frame(matrix(nrow = 183,ncol = 249))
+for (i in 1:nrow(sticky_weight_290)) {
+  new_w[i,]<-sticky_weight_290[i,]+(1000- rowSums(sticky_weight_290[i,]))/ncol(sticky_weight_290)
+}
+#
+rowSums(new_w[,])
+www<-new_w/1000
+dim(www)==dim(item_290_cpi_idex)
+rowSums(www)
+write.csv(www,"sticky CPI weight new.csv")
+```
+
+```{r Sticky CPI, include=FALSE} 
+sticky_core_inflation<-rowSums(www*item_290_cpi_idex)
+sticky_core_inflation<-c(rep(0,13),sticky_core_inflation)
+#这个sticky 是2006/02- 2021/04的 183行
+date0521 = seq(from = as.Date("2005-01-01"), to = as.Date("2021-04-01"),
+           by = "month")#生成日期
+#合并成为df
+sticky.df<-data.frame(date0521,sticky_core_inflation)
+#2019-12后的不要了
+sticky_06_19<-sticky.df[sticky.df$date0521<="2019-12-01",]
+
+sticky_new<- fread("sticky price/sticky CPI.csv")
+sticky_06_19$sticky_core_inflation <- sticky_new$x
+```
+
+
+
+# Stochastic models for forecasting inflation rate
+Beside the core inflation measures, we also includes stochastic model in our comparison. 
+The main purpose of modeling time series using stochastic processes is to explain how the phenomenon evolves and to make predictions based on the estimated model. 
+The main idea of this method is to predict the future through inflation historical data, which is used as the baseline in comparison.
+
+## Autoregressive process (AR)
+A stationary series, $Y_t$, follows a process $AR (p)$ if the condition if fullfilled:
+$$Y_{t}=\beta_{0}+\beta_{1} Y_{t-1}+\ldots+\beta_{p} Y_{t-p}+\varepsilon_{t}$$
+where $\varepsilon_{\mathrm{t}} \sim \mathrm{N}\left(0, \sigma_{\varepsilon}^{2}\right)$ stationary time series, $\mathrm{E}\left(\varepsilon_{\mathrm{t}}\right)=0, \mathrm{E}\left(\varepsilon_{\mathrm{t}}^{2}\right)=\sigma^{2}, \mathrm{E}\left(\varepsilon_{\mathrm{t},} \varepsilon_{\mathrm{s}}\right)=0$,if $\mathrm{t} \neq \mathrm{s} ; \beta_{0}, \beta_{1}, . ., \beta_{\mathrm{p}}$ parameters.
+
+The autoregressive models are characterized by the fact that the value of variable $Y$ at time $t$ depends on the
+previous values of the variable.
+
+One of AR models used to explain the unpredictability nature of financial asset price
+evolution is Random Walk model, where $p=1, \beta_{0}=0, \beta_{1}=1$.
+
+The representation of the model is $\mathrm{Y}_{\mathrm{t}}=\mathrm{Y}_{\mathrm{t}-1}+\varepsilon_{\mathrm{t} .}$
+
+As a result, the value of a series in a given period depends on the value of the series in the previous period and a
+random term whose value is expected to be zero.
+
+## Data used
+The data used are represented by the monthly data series from January 2005 to December 2019 for the inflation rate in UK.
+
+## The analysis of the series stationarity
+Hypothesis: $H_0$:the time series has a unit root
+            $H_1$:the time series is stationary
+```{r AR start,include=FALSE}
+#这份数据是从读取的
+#这AR是用CPI 百分比做的*(5% froexample)，不对, 应该用index 的 inflation
+CPI.89_1_2021_10 <- read.csv("CPI_1989_1-2021_10.csv")
+library(aTSA)
+library(tseries)
+#log cpi看看adf结果如何
+a <- log(CPI.89_1_2021_10$CPI.ANNUAL.RATE.00..ALL.ITEMS.2015.100)
+a[!is.finite(a)] <- 0
+adf.test(a)
+#Test statistic: -3.5831
+#P-value: 0.03473
+#Since the p-value is less than .05, we can reject the null hypothesis.
+adf.test((CPI.89_1_2021_10$CPI.ANNUAL.RATE.00..ALL.ITEMS.2015.100))
+#Test statistic: -2.6532
+#P-value: 0.3013
+#Since the p-value is not less than .05, we fail to reject the null hypothesis.
+#This means the time series is non-stationary. In other words, it has some time-dependent structure and does not have constant variance over time.
+```
+
+
+
+According to Augmented Dickey-Fuller test, for a significance apron of 0.05, the test’s value is -2.6532 and P-value is 0.3013. Since the p-value is not less than .05, we fail to reject the null hypothesis. This means the time series is non-stationary. In other words, it has some time-dependent structure and does not have constant variance over time.
+However, after applying on the series a logarithmic transformation to remove the negative effect induced by non-stationarity in variance, test statistic is -3.5831 and P-value is 0.03473. As the test value is lower than the critical value for any level of relevance, we can say that at 5% level of relevance, the null hypothesis is rejected or it is
+stationary, so the basis series is integrated by the first order.
+After this transformation, we will get a series with approximately the same trend but with milder amplitudes of the variance.
+            
+## Identification of the model’s type
+Using the data series with a monthly frequency of the inflation rate for the period January 2005 - December 2019
+there were estimated AR model to describe the inflation rate.
+
+The Akaike Information Criterion is used to choose the order of the autoregressive model. The results recommended an AR process (8).
+
+
+```{r AR order selection,include=FALSE}
+# subset data
+CPI.89_1_2021_10$log <- a
+GDPGRSub <-
+  CPI.89_1_2021_10[CPI.89_1_2021_10$date_all >= "2005-01-01" &
+                     CPI.89_1_2021_10$date_all <= "2019-12-01", ]
+# estimate the model
+#log lag selection 8
+ 
+#转化成xts格式和原来直接做结果完全一模一样
+#都是 选择 lag 8 AR(8)
+#library(tidyquant)
+
+#qxts <- xts(GDPGRSub[,-(1:3)], order.by=as.Date( GDPGRSub[,2]))
+
+#ar.ols(qxts,
+#       demean = F,
+#       intercept = T)
+#非log的 inflation， order 是3
+#ar.ols(GDPGRSub$CPI.ANNUAL.RATE.00..ALL.ITEMS.2015.100,
+#       demean = F,
+#       intercept = T)
+```
+
+## Parameters estimation of the econometric models
+The estimated model is:
+$$\pi_t=0.06865  +0.4156   \pi_{t-1}+0.3868    \pi_{t-2} -0.1276   \pi_{t-3} +0.3274\pi_{t-4} -0.0032   \pi_{t-5} +0.2341   \pi_{t-6}+0.0212  \pi_{t-7} -0.3609  \pi_{t-8}$$
+```{r calculation ar inflation, include=FALSE}
+#要生成8列lag
+
+#从2005.9月开始,因为lag
+#把时间和inflation复制过来
+ar.lag<-GDPGRSub[,c(2,4)]
+#生成8列lag
+#必须要as.data.table 才能shift
+ar.lag<-as.data.table(ar.lag)
+#shift 指定package（data。table) 避免调用其他包
+ ar.lag <- ar.lag[, unlist(lapply(.SD, data.table:: shift,type = "lag", n = 0:8), recursive = FALSE),.SDcol=2]
+#把时间加入
+ ar.lag<-add_column(ar.lag,GDPGRSub[,2],.before = 1)
+#不要前八行
+ ar.lag<-ar.lag[-c(1:8),]
+#compare origin
+# compare.df<-GDPGRSub[,c(2,4)]
+ 
+ #ar inflation 计算
+ ar.inflation<-0.06865 +
+   0.4156   *ar.lag[,2] +
+   0.3868*ar.lag[,3]  +
+  -0.1276    *ar.lag[,4]  +
+  0.3274   *ar.lag[,5]  +
+  -0.0032    *ar.lag[,6]  +
+  0.2341    *ar.lag[,7]  +
+ 0.0212    *ar.lag[,8]  +
+  - 0.3609  *ar.lag[,9]  
+ #添加时间
+ ar.inflation<-add_column(ar.inflation,ar.lag[,1],.before = 1)
+ #把log过来的原数据添加进去试试
+ ar.inflation$inflation<-GDPGRSub$CPI.ANNUAL.RATE.00..ALL.ITEMS.2015.100[-c(1:8)]
+    ar.inflation$inflation.log<-GDPGRSub$log[-c(1:8)]
+
+#colnames(ar.inflation)<-c("c1","c2","c3","c4")
+```
+
+```{r ARCPI, echo=FALSE, fig.cap="AR(8) inflation", fig.topcaption=TRUE, message=FALSE, warning=FALSE,results='asis'}
+ttnn<-ts(ar.inflation[,1],start = c(2005,9),frequency = 12 )
+
+sadasda<-ggplot(data=ar.inflation, aes(x=time(ttnn)))+
+ geom_line(aes(y =ar.inflation$log1, color="AR(8) (logarithmic)")) +
+   #geom_line(aes(y = ar.inflation$inflation, color="Headline")) +
+     geom_line(aes(y = ar.inflation$inflation.log, color="Headline(logarithmic)")) +
+labs(x="AR and Headline CPI",y="Inflation")
+sadasda + theme(legend.title = element_blank()) 
+
+sadasda + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))
+```
+
+# Criteria for evaluation : forecasting future inflation
+
+This work uses Cogley's model to test the forecasting ability of core inflation rate, and it also compares the forecasting ability of various core inflation measures, including excluding food and energy(FE), sticky price(SP) and trimmed mean(TR).
+We also include the ability of current inflation to predict future inflation as a baseline in  comparison(AR(8)).
+Cogley's model is based on Bryan and Cecchetti's definition of core inflation: "Core inflation is changes in the price level that are expected to persist over a long period of time."
+
+According to Bryan and Cecchetti's definition, a valid core inflation is one that is "pure" after removing temporary factors from measured real inflation. On this basis, Cogley developed the following model to evaluate the predictive power of core inflation:
+
+```{r latex, include=FALSE}
+#想在r markdown里输入latex公式居中 首先需要首位$$\begin{} \end{}$$
+#html公式后面是没有标号的，pdf有
+#这个 公式模型 我自己用ols也能做啊？
+#就做一个df，有三列数据，第一列x_t+12,第二列x_t,第三列core
+#日期的问题
+#
+```
+
+$$\pi_{t+h}-\pi_{t}=\alpha_{h}+\beta_{h}\left(\pi_{t}-\pi_{t}^{c}\right)+u_{t+h}$$
+
+Here, $\pi$ represents the headline inflation rate and core $\pi^{c}$ represents some core inflation indicator, both year-on-year data. Parameter h is N (month) ahead. For sufficiently large h, the core deviation, $\left(\pi_{t}-\pi_{t}^{c}\right)$, should be inversely related to subsequent changes in inflation, $\pi_{t+h}-\pi_{t}$. Moreover, in order for the candidate to satisfy equation (1), the coefficients in the regression, should satisfy $\alpha=0$ and $\beta = -1$.
+
+Of importance to the forecasting model is the estimated coefficient of $\beta$, which indicates whether core inflation has sufficiently purified the transitory component. Because if the absolute value of the estimated coefficient is equal to 1, it indicates that the model is a random walk process, and the components removed from the core inflation do not contain any information that predicts future overall inflation. If $\beta=-1$, the forecasting capacity for core inflation is the best . This proves that core inflation has fully captured the trend components of overall inflation and has a complete forecasting ability for future inflation.
+
+1.  If the $|\beta|<1$, it indicates that subsequent changes in inflation are overestimated;
+
+2.  If the $|\beta|>1$, it shows that underestimation of the current temporary movement in headline inflation.
+
+Therefore, the closer the absolute value of the estimated regression coefficient $\beta$ is to 1, the better the predictive power of core inflation is. In addition, the root mean square error RMSE $=\sqrt{\frac{1}{\mathrm{~T}} \sum_{\mathrm{t}=1}^{\mathrm{T}}\left(\pi_{\mathrm{t}}-\hat\pi_{\mathrm{t}}\right)^{2}}$obtained by Cogley regression represents the deviation between the predicted value and the actual value. $\hat\pi_{\mathrm{t}}$ is the forecast value of the inflation rate. The smaller the RMSE, the more accurate the forecast. and the better the forecast of core inflation.
+
+```{r V1 excluding, include=FALSE}
+#首先导入数据
+#05.1对应的是x+12是06.1
+#那尾部又不够了， 重新搞一份全的cpi重新提取把
+core_headline<-read_excel("V2 core excluding food and energy.xlsx","Comparision")
+#读取全部的cpi数据
+headline_df<-read_excel("UK ALL year CPI.xls")
+#提取2006JAN -2020 DEC的数据作为x+12
+#开始结束的位置
+start_poisition<-which(headline_df$Title=="2006 JAN")
+end_poisition<-which(headline_df$Title=="2020 DEC")
+#把开始结束的之间的内容提取到主df里
+core_headline[,7]<-headline_df[start_poisition:end_poisition,2]
+#命名新的列
+colnames(core_headline)[7]<-c("x+12")
+#把几个数据都改为numerical
+core_headline[, 4:7] <- sapply(core_headline[,4:7], as.numeric)
+core_headline<-data.frame(core_headline)
+#生成x_core-x -> difference
+core_headline$difference<- core_headline$CPI.ANNUAL.RATE.00..ALL.ITEMS.2015.100 - core_headline$Core.inflation.excluding.food.and.energy.
+#left difference
+colnames(core_headline)<-c("titlle","time","origin","core","CPI","approx","x+12","difference")
+core_headline$left_difference<-core_headline$`x+12`- core_headline$CPI
+#core_jeadline$difference 改名字为beta方便输出
+colnames(core_headline)[8]<-c("beta")
+#regression
+regression<-lm(core_headline$left_difference~ beta,data = core_headline)
+
+```
+
+```{r 6 12 food,include=FALSE}
+#6 months ahead
+start_poisition_6<-which(headline_df$Title=="2005 JUL")
+end_poisition_6<-which(headline_df$Title=="2020 JUN")
+#把开始结束的之间的内容提取到主df里
+core_headline$"6 month ahead"<-headline_df[start_poisition_6:end_poisition_6,2]
+#9 months 
+start_poisition_9<-which(headline_df$Title=="2005 OCT")
+end_poisition_9<-which(headline_df$Title=="2020 SEP")
+#把开始结束的之间的内容提取到主df里
+core_headline$"9 month ahead"<-headline_df[start_poisition_9:end_poisition_9,2]
+core_headline[, 10:11] <- sapply(unlist(core_headline[,10:11]), as.numeric)
+#6 month diff
+core_headline$"6 months diff"<-core_headline$`6 month ahead`-core_headline$CPI
+#9month diff
+core_headline$"9 months diff"<-core_headline$`9 month ahead`- core_headline$CPI
+#regression 6 head
+regression_6<-lm(core_headline$`6 months diff`~ beta,data = core_headline)
+#regression 9 head
+regression_9<-lm(core_headline$`9 months diff`~ beta,data = core_headline)
+```
+
+```{r  trimmed, include=FALSE}
+#Trend
+#我把trend的也向前做了12期，其实是错误的
+#我唯一要做的就是ukcpi向前推12期
+#如果我想做05.1-19.12的， 那对应的数据范围是05.2-20.12
+#尝试建立连续12个月的预测
+#%%
+#95.1-21.10
+TM<-read_excel("Trimmed mean.xlsx")
+TM<-as.data.table(TM)
+#我的idea是：
+#1.首先生成12列lead，每一行第一个数都是上一列的第二行
+#2. 这样后面十二列都减去第一列就是x12— x。也就是等式左边的数据了
+#lead 超前12个月的预测
+#取消spatstat package 还原shift funciton
+
+
+#TM[, paste0("lead", 1L:3L) := shift(`CPI-trim (5%)`, 1L:3L, type = "lead"), by = groups]
+TM <- TM[, unlist(lapply(.SD, data.table::shift,type = "lead", n = 0:12), recursive = FALSE),.SDcol=2]
+#
+TM<-data.frame(TM)
+#这个式子不在data。frame里运行不了。
+TM[2:ncol(TM)] <- TM[2:ncol(TM)]-TM[,1]
+#这代码的意思是： 对2：13列的数据减去他们自己的lag1数据
+#sad<-TM %>% mutate(across(2:13, ~. - lag(.)) )
+#date
+date_t = seq(from = as.Date("1995-01-01"), to = as.Date("2021-10-01"),
+           by = "month")#生成日期
+TM<-add_column(TM,date_t,.before = 1)
+#挑选05.1 ： 19.12
+TM_05<-TM[TM$date_t>="2005-01-01" & TM$date_t<="2019-12-01",]
+
+
+```
+
+# Results
+
+From the above discussion, I used my own data to re-simulate the values of the parameters.
+The results please see Table \@ref(tab:summary),\@ref(tab:RMSEsummary) and Figure \@ref(fig:Overall).
+
+```{r  forcast main code,include=FALSE}
+
+#读取cpi 数据
+#1989 JAn 开始
+#2021 OCT 结束
+start_poisition_all<-which(headline_df$Title=="1989 JAN")
+end_poisition_all<-which(headline_df$Title=="2021 OCT")
+CPI_alll<-headline_df[start_poisition_all:end_poisition_all,2]
+#转化数据类型
+CPI_alll[,1]<-as.numeric(unlist(CPI_alll[,1]))
+#
+CPI_alll<-as.data.table(CPI_alll)
+#date
+#date_all = seq(from = as.Date("1989-01-01"), to = as.Date("2021-10-01"),
+#           by = "month")#生成日期
+#CPI_alll<-add_column(CPI_alll,date_all,.before = 1)
+#write.csv(CPI_alll,"CPI_1989_1-2021_10.csv")
+
+#lead 超前12个月的预测
+library(data.table) 
+
+CPI_alll <- CPI_alll[, unlist(lapply(.SD, data.table::shift,type = "lead", n = 0:12), recursive = FALSE),.SDcol=1]
+#
+CPI_alll<-data.frame(CPI_alll)
+#这个式子不在data。frame里运行不了。
+#2:13列 x+1 - x+12 都 减去 x
+CPI_alll[2:ncol(CPI_alll)] <- CPI_alll[2:ncol(CPI_alll)]-CPI_alll[,1]
+#建立时间序列
+#date
+date_all = seq(from = as.Date("1989-01-01"), to = as.Date("2021-10-01"),
+           by = "month")#生成日期
+CPI_alll<-add_column(CPI_alll,date_all,.before = 1)
+#我需要05.1-19.12
+CPI519<-CPI_alll[CPI_alll$date_all>="2005-01-01" & CPI_alll$date_all<="2019-12-01",]
+#列命名
+# 1.2.3.... months diff?
+#
+colnames(CPI519)[2]<-c("CPI")
+colnames(CPI519)[3:14]<- paste(1:12,"months difference ",sep=" ")
+#把05-19的各种core 导入cpi519 并且 core difference with CPI
+ #excluding food and energy
+CPI519$excluding_food_and_energy<-CPI519$CPI - core_headline$core
+#trimmed
+CPI519$Trimmed_mean<-CPI519$CPI - TM_05$CPI.trim..5..1
+#sticky
+CPI519$sticky<-CPI519$CPI-sticky_06_19$sticky_core_inflation
+#ar 8
+CPI519$ar<-c(rep(0,8),ar.inflation$inflation.log- ar.inflation$log1)
+#regression
+#每个core 对应12列
+# #excluding food and energy
+res_excluding<-lapply(3:14, function(x) lm(CPI519[,x]~ CPI519$excluding_food_and_energy))
+RMSE_food<-unlist(lapply(1:12, function(x) sqrt(mean(res_excluding[[x]]$residuals^2)))
+)
+cof_food_alpha<-unlist(lapply(1:12, function(x) res_excluding[[x]]$coefficients[1])) 
+cof_food_beta<-unlist(lapply(1:12, function(x) res_excluding[[x]]$coefficients[2]))
+
+#Trimmed mean
+res_trimmed<-lapply(3:14, function(x) lm(CPI519[,x]~ CPI519$Trimmed_mean))
+RMSE_trimmed<-unlist(lapply(1:12, function(x) sqrt(mean(res_trimmed[[x]]$residuals^2)))
+)
+cof_trimmed_alpha<-unlist(lapply(1:12, function(x) res_trimmed[[x]]$coefficients[1]))
+cof_trimmed_beta<-unlist(lapply(1:12, function(x) res_trimmed[[x]]$coefficients[2]))
+#sticky
+res_sticky<-lapply(3:14, function(x) lm(CPI519[,x]~ CPI519$sticky))
+RMSE_sticky<-unlist(lapply(1:12, function(x) sqrt(mean(res_sticky[[x]]$residuals^2)))
+)
+cof_sticky_alpha<-unlist(lapply(1:12, function(x) res_sticky[[x]]$coefficients[1]))
+cof_sticky_beta<-unlist(lapply(1:12, function(x) res_sticky[[x]]$coefficients[2]))
+#AR
+res_cpi<-lapply(3:14, function(x) lm(CPI519[,x]~ CPI519$ar))
+RMSE_cpi<-unlist(lapply(1:12, function(x) sqrt(mean(res_cpi[[x]]$residuals^2)))
+)
+cof_cpi_alpha<-unlist(lapply(1:12, function(x) res_cpi[[x]]$coefficients[1]))
+cof_cpi_beta<-unlist(lapply(1:12, function(x) res_cpi[[x]]$coefficients[2]))
+#
+dt<-cbind(RMSE_food,cof_food_alpha,cof_food_beta,cof_sticky_beta)
+rownames(dt)<-paste(1:12,"months ahead")
+#colnames(dt)<-c("RMSE","$\alpha$","$\beta$" )
+dt %>%
+  kbl() %>%
+  kable_paper("hover", full_width = F)
+
+```
+
+```{r summary, echo=FALSE}
+together<-cbind(cof_food_alpha,cof_food_beta,cof_trimmed_alpha,cof_trimmed_beta,cof_sticky_alpha,cof_sticky_beta,cof_cpi_alpha,cof_cpi_beta)
+rownames(together)<-paste(1:12,"months ahead")
+colnames(together)<-c("$\\alpha$","$\\beta$","$\\alpha$","$\\beta$","$\\alpha$","$\\beta$","$\\alpha$","$\\beta$" )
+
+kbl(together,caption = "Headline CPI Forecast Accuracy: Coefficients",col.names=c("$\\alpha$","$\\beta$","$\\alpha$","$\\beta$","$\\alpha$","$\\beta$","$\\alpha$","$\\beta$" ),escape = FALSE) %>%
+  kable_classic() %>%
+  kable_styling(latex_options = c("striped", "hold_position","scale_down")) %>%
+  add_header_above(c(" " , "FE" = 2, "TR" = 2,"SP" = 2,"AR(8)"=2)) %>%
+  add_header_above(c(" ", "Core Inflation " = 8)) %>%
+   save_kable(file = "Headline CPI Forecast Accuracy Coefficients.tex", self_contained = T) 
+
+
+```
+
+```{r plot RMSE, echo=FALSE}
+together<-data.table(together)
+colnames(together)<-paste0("c",1:8)
+#ggplot
+together$idu <- as.numeric(row.names(together))
+
+```
+
+```{r RMSEsummary, echo=FALSE}
+together.rmse<-cbind(RMSE_food,RMSE_trimmed,RMSE_sticky,RMSE_cpi)
+rownames(together.rmse)<-paste(1:12,"months ahead")
+
+kbl(together.rmse,caption = "Headline CPI Forecast Accuracy: Root Mean Squared Errors ",col.names=c("FE","TR","SP","AR(8)" ),escape = FALSE) %>%
+  kable_classic() %>%
+  kable_styling(latex_options = c("striped", "hold_position","scale_down")) %>%
+  add_header_above(c(" ", "Core Inflation " = 4))
+
+stargazer(together.rmse,
+          dep.var.labels.include = FALSE,
+          report = "vc*",
+          align=TRUE,           
+          header = FALSE,
+          model.numbers=FALSE,
+          df=FALSE, 
+          digits=2, single.row = TRUE,
+          summary=FALSE,
+          out="together_rmse.html",
+          se = NULL, type = "html")
+```
+
+```{r ranking RMSE,include=FALSE}
+RMSE.df<-together.rmse[,c(1:4)]
+RMSE.ranking<-data.frame(RMSE.df, t(apply(-RMSE.df, 1, rank, ties.method='min')))
+colnames(RMSE.ranking)<-c("FE", "TR", "SP","AR(8)","FE", "TR", "SP","AR(8)")
+#<= 2MONTHS  FE>TR>SP
+#=3M TR>FE>SP
+#>3M TR>SP>FE
+```
+
+```{r RMSE, echo=FALSE, fig.cap="Cogley Regression RMSE", fig.topcaption=TRUE, message=FALSE, warning=FALSE,results='asis'}
+together.rmse<-as.data.frame(together.rmse)
+together.rmse$idu <- together$idu
+
+p<-ggplot(data=together.rmse, aes(x=idu))+
+ geom_line(aes(y =RMSE_food, color="FE")) +
+   geom_line(aes(y = RMSE_trimmed, color="TR")) +
+   geom_line(aes(y =RMSE_sticky, color="SP")) +
+     geom_line(aes(y =RMSE_cpi, color="AR(8)")) +
+labs(x="Forecast Horizon (Months)",y="RMSE")
+p + theme(legend.title = element_blank()) 
+```
+
+```{r beta,  echo=FALSE, fig.cap="Cogley Regression Beta estimates", fig.topcaption=TRUE, message=FALSE, warning=FALSE}
+#beta
+q<-ggplot(data=together, aes(x=idu))+
+ geom_line(aes(y =c2, color="FE")) +
+   geom_line(aes(y = c4, color="TR")) +
+     geom_line(aes(y = c6, color="SP")) +
+       geom_line(aes(y = c8, color="AR(8)")) +
+labs(x="Forecast Horizon (Months)",y="Beta")
+q + theme(legend.title = element_blank())
+
+```
+
+```{r cpi trend, echo=FALSE}
+CPI519$TM<-TM_05$CPI.trim..5..1
+CPI519$EXFD<-core_headline$core
+CPI519$Sticky<-sticky_06_19$sticky_core_inflation
+CPI519$Baseline<-c(rep(0,8),ar.inflation$log1)
+#前13行（2005.01-2006.01没数据） 替换na
+CPI519$Sticky[1:13]<-NA
+#ggplot
+nt<-ts(CPI519$date,start = c(2005,1),frequency = 12 )
+
+```
+
+```{r coreheadlinecpi, echo=FALSE, fig.cap="Core CPI and Headline CPI.", fig.topcaption=TRUE, message=FALSE, warning=FALSE}
+w<-ggplot(data=CPI519, aes(x=time(nt)))+
+ geom_line(aes(y = TM, color="Trimmed Mean")) +
+   geom_line(aes(y = EXFD, color="Ex F&E")) +
+     geom_line(aes(y = CPI, color="CPI Inflation")) +
+       geom_line(aes(y = Sticky, color="Sticky CPI")) +
+         geom_line(aes(y = Baseline, color="AR(8)(logarithmic)"))+ 
+labs(x="Time",y="Inflation")
+w + theme(legend.title = element_blank()) 
+```
+
+```{r Overall, fig.cap= "overall", echo=FALSE,fig.topcaption=TRUE, message=FALSE, warning=FALSE}
+grid.arrange(arrangeGrob(p, top = 'Cogley Regression RMSE') , arrangeGrob(q, top = 'Cogley Regression Beta estimates'),arrangeGrob(w, top = 'Core CPI and Headline CPI'), nrow=3)
+```
+
+```{r EX, echo=FALSE, fig.cap="Ex. Food & Energy", fig.topcaption=TRUE, message=FALSE, warning=FALSE,results='asis'}
+
+FE<-ggplot(data=CPI519, aes(x=time(nt)))+
+ geom_line(aes(y =EXFD, color="FE")) +
+   geom_line(aes(y = CPI, color="CPI all items")) +
+labs(x="Time",y="Inflation")
+FE + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
+```
+
+```{r Trimmed mean and cpi, echo=FALSE, fig.cap="CPI and trimmed mean inflation", fig.topcaption=TRUE, message=FALSE, warning=FALSE,results='asis'}
+
+FE<-ggplot(data=CPI519, aes(x=time(nt)))+
+ geom_line(aes(y =TM, color="Trimmed mean inflation")) +
+   geom_line(aes(y = CPI, color="CPI inflation")) +
+labs(x="Time",y="Inflation")
+FE + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
+```
+
+```{r Trimmed mean and cpi, echo=FALSE, fig.cap="CPI and trimmed mean inflation", fig.topcaption=TRUE, message=FALSE, warning=FALSE,results='asis'}
+
+SP<-ggplot(data=CPI519, aes(x=time(nt)))+
+ geom_line(aes(y =Sticky, color="Sticky CPI")) +
+   geom_line(aes(y = CPI, color="CPI inflation")) +
+labs(x="Time",y="Inflation")
+SP + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
+```
+\newpage
+
+# Conclusions
+
+As expected, all Cogley regressions of the core inflation rate with $\beta$ estimates are all negative. The beta keeps falling as the number of forecast periods rises; The forecast RMSE for core inflation rates increases as the number of forecast periods increases continuously. This suggests that the longer the forecast period, the more inaccurate the forecast. 
+
+Figure \@ref(fig:Overall) shows that the predictive power of the core inflation of AR(8) is the worst. The coefficient estimates of the Cogley regression deviate the furthest from - 1 and the predicted root mean square error (RMSE) was the largest except 1 month head.
+The Cogley regression $\beta$ estimate of the core inflation rate of Trimmed Mean is closet to 1 when the forecast period is less than 10 months.
+The $\beta$ of the Ex FE and SP are between Trimmed mean and AR(8) in this period.
+So from $\beta$ estimates, TR has the best prediction effect of core inflation rate when forecast horizon less 10 months.
+The FE core inflation rate is predicted to work best after 10 months periods. 
+
+From the root mean square error criteria, for months 1 the ranking is SP>TR>AR(8)>FE;
+month 2 is SP>TR>FE>AR(8);
+month 3 SP>FE>TR>AR(8); 
+months 4-12 FE>SP>TR>AR(8). All four similar.
+```{r eval=FALSE, include=FALSE}
+### 6 months ahead
+#RMSE 6
+RSS <- c(crossprod(regression_6$residuals))
+MSE <- RSS / length(regression_6$residuals)
+sig2 <- RSS / regression_6$df.residual
+
+sqrt(mean(regression_6$residuals^2))
+
+
+### 9 months ahead
+
+#RMSE 9
+RSS <- c(crossprod(regression_9$residuals))
+MSE <- RSS / length(regression_9$residuals)
+sig2 <- RSS / regression_9$df.residual
+
+sqrt(mean(regression_9$residuals^2))
+
+
+### 12 months ahead
+
+
+#RMSE 12
+RSS <- c(crossprod(regression$residuals))
+MSE <- RSS / length(regression$residuals)
+sig2 <- RSS / regression$df.residual
+
+sqrt(mean(regression$residuals^2))
+
+
+## Coefficients
+
+### 6 months ahead
+
+summary(regression_6)
+
+### 9 months ahead
+
+summary(regression_9)
+
+
+### 12 months ahead
+
+summary(regression)
+```

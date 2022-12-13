@@ -31,7 +31,7 @@ ts.divs <-
 #convert % change
 
 ts.divs.percent <- 100 * (ts.divs / stats::lag(ts.divs, -1) - 1)
-
+#write.csv(ts.divs.percent,"cpi data/12 mom.csv")
 #
 
 time1 = seq.Date(
