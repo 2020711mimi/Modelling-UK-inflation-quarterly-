@@ -50,6 +50,46 @@ rm(list = ls())
 '%!in%' <- function(x, y)
   ! ('%in%'(x, slack))
 
+
 # -------------------------------------------------------------------------
 
-EX <- fread("ex f&e/EXFD.csv")
+df <- fread("all core inflation measures/OVERALL.csv")
+df <- df[,-1]
+# 计算每一列的平均值
+mean_values <- sapply(df, mean)
+
+# 计算每一列的中位数
+median_values <- sapply(df, median)
+
+# 计算每一列的标准差
+sd_values <- sapply(df, sd)
+
+# 计算每一列的偏度
+skewness_values <- sapply(df, skewness)
+
+# 计算每一列的峰度
+kurtosis_values <- sapply(df, kurtosis)
+
+# 将结果绑定在一起，生成新的数据框
+new_df <- cbind(mean_values, median_values, sd_values, skewness_values, kurtosis_values)
+
+# 保留两位小数
+new_df <-data.frame( round(new_df, 2))
+
+# 使用kable函数生成表格
+library(knitr)
+library(officer)
+# 将行名添加到数据的第一行中
+new_df <- cbind(rownames(new_df), new_df)
+# 创建一个新的Word文档
+doc <- read_docx()
+
+# 将表格插入到文档中
+# 将表格插入到文档中
+doc <- doc %>%
+  body_add_table(new_df)
+
+# 保存文档
+doc <- doc %>%
+  print(target = "all core inflation measures/data description.docx")
+

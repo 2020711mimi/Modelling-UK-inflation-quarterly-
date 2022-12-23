@@ -51,14 +51,14 @@ colnames(Dixon_tian)[7] <- c("accumative")
 sapply(Dixon_tian, class)
 
 #duration
-Dixon_tian <- head(Dixon_tian, -2)
+Dixon_tian <- head(Dixon_tian,-2)
 Dixon_tian$duration <- 100 / Dixon_tian$frequency
 
 # median frequency: Median frequency by CPI weight
 # You do not measure frequency by months. You measure it as proportion of changes per month. I would suggest frequencies of over >18% (mean duration 5.56 months.  Use the mean duration of 1/freq not the log one.
 
 
-Dixon_tian[which.min(abs(500 - Dixon_tian$accumative)), ]
+Dixon_tian[which.min(abs(500 - Dixon_tian$accumative)),]
 
 #there are 244 sticky items.
 sticky_id <-
@@ -84,11 +84,11 @@ duplicated_stickyID <- ((sticky_id[((sticky_id)) %in% duo_id]))
 sticky_id[((sticky_id)) %!in% as.numeric(colnames(item_cpi)[-1])]
 
 
-#ts. annual growth rate. 
+#ts. annual growth rate.
 ## in % percent
 test <-
-  ts(item_cpi[,-1] , start = c(2005, 2), frequency = 12)
-cnm<- growth.rate(test, lag = 12)
+  ts(item_cpi[, -1] , start = c(2005, 2), frequency = 12)
+cnm <- growth.rate(test, lag = 12)
 casdaasd <- data.table(cnm)
 # -------------------------------------------------------------------------
 
@@ -132,7 +132,7 @@ length(which(df.na != 0))
 #weight data from feb 05
 sticky_weight <- fread("sticky price/weight.csv")
 #减去前12个月(05 feb - jan 06)
-sticky_weight <- tail(sticky_weight,-12)
+sticky_weight <- tail(sticky_weight, -12)
 
 sti_weight <- sticky_weight[, ..all.sti.loc]
 
@@ -141,13 +141,14 @@ sti_weight[is.na(sti_weight)] <- 0
 #重新权重weight
 #weight 总和不是1000，
 #每行的每个数加上（1000-每行的和）/290
-new_w<-data.frame(matrix(nrow = 183,ncol = 331))
+new_w <- data.frame(matrix(nrow = 183, ncol = 331))
 for (i in 1:nrow(sti_weight)) {
-  new_w[i,]<-sti_weight[i,]+(1000- rowSums(sti_weight[i,]))/ncol(sti_weight)
+  new_w[i, ] <-
+    sti_weight[i, ] + (1000 - rowSums(sti_weight[i, ])) / ncol(sti_weight)
 }
 #
-rowSums(new_w[,])
-sti_weight<-data.table( new_w/1000)
+rowSums(new_w[, ])
+sti_weight <- data.table(new_w / 1000)
 rowSums(sti_weight)
 
 
@@ -158,10 +159,13 @@ colnames(sti_weight)[1:10] == colnames(sti_index)[1:10]
 
 sticky_core_inflation <- rowSums(sti_index * sti_weight)
 
-sticky_cpi<- ts(sticky_core_inflation, start = c(2006,2),frequency = 12)
+sticky_cpi <-
+  ts(sticky_core_inflation,
+     start = c(2006, 2),
+     frequency = 12)
 
-myts2 <- window(sticky_cpi, start=c(2006, 2), end=c(2019, 12))
+myts2 <- window(sticky_cpi,
+                start = c(2006, 2),
+                end = c(2019, 12))
 
 #write.csv(myts2,"sticky price/ flexible.csv")
-
-

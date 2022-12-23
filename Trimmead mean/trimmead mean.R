@@ -48,8 +48,11 @@ options(scipen = 200)
 
 rm(list = ls())
 '%!in%' <- function(x, y)
-  ! ('%in%'(x, slack))
+        ! ('%in%'(x, slack))
 
 # -------------------------------------------------------------------------
+# 
+ TM<-fread("Trimmead mean/Trimmed mean.csv")
 
-EX <- fread("ex f&e/EXFD.csv")
+TMM<- TM[which(TM[,1]=="2005m1"):which(TM[,1]=="2019m12"),]
+
